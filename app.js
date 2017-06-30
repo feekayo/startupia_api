@@ -8,8 +8,8 @@ var express = require('express'),
 
 
 console.log(__dirname);
-//mongoose.connect('mongodb://admin:spotpinadmin@ds139288.mlab.com:39288/heroku_9f8083p7');
-mongoose.connect('mongodb://localhost/startupia');
+mongoose.connect('mongodb://startupia:FIkk**164499@ds145312.mlab.com:45312/heroku_jrw9gf21');
+//mongoose.connect('mongodb://localhost/startupia');
 mongoose.connection.on('open',function(){
    console.log('Mongoose Connected.');
 });
