@@ -166,26 +166,52 @@ exports.register = function(requestBody,response){
 								response.end(JSON.stringify(response.data));
 							}
 						}else{
-							var email = new sendgrid.email();
-							email.addTo("test@sendgrid.com");
-							email.setFrom("accounts@startupia.com");
-							email.setSubject("Startupia account validation");
-							email.setHtml("Validate your startupia account by clicking <a href='https://startupia-api.herokuapp.com/user/confirm/"+user_key+"'>here</a>");
-				
-							if(sendgrid.send(email)){
-								//send email here
-								response.writeHead(201,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Check your email for confirmation email";//log response
-								response.data.success = 1;
-								response.end(JSON.stringify(response.data));
-							}else{
+
+							var request = sendgrid.emptyRequest({
+							  method: 'POST',
+							  path: '/v3/mail/send',
+							  body: {
+							    personalizations: [
+							      {
+							        to: [
+							          {
+							            email: email,
+							          },
+							        ],
+							        subject: 'Startupia account validation! Do not reply',
+							      },
+							    ],
+							    from: {
+							      email: 'accounts@startupia.com',
+							    },
+							    content: [
+							      {
+							        type: 'text/html',
+							        value: "Validate your startupia account by clicking <a href='https://startupia-api.herokuapp.com/user/confirm/"+user_key+"'>here</a>",
+							      },
+							    ],
+							  },
+							});
+							//With callback
+							sendgrid.API(request, function(error, response) {
+							  if (error) {
+							  	console.log(error);
 								//send email here
 								response.writeHead(200,{'Content-Type':'application/json'});//set response type
 								response.data.log = "Trouble sending confirmation email";//log response
 								response.data.success = 0;
 								response.end(JSON.stringify(response.data));
-							}
-				
+							  }else{
+								//send email here
+								response.writeHead(201,{'Content-Type':'application/json'});//set response type
+								response.data.log = "Check your email for confirmation email";//log response
+								response.data.success = 1;
+								response.end(JSON.stringify(response.data));
+							  }
+							  console.log(response.statusCode);
+							  console.log(response.body);
+							  console.log(response.headers);
+							});				
 						}
 
 					}); 
