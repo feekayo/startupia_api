@@ -1,7 +1,8 @@
 var mongoose = require("mongoose"),//requirements
 	shortid = require("shortid"),
 	Sessions = require("./sessions");
-var sendgrid = require("sendgrid")("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");
+
+var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
 
 var usersSchema = new mongoose.Schema({
