@@ -1,6 +1,8 @@
 var mongoose = require("mongoose"),//requirements
 	shortid = require("shortid"),
 	Sessions = require("./sessions");
+var sendgrid = require("sendgrid")("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");
+
 
 var usersSchema = new mongoose.Schema({
 
@@ -163,11 +165,26 @@ exports.register = function(requestBody,response){
 								response.end(JSON.stringify(response.data));
 							}
 						}else{
-							//send email here
-							response.writeHead(201,{'Content-Type':'application/json'});//set response type
-							response.data.log = "Check your email for confirmation email";//log response
-							response.data.success = 1;
-							response.end(JSON.stringify(response.data));
+							var email = new sendgrid.email();
+							email.addTo("test@sendgrid.com");
+							email.setFrom("accounts@startupia.com");
+							email.setSubject("Startupia account validation");
+							email.setHtml("Validate your startupia account by clicking <a href='https://startupia-api.herokuapp.com/user/confirm/"+user_key+"'>here</a>");
+				
+							if(sendgrid.send(email)){
+								//send email here
+								response.writeHead(201,{'Content-Type':'application/json'});//set response type
+								response.data.log = "Check your email for confirmation email";//log response
+								response.data.success = 1;
+								response.end(JSON.stringify(response.data));
+							}else{
+								//send email here
+								response.writeHead(200,{'Content-Type':'application/json'});//set response type
+								response.data.log = "Trouble sending confirmation email";//log response
+								response.data.success = 0;
+								response.end(JSON.stringify(response.data));
+							}
+				
 						}
 
 					}); 
