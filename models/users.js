@@ -193,7 +193,7 @@ exports.register = function(requestBody,response){
 							  },
 							});
 							//With callback
-							sendgrid.API(request, function(error, response) {
+							sendgrid.API(request, function(error, qresponse) {
 							  if (error) {
 							  	console.log(error);
 								//send email here
@@ -208,9 +208,9 @@ exports.register = function(requestBody,response){
 								response.data.success = 1;
 								response.end(JSON.stringify(response.data));
 							  }
-							  console.log(response.statusCode);
-							  console.log(response.body);
-							  console.log(response.headers);
+							  console.log(qresponse.statusCode);
+							  console.log(qresponse.body);
+							  console.log(qresponse.headers);
 							});				
 						}
 
