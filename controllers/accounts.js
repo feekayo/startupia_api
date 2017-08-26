@@ -75,6 +75,28 @@ module.exports = {
         }
     },
 
+    verify_email: function(request,response){//for sending email verification codes
+        if((request.body.email!=undefined) && (request.body.user_id!=undefined)){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//async function for validating sessions
+                if(validated){
+                    Verification.create_for_email(request.body,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
+                    response.data.log = "Invalid session";
+                    response.success = 0;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client
+                }
+            });
+        }else{
+            response.data = {};//declare response array
+            response,writeHead(201,{'Content-Type':'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client
+        }
+    },
+
     verify_phone: function(request,response){
         if((request.body.user_id!=undefined)&&(request.body.type!=undefined)&&(request.body.country_code!=undefined)&&(request.body.number!=undefined)){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
@@ -98,7 +120,7 @@ module.exports = {
     },
 
     confirm_verify_phone: function(request,response){
-        if((request.body.user_id!=undefined)&&(request.body.key)){
+        if((request.body.user_id!=undefined)&&(request.body.key!=undefined)){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if (validated) {
                     Verification.confirm_phone(request.body,response);
@@ -119,6 +141,27 @@ module.exports = {
         }
     },
 
+    confirm_verify_email: function(request,response){
+        if((request.body.user_id!=undefined)&&(request.body.key!=undefined) && (request.body.email!=undefined)){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if (validated) {
+                    Verification.confirm_email(request.body,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid session";//log message for client
+                    response.data.success = 0; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client                     
+                }
+            }); 
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));
+        }
+    },
 
     check_passwordchange_token: function(request,response){//function for checking password change variables
         var get_params = url.parse(request.url,true);//parse url

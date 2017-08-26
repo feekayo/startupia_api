@@ -47,10 +47,11 @@ exports.create = function(requestBody,response){
 		}else{
 			if (data && (Object.keys(data).length!=0)) {
 				response.writeHead(200,{'Content-Type':'application/json'});
-				response.data.log = "Startup exists";
+				response.data.log = "Startup name taken";
 				response.data.success = 0;
 				response.end(JSON.stringify(response.data));
 			}else{
+
 				var token = requestBody.name.replace(/\s+/g,"_").toLowerCase();//replace all spaces and ' in string with -s
 				var startup_id = shortid.generate();
 				var Startup = toStartups(requestBody,token,startup_id);
@@ -240,6 +241,6 @@ function toStartups(data,token,id){
 		name: data.name,
 		logo: 'modules/accounts/img/material/bgiii.png',
 		url: data.company_url,
-		type_id: data.type_id
+		email: data.company_email
 	});
 }

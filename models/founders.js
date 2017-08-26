@@ -46,7 +46,7 @@ exports.create_callback = function(startup_data,callback){
 
 exports.startup_founders = function(startup_id,response){
 	var pipeline = [{
-		$match: {$and: [{startup_id:startup_id},{deleted: !true}]}
+		$match: {$and: [{startup_id:startup_id},{deleted: !true},{confirmed: true}]}
 	},{
 		$lookup: {
 			from: "users",

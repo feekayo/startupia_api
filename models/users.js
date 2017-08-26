@@ -182,7 +182,7 @@ exports.register = function(requestBody,response){
 							      },
 							    ],
 							    from: {
-							      email: 'accounts@startupia.com',
+							      email: 'accounts@startupia.io',
 							    },
 							    content: [
 							      {

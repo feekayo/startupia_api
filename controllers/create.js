@@ -186,7 +186,7 @@ module.exports = {
 
    //create startups
    startups: function(request,response){
-        if((request.params.session_id!=undefined)&&(request.body.user_id!=undefined)&&(request.body.name!=undefined)&&(request.body.company_url!=undefined)&&(request.body.type_id!=undefined)&&(request.body.email!=undefined)){
+        if((request.params.session_id!=undefined)&&(request.body.user_id!=undefined)&&(request.body.name!=undefined)&&(request.body.company_url!=undefined)&&(request.body.company_email!=undefined)&&(request.body.email!=undefined)){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
                     Startups.create(request.body,response);
