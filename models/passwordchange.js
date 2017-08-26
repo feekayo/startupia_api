@@ -56,7 +56,7 @@ exports.create = function(requestBody,response){
 							      {
 							        to: [
 							          {
-							            email: email,
+							            email: requestBody.email,
 							          },
 							        ],
 							        subject: 'Startupia account validation! Do not reply',
