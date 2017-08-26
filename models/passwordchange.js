@@ -33,6 +33,8 @@ exports.create = function(requestBody,response){
 						return;
 					}
 				}else{
+					var uniq_id = Math.floor(Math.random()*(999999-100000+1))+100000;
+					uniq_id = ""+uniq_id+"";
 					var PasswordChange = toForgotPassword(requestBody.email,uniq_id);//create password change schema
 
 					PasswordChange.save(function(error){
@@ -61,7 +63,7 @@ exports.create = function(requestBody,response){
 							      },
 							    ],
 							    from: {
-							      email: 'recovery@startupia.com',
+							      email: 'recovery@startupia.io',
 							    },
 							    content: [
 							      {
