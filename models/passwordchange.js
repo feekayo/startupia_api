@@ -100,7 +100,7 @@ exports.create = function(requestBody,response){
 		}else{
 			response.writeHead(201,{'Content-Type':'application/json'});
 			response.data.log = "Email doesn't exist on our servers";
-			response.data.success = 1;
+			response.data.success = 0;
 			response.end(JSON.stringify(response.data));
 			return;			
 		}

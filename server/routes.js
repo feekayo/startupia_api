@@ -23,47 +23,7 @@ module.exports = function(app){
     
     router.put('/user/verify_email/:session_id',accounts.verify_email);//route for sending verification code to user email
     router.post('/user/verify_email/:session_id',accounts.confirm_verify_email);//route for checking and authorizing email verification
-
-    /****/
-
-    //create routes
-    router.put('/create/cv_certificate/:session_id',create.cv_certificate); //create cv certificate
-    router.put('/create/cv_project/:session_id',create.cv_project);//create cv project
-    router.put('/create/cv_job/:session_id',create.cv_job);//create cv job
-    router.put('/create/cv_skill/:session_id',create.cv_skill);//create cv skill
-    router.put('/create/cv_tool/:session_id',create.cv_tool);//create cv tool
-    router.put('/create/cv_interest/:session_id',create.cv_interest);//create cv interest
-    router.put('/create/cv_essay/:session_id',create.cv_essay);//create cv essay
-    router.put('/create/cv_social/:session_id',create.cv_social);//create cv social
-    
-    router.put('/create/startup/:session_id',create.startups);//create startup    
-    router.put('/create/founder/:session_id',create.founders);//add founder
-    /**
-
-    
-    **/
-
-    //read routes
-    router.get('/read/user_cv',read.user_cv); // fetch user cv
-    router.get('/read/user_skills',read.user_skills);//fetch user skills
-    router.get('/read/startup_setup',read.fetch_startup_setup_data);//fetch startup setup data
-    router.get('/read/startup_founders',read.fetch_startup_founders);//fetch startup founders data
-
-    /****/
-    //update routes
-    router.post('/update/startup/:session_id',update.startups); //route  to update startup details
-    
-    
-    //delete routes
-    router.delete('/delete/cv_certificate/:session_id',remove.cv_certificate)//route to delete cv certificate
-    router.delete('/delete/cv_project/:session_id',remove.cv_project);//delete cv project
-    router.delete('/delete/cv_job/:session_id',remove.cv_job);//delete cv job
-    router.delete('/delete/cv_skill/:session_id',remove.cv_skill);//delete cv skill
-    router.delete('/delete/cv_tool/:session_id',remove.cv_tool);//delete cv tool
-    router.delete('/delete/cv_interest/:session_id',remove.cv_interest);//delete cv interest
-    router.delete('/delete/cv_essay/:session_id',remove.cv_essay);//delete cv essay
-    router.delete('/delete/cv_social/:session_id',remove.cv_social);//delete cv social
-    router.delete('/delete/founders/:session_id',remove.founder);//delete startup founder    
+  
 
     app.use(router);
 }
