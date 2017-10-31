@@ -3,6 +3,8 @@ var Sessions = require('../models/sessions'),
     Users = require('../models/users'),
     PasswordChange = require('../models/passwordchange'),
     Verification = require('../models/verify'),
+    Privileges = require('../models/privileges'),
+    CRM_apps = require('../models/CRM/apps'),
     url = require('url');
 
 module.exports = {
@@ -11,6 +13,8 @@ module.exports = {
     },
 
     login: function(request,response){
+        var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
+        console.log(ip);
         var get_params = url.parse(request.url,true);
 
         if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.password!=undefined)){
@@ -189,5 +193,49 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client            
         }
 
-    }    
+    },    
+
+    //Delete later on
+    login_compartment: function(request,response){
+        if((request.body.email!=undefined) && (request.body.password!=undefined) && (request.body.company_id!=undefined) && (request.body.compartment!=undefined)){//add session_id later on
+
+            Users.callback_login(request.body.email,request.body.password,function(success){
+
+                if(success){
+                    //success == user_id
+                    Privileges.check_privilege_callback(request.body.email,request.body.company_id,request.body.compartment,function(access){
+                        if(!access){
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                                        
+                        }else{
+                            //add create session here to make fool proof
+                            response.data = {};
+                            response.writeHead(200,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Granted!"; //log message for client
+                            response.data.access_level = access;
+                            response.data.user_id = success;
+                            response.data.success = 1;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client
+                        }
+                    });
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid Login"; //log message for client
+                    response.data.success = 0;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 
+                }
+            });
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete Request"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 
+        }
+        
+    }
 }

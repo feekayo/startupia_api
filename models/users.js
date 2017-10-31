@@ -6,32 +6,18 @@ var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
 
 var usersSchema = new mongoose.Schema({
-
 	id: {type: String, unique: true, 'default': shortid.generate},
 	fullname: {type: String, require: true},
 	password: {type: String, require: true},
 	email: {type: String, require: true},
 	dp: String,
-	phone: {
-		country_code: String,
-		number: String
-	},
+	phone: String,
 	bio: String,
 	address: String,
 	zip_code: String,
 	town: String,
-	acct_no: String,
-	bank_name: String,
-	bank_statement: {
-		bucket: String,
-		object: String
-	},
-	id_card: {
-		bucket: String,
-		object: String
-	},
-	verified: {type: Boolean, 'default': false},
-	updated_at: {type: Date,'default': Date.now}
+	updated_at: {type: Date,'default': Date.now},
+	created_at: {type: Date}
 });
 
 var Users = mongoose.model('Users',usersSchema);//intialize data model instance
@@ -64,6 +50,19 @@ exports.check_param_exists = function(param,callback){//check if email or phone 
 
 		callback(status)
 
+	});
+}
+
+exports.callback_login = function(email,password,callback){
+
+	Users.findOne({$and: [{email: email},{password: password}]},function(error,data){
+		if (data) {
+			var success = data.id;
+		}else{
+			var success = false;
+		}
+
+		callback(success);
 	});
 }
 
@@ -240,8 +239,7 @@ exports.confirm_user = function(uniq_id,response){
 						}
 					}else{
 						data.remove();//delete data instance
-						response.writeHead(201,{'Content-Type' : 'text/plain'});//server response is in text format
-						response.end("User email confirmed");
+						response.writeHead(301,{'Location' : 'https://startupia-frontend.herokuapp.com/#/login?confirmed=true'});//server response is in text format
 					}
 				})
 			}else{
@@ -276,10 +274,6 @@ exports.edit = function(requestBody,response){
 					data.dp = requestBody.param;
 				}else if (requestBody.type == "Bio") {
 					data.bio = requestBody.param;
-				}else if (requestBody.type == "Acct_no"){
-					data.acct_no = requestBody.param;
-				}else if (requestBody.type == "Bank_name"){
-					data.bank_name = requestBody.param;
 				}
 
 				data.save(function(error){
@@ -321,6 +315,6 @@ function toUser(email,fullname,password){
 		email: email,
 		fullname: fullname,
 		password: password,
-		dp: "modules/accounts/img/material/avatar.jpg"
+		created_at: Date.now()
 	});
 }

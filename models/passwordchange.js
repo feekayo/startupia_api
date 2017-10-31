@@ -59,7 +59,7 @@ exports.create = function(requestBody,response){
 							            email: requestBody.email,
 							          },
 							        ],
-							        subject: 'Startupia account validation! Do not reply',
+							        subject: 'Startupia account recovery! Do not reply',
 							      },
 							    ],
 							    from: {
@@ -79,13 +79,13 @@ exports.create = function(requestBody,response){
 							  	console.log(error);
 								//send email here
 								response.writeHead(200,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Trouble sending confirmation email";//log response
+								response.data.log = "Trouble sending Recovery Token";//log response
 								response.data.success = 0;
 								response.end(JSON.stringify(response.data));
 							  }else{
 								//send email here
 								response.writeHead(201,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Check your email for confirmation email";//log response
+								response.data.log = "An Account Recovery Token has been sent to your Email";//log response
 								response.data.success = 1;
 								response.end(JSON.stringify(response.data));
 							  }
