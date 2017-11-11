@@ -51,6 +51,10 @@ exports.validate_privilege = function(user_email,company_id,compartment,required
 	});	
 } 
 
+exports.create_privilege = function(requestBody,response){
+    
+}
+
 exports.save_privilege = function(requestBody,response){
 
 	response.data = {};//set response object
