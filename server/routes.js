@@ -51,6 +51,8 @@ module.exports = function(app){
     //router.post('/crm/fetch_app_usage',read.crm_live_app_usage);//route for fetching orders
 
     //read routes
+    
+    router.get('/startups/fetch_invited_founders',read.startup_founders_queue);//route for fetching startup founders queue
     router.get('/startups/fetch_founders',read.startup_founders);//route for fetching startup founders
     router.get('/startups/fetch_personnel',read.startup_personnel);//route for fetching startup personnel
     app.use(router);

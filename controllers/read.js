@@ -138,6 +138,20 @@ module.exports = {
 		}
 	},
 
+	startup_founders_queue: function(request,response){
+		var get_params = url.parse(request.url,true);
+
+		if(get_params.query.startup_id!=undefined){
+			Startups.fetch_founders_queue(get_params.query,response);
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client 			
+		}
+	},
+    
 	startup_founders: function(request,response){
 		var get_params = url.parse(request.url,true);
 

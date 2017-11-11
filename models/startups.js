@@ -18,9 +18,12 @@ var startupsSchema = new mongoose.Schema({//define schema
 	email: String,
 	inc_document: {
 		bucket: String,
-		object: String
+		object_key: String
 	},
-    founders_agreement_url: String,
+    founders_agreement: {
+        bucket: String,
+        object_key: String
+    },
     address: String,
 	town: String,
 	country: String,
@@ -52,8 +55,8 @@ var StartupsQueue = mongoose.model('startupsQueue',startupQueueSchema);
 var exports = module.exports;
 
 exports.save_startup_queue = function(requestBody,response){
-    
-    var token = generate_token();//generate unique token
+    response.data = {};
+    var token = shortid.generate();//generate unique token
     
     var url_optimizer = requestBody.name;
     
@@ -70,11 +73,19 @@ exports.save_startup_queue = function(requestBody,response){
 				response.data.success = 0;//flag success
 				response.end(JSON.stringify(response.data));//send response to client 
 				return;//return
-			}           
+			}else{
+                response.data = {};
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                         
         }else{
             
+            requestBody.startup_id = token;
             var FounderInvite = toFoundersInvite(requestBody,shortid.generate());//create founder invite
-            
+            console.log(requestBody);
             FounderInvite.save(function(error){//save session user as a founder invite
                 if(error){//if error
                     console.log(error);//log error
@@ -84,10 +95,17 @@ exports.save_startup_queue = function(requestBody,response){
                         response.data.success = 0;//flag success
                         response.end(JSON.stringify(response.data));//send response to client
                         return;//return statement
-                    }                        
+                    }else{
+                        response.data = {};
+                        response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                        response.data.log = "Database Error";//log message for client
+                        response.data.success = 0;//flag success
+                        response.end(JSON.stringify(response.data));//send response to client
+                        return;//return statement                
+                    }                                      
                 }else{//if no error
                     response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
-                    response.data.log = "Startup Created!";//log message for client
+                    response.data.log = "Startup Queued!";//log message for client
                     response.data.startup_id= token;//return startup_id
                     response.data.success = 1;//success flag
                     response.end(JSON.stringify(response.data));//send response to client 
@@ -112,7 +130,14 @@ exports.create_startup = function(requestBody,response){
 				response.data.success = 0;//flag success
 				response.end(JSON.stringify(response.data));//send response to client
 				return;//return statement
-            }              
+            }else{
+                response.data = {};
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                            
        } else{
            if(data){
                var Startup = toStartup(data);//create a new startup from queue data
@@ -126,7 +151,14 @@ exports.create_startup = function(requestBody,response){
                             response.data.success = 0;//flag success
                             response.end(JSON.stringify(response.data));//send response to client
                             return;//return statement
-                        }                          
+                        }else{
+                            response.data = {};
+                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Database Error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement                
+                        }                                        
                    }else{
                        data.remove(function(error){//remove data in queue
                            if(error){//if error in deleting queue data
@@ -137,7 +169,14 @@ exports.create_startup = function(requestBody,response){
                                     response.data.success = 0;//flag success
                                     response.end(JSON.stringify(response.data));//send response to client
                                     return;//return statement
-                                }                                  
+                                }else{
+                                    response.data = {};
+                                    response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                                    response.data.log = "Database Error";//log message for client
+                                    response.data.success = 0;//flag success
+                                    response.end(JSON.stringify(response.data));//send response to client
+                                    return;//return statement                
+                                }                                                
                            }else{
                                FoundersInvite.findOne({$and: [{startup_id: id},{user_email:requestBody.user_email}]},function(error,data){//fetch session user's invite
                                    if(error){//if error in fetching data
@@ -148,7 +187,14 @@ exports.create_startup = function(requestBody,response){
                                             response.data.success = 0;//flag success
                                             response.end(JSON.stringify(response.data));//send response to client
                                             return;//return statement
-                                        }                                       
+                                        }else{
+                                            response.data = {};
+                                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                                            response.data.log = "Database Error";//log message for client
+                                            response.data.success = 0;//flag success
+                                            response.end(JSON.stringify(response.data));//send response to client
+                                            return;//return statement                
+                                        }                                                     
                                    }else{
                                        if(data){
                                            data.startup_id = id;//set startup_id
@@ -163,7 +209,14 @@ exports.create_startup = function(requestBody,response){
                                                         response.data.success = 0;//flag success
                                                         response.end(JSON.stringify(response.data));//send response to client
                                                         return;//return statement
-                                                    }    
+                                                    }else{
+                                                        response.data = {};
+                                                        response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                                                        response.data.log = "Database Error";//log message for client
+                                                        response.data.success = 0;//flag success
+                                                        response.end(JSON.stringify(response.data));//send response to client
+                                                        return;//return statement                
+                                                    }                  
                                                }else{
                                                    data.remove();//delete associated data
                                                    response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
@@ -205,7 +258,14 @@ exports.fetch_startup_data = function(requestBody,response){
 				response.data.success = 0;
 				response.end(JSON.stringify(response.data));
 				return;
-			}               
+			}else{
+                response.data = {};
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                             
         }else{
             if(data){
 				response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
@@ -240,11 +300,14 @@ Founder Part
 var foundersQueueSchema = new mongoose.Schema({//define Schema
 	id: {type: String, unique: true},
 	startup_id: {type:String,required:true},
-    founders_agreement_url: {type:String,required:true},
+    founders_agreement:{
+        bucket: {type:String,required:true},
+        object_key: {type:String,required:true}
+    },
 	user_email: {type:String,required:true}
 });
 
-var FoundersInvite = mongoose.model('founders',foundersQueueSchema);
+var FoundersInvite = mongoose.model('founders_invites',foundersQueueSchema);
 
 var foundersSchema = new mongoose.Schema({//define Schema
 	id: {type: String, unique: true, 'default': shortid.generate},
@@ -253,11 +316,11 @@ var foundersSchema = new mongoose.Schema({//define Schema
     user_email: {type:String,required:true}
 });
 
-var Founders = mongoose.model('startup_founders',foundersSchema);
+var Founders = mongoose.model('founders',foundersSchema);
 
 exports.save_founder_invite = function(requestBody,response){
     
-    response.body = {};//set response array
+    response.data = {};//set response array
     
     var id = shortid.generate();
     var Invite = toFoundersInvite(requestBody,id);
@@ -271,6 +334,12 @@ exports.save_founder_invite = function(requestBody,response){
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
             }              
         }else{
             //send email
@@ -301,23 +370,21 @@ exports.save_founder_invite = function(requestBody,response){
             });
 			//With callback
 			sendgrid.API(request, function(error, qresponse) {
+                response.data = {};
                 if (error) {
 				 	console.log(error);
 				    //send email here
 					response.writeHead(200,{'Content-Type':'application/json'});//set response type
-					response.data.log = "Trouble sending confirmation email";//log response
+					response.data.log = "Trouble Sending Invite";//log response
 					response.data.success = 0;
 					response.end(JSON.stringify(response.data));
 				 }else{
 				    //send email here
 					response.writeHead(201,{'Content-Type':'application/json'});//set response type
-					response.data.log = "Email sent to Co-Founder";//log response
+					response.data.log = "Invite sent to Co-Founder";//log response
 					response.data.success = 1;
 					response.end(JSON.stringify(response.data));
 				}
-				//console.log(qresponse.statusCode);
-				//console.log(qresponse.body);
-                //console.log(qresponse.headers);
             });	            
         }
     });
@@ -333,12 +400,19 @@ exports.fetch_founder_invite = function(requestBody,response){
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement
-            }            
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                          
        }else{
            if(data){
                 response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "Data fetched";//log message for client
                 response.data.success = 1;//flag success
+                response.data.data = data;//founder data 
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement               
            }else{
@@ -352,8 +426,69 @@ exports.fetch_founder_invite = function(requestBody,response){
     });
 }
 
-exports.fetch_founders = function(requestBody,response){
+exports.fetch_founders_queue = function(requestBody,response){
+    response.data = {};//init data array
+    console.log(requestBody.startup_id);
+    var aggregate = [{
+        $match: {startup_id: requestBody.startup_id}
+    },{
+        $lookup: {
+            from: "users",
+            foreignField: "email",
+            localField: "user_email",
+            as: "founder_info"
+        }
+    },{
+        $project: {
+            id: 1,
+            startup_id: 1,
+            founders_agreement:{
+                bucket: 1,
+                object_key: 1
+            },
+            user_email: 1,
+            founder_info: {
+                id: 1,
+                fullname: 1,
+                dp: 1,
+                bio: 1               
+            }
+        }
+    }];
     
+    FoundersInvite.aggregate(aggregate,function(error,data){
+       if(error){
+           if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Internal server error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            } 
+       }else{
+           //console.log(Object.keys(data));
+           if(data && (Object.keys(data).length!=0)){
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Data fetched";//log message for client
+                response.data.success = 1;//flag success
+                response.data.data = data;//founder data 
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement               
+           }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Data";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+           }
+       }
+    });
 }
 
 exports.confirm_founder = function(requestBody,response){
@@ -366,7 +501,13 @@ exports.confirm_founder = function(requestBody,response){
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement
-            }            
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                          
        }else{
            if(data){
                 var Founder = toFounders(data);
@@ -380,7 +521,13 @@ exports.confirm_founder = function(requestBody,response){
                             response.data.success = 0;//flag success
                             response.end(JSON.stringify(response.data));//send response to client
                             return;//return statement
-                        }                        
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Database Error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement                
+                        }                                      
                    }else{
                         response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
                         response.data.log = "Fetch Data";//log message for client
@@ -424,8 +571,8 @@ function toFoundersInvite(data,id){
         startup_id: data.startup_id,
         founders_agreement:{
             bucket: data.bucket,
-            object: data.object
-        } 
+            object_key: data.object_key
+        }, 
         user_email: data.email        
     });
 }
@@ -433,7 +580,10 @@ function toFoundersInvite(data,id){
 function toFounders(data){
     return new FoundersInvite({
         startup_id: data.startup_id,
-        founders_agreement_url: data.founders_agreement_url,
+        founders_agreement:{
+            bucket: data.bucket,
+            object_key: data.object_key
+        }, 
         user_email: data.user_email        
     });    
 }
@@ -445,7 +595,10 @@ function toStartupQueue(data,token,url_optimizer){
         name: data.name,
         email: data.email,
         type_id: data.type_id,
-        founders_agreement_url: data.founders_agreement_url,
+        founders_agreement: {
+            bucket: data.bucket,
+            object_key: data.object_key
+        },
         address: data.address,
         town: data.town,
         country: data.country,
@@ -461,7 +614,10 @@ function toStartup(data){
         name: data.name,
         email: data.email,
         type_id: data.type_id,
-        founders_agreement_url: data.founders_agreement_url,
+        founders_agreement: {
+            bucket: data.bucket,
+            object_key: data.object_key
+        },
         address: data.address,
         town: data.town,
         country: data.country,

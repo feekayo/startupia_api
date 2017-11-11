@@ -9,11 +9,21 @@ var privilegesSchema = new mongoose.Schema({
 	id: {type: String, unique: true, 'default': shortid.generate},
 	company_id: String,
 	user_email: String,
-	compartment: String, // ROOT, FM, PD, HR, CRM
+	compartment: String, // ROOT, FM, PD, HR, CRM, BP
 	access_level: Number //1: Super Admin, 2: Administrator, 3
 });
 
 var Privileges = mongoose.model('Privileges',privilegesSchema)
+
+var privilegesQueueSchema = new mongoose.Schema({
+	id: {type: String, unique: true},
+	company_id: String,
+	user_email: String,
+	compartment: String, // ROOT, FM, PD, HR, CRM, BP
+	access_level: Number //1: Super Admin, 2: Administrator, 3
+});
+
+var PrivilegesQueue = mongoose.model('PrivilegesQueue',privilegesQueueSchema)
 
 var exports = module.exports;
 
@@ -41,7 +51,7 @@ exports.validate_privilege = function(user_email,company_id,compartment,required
 	});	
 } 
 
-exports.create_privilege = function(requestBody,response){
+exports.save_privilege = function(requestBody,response){
 
 	response.data = {};//set response object
 	Privileges.findOne({$and: [{company_id:requestBody.startup_id},{compartment:requestBody.compartment},{access_level:requestBody.access_level}]},function(error,data){//check if privilege has already been granted to someone else
