@@ -3,13 +3,14 @@ var mongoose = require("mongoose"),
 	Sessions = require('./sessions'),
 	Users = require('./users');
 
-var sendgrid = require("sendgrid")("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");
+var sendgrid = require("sendgrid")(process.env.SENDGRID_API_KEY);
 
 var privilegesSchema = new mongoose.Schema({
 	id: {type: String, unique: true, 'default': shortid.generate},
 	company_id: String,
 	user_email: String,
-	compartment: String, // ROOT, FM, PD, HR, CRM, BP
+	description: String,
+    compartment: String, // ROOT, FM, PD, HR, CRM, BP
 	access_level: Number //1: Super Admin, 2: Administrator, 3
 });
 
@@ -19,6 +20,7 @@ var privilegesQueueSchema = new mongoose.Schema({
 	id: {type: String, unique: true},
 	company_id: String,
 	user_email: String,
+    description: String,
 	compartment: String, // ROOT, FM, PD, HR, CRM, BP
 	access_level: Number //1: Super Admin, 2: Administrator, 3
 });
@@ -52,7 +54,178 @@ exports.validate_privilege = function(user_email,company_id,compartment,required
 } 
 
 exports.create_privilege = function(requestBody,response){
+    response.data = {};
     
+    PrivilegesQueue.findOne({$and: [{company_id:requestBody.startup_id},{compartment:requestBody.compartment},{access_level:requestBody.access_level}]},function(error,data){
+       if(error){
+			//console.log(error);//log error
+			if(response==null){//check for error 500
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+				return;
+			}else{
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Database Error";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+				return;                
+            }           
+       }else{
+           if(data){//if current privilege
+                data.remove(function(error){//remove current privilege 
+                    if(error){
+                        //console.log(error);//log error
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Database Error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                
+                        }                        
+                    }else{
+                        var id = shortid.generate();   
+                        var Privilege = toPrivilegeQueue(id,requestBody);
+                        
+                        Privilege.save(function(error){
+                            if(error){
+                                if(response==null){//check for error 500
+                                    response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                    response.data.log = "Internal server error";//send message to user
+                                    response.data.success = 0;//failed flag
+                                    response.end(JSON.stringify(response.data));//send message to user
+                                    return;
+                                }else{
+                                    response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                    response.data.log = "Database Error";//send message to user
+                                    response.data.success = 0;//failed flag
+                                    response.end(JSON.stringify(response.data));//send message to user
+                                    return;                                     
+                                }
+                            }else{
+
+                                var request = sendgrid.emptyRequest({
+                                    method: 'POST',
+                                    path: '/v3/mail/send',
+                                    body: {
+                                        personalizations: [
+                                          {
+                                            to: [
+                                              {
+                                                email: requestBody.email,
+                                              },
+                                            ],
+                                            subject: 'Startupia account privileges! Do not reply',
+                                          },
+                                        ],
+                                        from: {
+                                          email: 'privileges@startupia.io',
+                                        },
+                                        content: [
+                                          {
+                                            type: 'text/html',
+                                            value: "You have received an invite for a privileged role at "+requestBody.startup_name+" Click here for more detaials <a href='https://startupia-frontend.herokuapp.com/startups/privilege_invites/"+id+"'>DETAILS</a>"
+                                          },
+                                        ],
+                                      },
+                                    });
+                                    //With callback
+                                    sendgrid.API(request, function(error, qresponse) {
+                                      if (error) {
+                                        console.log(error);
+                                        //send email here
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                        response.data.log = "Trouble sending confirmation email";//log response
+                                        response.data.success = 1;
+                                        response.end(JSON.stringify(response.data));
+                                      }else{
+                                        //send email here
+                                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                        response.data.log = "Updated Privileges";//log response
+                                        response.data.success = 1;
+                                        response.end(JSON.stringify(response.data));
+                                      }
+                                    });							
+                            }                            
+                        });
+                    }   
+                });
+            }else{
+                var id = shortid.generate();   
+                var Privilege = toPrivilegeQueue(id,requestBody);
+                        
+                Privilege.save(function(error){
+                    if(error){
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Database Error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                                     
+                        }
+                    }else{
+
+                        var request = sendgrid.emptyRequest({
+                        method: 'POST',
+                        path: '/v3/mail/send',
+                        body: {
+                            personalizations: [
+                                {
+                                to: [{
+                                   email: requestBody.email,
+                                },
+                                ],
+                                    subject: 'Startupia account privileges! Do not reply',
+                                      },
+                            ],
+                            from: {
+                                email: 'privileges@startupia.io',
+                            },
+                            content: [
+                                {
+                                    type: 'text/html',
+                                    value: "You have received an invite for a privileged role at "+requestBody.startup_name+". Click here for more details <a href='https://startupia-frontend.herokuapp.com/startups/privilege_invites/"+id+"'>DETAILS</a>"
+                                    },
+                                ],
+                            },
+                        });
+                        //With callback
+                        sendgrid.API(request, function(error, qresponse) {
+                             if (error) {
+                                console.log(error);
+                                //send email here
+                                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                response.data.log = "Trouble sending confirmation email";//log response
+                                response.data.success = 1;
+                                response.end(JSON.stringify(response.data));
+                             }else{
+                                //send email here
+                                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                response.data.log = "Updated Privileges";//log response
+                                response.data.success = 1;
+                                response.end(JSON.stringify(response.data));
+                            }
+                        });							
+                    }                            
+                });
+                
+            }
+       } 
+        
+    });
 }
 
 exports.save_privilege = function(requestBody,response){
@@ -196,14 +369,26 @@ exports.save_privilege = function(requestBody,response){
 				});				
 			}
 		}
-	})
+	});
+}
+
+function toPrivilegeQueue(id,data){
+	return new PrivilegesQueue({
+        id: id,
+		company_id: data.startup_id,
+		user_email: data.email,
+        description: data.description,
+		compartment: data.compartment,
+		access_level: data.access_level		
+	});
 }
 
 function toPrivilege(data){
 	return new Privileges({
 		company_id: data.startup_id,
 		user_email: data.email,
+        description: data.description,
 		compartment: data.compartment,
 		access_level: data.access_level		
-	})
+	});
 }

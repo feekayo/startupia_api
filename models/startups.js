@@ -363,7 +363,7 @@ exports.save_founder_invite = function(requestBody,response){
 				   content: [
 				     {
 				       type: 'text/html',
-				       value: "You have received an invite to Join a Startup as a Founder. Click here for more detaials <a href='https://startupia-frontend.herokuapp.com/startups/invites/"+id+"'>DETAILS</a>"
+				       value: "You have received an invite to Join a Startup as a Founder. Click here for more detaials <a href='https://startupia-frontend.herokuapp.com/startups/founder_invites/"+id+"'>DETAILS</a>"
 				     },
 				   ],
 				 },

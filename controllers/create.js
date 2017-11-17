@@ -197,7 +197,7 @@ module.exports = {
 	},
 
 	create_startup: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.id!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.id!=undefined) && (request.body.user_email!=undefined)){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.create(request.body,response); 
@@ -263,7 +263,7 @@ module.exports = {
 	},
 
 	create_privilege: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined)){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Privileges.create_privilege(request.body,response); 
