@@ -94,7 +94,7 @@ module.exports = {
             });
         }else{
             response.data = {};//declare response array
-            response,writeHead(201,{'Content-Type':'application/json'});//server response is in json format
+            response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client
