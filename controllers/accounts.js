@@ -66,7 +66,7 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 0; // success variable for client
+                    response.data.success = 2; // success variable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             });
@@ -78,6 +78,32 @@ module.exports = {
             response.end(JSON.stringify(response.data)); //send response to client             
         }
     },
+    
+    verify_session: function(request,response){//for validating sessions
+        if((request.body.type!=undefined) && (request.body.param!=undefined) && (request.body.user_id!=undefined)){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if (validated) {
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Valid session";//log message for client
+                    response.data.success = 1; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client 
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid session";//log message for client
+                    response.data.success = 2; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client                     
+                }
+            });
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }        
+    },
 
     verify_email: function(request,response){//for sending email verification codes
         if((request.body.email!=undefined) && (request.body.user_id!=undefined)){
@@ -88,13 +114,13 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
                     response.data.log = "Invalid session";
-                    response.success = 0;//success variable for client
+                    response.success = 2;//success variable for client
                     response.end(JSON.stringify(response.data));//send response to client
                 }
             });
         }else{
             response.data = {};//declare response array
-            response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
+            response,writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client
@@ -110,7 +136,7 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 0; // success variable for client
+                    response.data.success = 2; // success variable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             });            
@@ -132,7 +158,7 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 0; // success variable for client
+                    response.data.success = 2; // success variable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             }); 
@@ -154,7 +180,7 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 0; // success variable for client
+                    response.data.success = 2; // success variable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             }); 

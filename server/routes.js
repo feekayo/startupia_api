@@ -20,6 +20,7 @@ module.exports = function(app){
     //router.post('/user/verify_phone/:session_id',accounts.confirm_verify_phone);//route for confirming phone verification
     router.get('/user/check_passwordchange_token',accounts.check_passwordchange_token);//check password change token
     router.post('/user/change_password',accounts.change_password);//for updating password
+    router.post('/user/verify_session/:session_id',accounts.verify_session);//for verifying passwords
     
     router.put('/user/verify_email/:session_id',accounts.verify_email);//route for sending verification code to user email
     router.post('/user/verify_email/:session_id',accounts.confirm_verify_email);//route for checking and authorizing email verification
