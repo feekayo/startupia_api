@@ -80,7 +80,7 @@ module.exports = {
     },
     
     verify_session: function(request,response){//for validating sessions
-        if((request.body.type!=undefined) && (request.body.param!=undefined) && (request.body.user_id!=undefined)){
+        if(request.body.user_id!=undefined){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if (validated) {
                     response.data = {};
@@ -104,6 +104,8 @@ module.exports = {
             response.end(JSON.stringify(response.data)); //send response to client             
         }        
     },
+    
+    
 
     verify_email: function(request,response){//for sending email verification codes
         if((request.body.email!=undefined) && (request.body.user_id!=undefined)){
