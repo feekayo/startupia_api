@@ -175,7 +175,7 @@ module.exports = {
     **/
     
     save_startup: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined)  && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined) && (request.body.website!=undefined) (request.params.session_id!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined) && (request.body.type_id!=undefined) && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined)  && (request.params.session_id!=undefined)){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.save_startup_queue(request.body,response); 
@@ -200,7 +200,7 @@ module.exports = {
 		if((request.body.user_id!=undefined) && (request.body.id!=undefined) && (request.body.user_email!=undefined)){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
-    				Startups.create(request.body,response); 
+    				Startups.create_startup(request.body,response); 
     			}else{
             		response.data = {};
             		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
@@ -210,6 +210,7 @@ module.exports = {
     			}
     		});
 		}else{
+            console.log(request.body);
 			response.data = {};
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete data"; //log message for client
