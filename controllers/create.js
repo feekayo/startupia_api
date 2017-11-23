@@ -175,7 +175,7 @@ module.exports = {
     **/
     
     save_startup: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined) && (request.body.type_id!=undefined) && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined) && (request.body.address!=undefined) && (request.body.town!=undefined) && (request.body.country!=undefined) && (request.body.zip_code!=undefined) && (request.params.session_id!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined)  && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined) && (request.body.website!=undefined) (request.params.session_id!=undefined)){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.save_startup_queue(request.body,response); 

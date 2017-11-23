@@ -39,15 +39,16 @@ var startupQueueSchema = new mongoose.Schema({
     url_optimizer: {type: String},
     name: String,
     email: String,
-    type_id: String,
+    //type_id: String,
+    url: String,
     founders_agreement: {
         bucket: String,
         object_key: String
     },
-    address: String,
+    /**address: String,
     town: String,
     country: String,
-    zip_code: String
+    zip_code: String**/
 });
 
 
@@ -613,7 +614,12 @@ function toStartup(data){
         url_optimizer: data.url_optimizer,
         name: data.name,
         email: data.email,
-        type_id: data.type_id,
+        url: data.website,
+        founders_agreement: {
+            bucket: data.bucket,
+            object_key: data.object_key
+        }        
+        /**type_id: data.type_id,
         founders_agreement: {
             bucket: data.bucket,
             object_key: data.object_key
@@ -621,7 +627,7 @@ function toStartup(data){
         address: data.address,
         town: data.town,
         country: data.country,
-        zip_code: data.zip_code
+        zip_code: data.zip_code**/
     })
 }
 //function for checking if startup name exists and generates token
