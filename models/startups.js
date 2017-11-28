@@ -473,6 +473,7 @@ exports.fetch_founders_queue = function(requestBody,response){
     
     FoundersInvite.aggregate(aggregate,function(error,data){
        if(error){
+           console.log(error);
            if(response==null){//check for error 500
                 response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "Internal server error";//log message for client
