@@ -73,7 +73,22 @@ exports.validate_startup_access = function(email,startup_id,response){
                         }                         
                     }else{
                         if(data){
-                            
+                            data.forEach(function(element){
+                                //ROOT, FM, PD, HR, CRM, BP
+                                if(element.compartment=="ROOT"){
+                                    response.data.root_access = true;
+                                }else if(element.compartment=="FM"){ 
+                                    response.data.fm_access = true;
+                                }else if(element.compartment=="PD"){
+                                    response.data.pd_access = true;
+                                }else if(element.compartment=="HR"){
+                                    response.data.hr_access = true;
+                                }else if(element.compartment=="CRM"){
+                                    response.data.crm_access = true;
+                                }else if(element.compartment=="BP"){
+                                    response.data.bp_access = true;
+                                }
+                            });
                         }else{
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Limited Access";//send message to user
@@ -122,7 +137,22 @@ exports.validate_startup_access = function(email,startup_id,response){
                                     }                         
                                 }else{
                                     if(data){
-
+                                        data.forEach(function(element){
+                                            //ROOT, FM, PD, HR, CRM, BP
+                                            if(element.compartment=="ROOT"){
+                                                response.data.root_access = true;
+                                            }else if(element.compartment=="FM"){ 
+                                                response.data.fm_access = true;
+                                            }else if(element.compartment=="PD"){
+                                                response.data.pd_access = true;
+                                            }else if(element.compartment=="HR"){
+                                                response.data.hr_access = true;
+                                            }else if(element.compartment=="CRM"){
+                                                response.data.crm_access = true;
+                                            }else if(element.compartment=="BP"){
+                                                response.data.bp_access = true;
+                                            }
+                                        });
                                     }else{
                                         response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                                         response.data.log = "Limited Access";//send message to user
