@@ -36,6 +36,10 @@ module.exports = function(app){
     router.post('/create/personnel/:session_id',create.create_personnel);//route for creating personnel
     router.post('/create/privilege/:session_id',create.create_privilege);//route for creating personnel privilege
 
+    router.put('/create/personnel/:session_id',create.create_personnel);//route for sending email invite
+    router.post('/create/personnel/:session_id',create.accept_personnel_invite);//route for accepting personnel invite
+    
+    router.post('/update/validate_personnel/:session_id',update.personnel_verification);//for verifying a user 
     //router.post('/create/click',create.crm_create_click);
     //router.post('/create/order',create.crm_create_order);
     //router.post('/create/near_miss',create.crm_create_near_miss);

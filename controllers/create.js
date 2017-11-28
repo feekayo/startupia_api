@@ -2,6 +2,7 @@ var Sessions = require('../models/sessions'),
 	Users = require('../models/users'),
 	Privileges = require('../models/privileges'),
 	Startups = require('../models/startups'),
+    Personnel = require('../models/personnel');
 	CRM_apps = require('../models/CRM/apps'),
 	CRM_products = require('../models/CRM/products');
 
@@ -241,11 +242,22 @@ module.exports = {
 		}
 	},
 
-	create_personnel: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.email!=undefined) && (request.body.startup_name!=undefined) && (request.params.session_id!=undefined)){
+	create_personnel: function(request,response){ //requires write access to personnel creation (HR1)
+		if((request.body.user_id!=undefined) && (request.body.user_email) && (request.body.startup_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.startup_name!=undefined) && (request.body.non_compete!=undefined) && (request.params.session_id!=undefined)){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
-    				Startups.add_personnel(request.body,response); 
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can create personnel
+                        if(validated){
+                            Personnel.create_personnel(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    })
+    				
     			}else{
             		response.data = {};
             		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
@@ -263,6 +275,27 @@ module.exports = {
 		}
 	},
 
+    accept_personnel_invite: function(request,response){//requires session email verification
+        if((request.body.invite_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.object_key!=undefined) && (request.body.bucket!=undefined)){
+          Sessions.validate_email(request.params.session_id,request.body.user_id,request.body.personnel_email,function(validated){
+    			if(validated){
+                    Personnel.save_personnel(request.body,response);    				
+    			}else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client    				
+    			}
+    		});  
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client             
+        }
+    },
 	create_privilege: function(request,response){
 		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined)){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){

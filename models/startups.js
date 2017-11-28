@@ -9,8 +9,11 @@ var sendgrid = require("sendgrid")(process.env.SENDGRID_API_KEY);
 
 var startupsSchema = new mongoose.Schema({//define schema
 	id: {type: String,unique: true},
-	token: {type: String,unique: true}, 
-	logo: String,
+	token: String, 
+	logo: {
+        bucket: String,
+        object_key: String
+    },
 	name: {type:String},
 	type_id: String,
 	url: String,
@@ -62,6 +65,7 @@ exports.save_startup_queue = function(requestBody,response){
     
     url_optimizer = url_optimizer.replace(/[^A-Z0-9]+/ig,'-');
     
+    url_optimizer = url_optimizer+"_"+generate_token();
     var StartupQueue = toStartupQueue(requestBody,token,url_optimizer);//save startup to startup queue
     
     StartupQueue.save(function(error){//save queue
@@ -117,12 +121,13 @@ exports.save_startup_queue = function(requestBody,response){
 }
 
 exports.create_startup = function(requestBody,response){
-    var id = requestBody.id;//the startup id
+    
+    var id = requestBody.id; //startup id
+    
     response.data = {};//set response array
     
-    StartupsQueue.findOne({id: id},function(error,data){ //check if startup exists on queue
-       if(error){//if error in checking for item on queue
-           
+    StartupsQueue.findOne({id: id},function(error,data){
+        if(error){//if error in checking for item on queue       
            console.log(error);//log error
 			if(response==null){//check for error 500
 				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
@@ -137,13 +142,14 @@ exports.create_startup = function(requestBody,response){
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement                
-            }                            
-       } else{
-           if(data){
-               var Startup = toStartup(data);//create a new startup from queue data
+            }     
+        }else{//if no error
+            if(data){//if data is found
                 
-               Startup.save(function(error){//save startup from queue
-                   if(error){//if error in saving queue
+                var Startup = toStartup(data);
+                
+                Startup.save(function(error){
+                    if(error){//if error in saving data
                         console.log(error);//log error
                         if(response==null){//check for error 500
                             response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
@@ -158,11 +164,10 @@ exports.create_startup = function(requestBody,response){
                             response.data.success = 0;//flag success
                             response.end(JSON.stringify(response.data));//send response to client
                             return;//return statement                
-                        }                                        
-                   }else{
-                       data.remove(function(error){//remove data in queue
-                           if(error){//if error in deleting queue data
-                                console.log(error);//log error
+                        }
+                    }else{
+                        data.remove(function(error){//remove data set from queue
+                            if(error){
                                 if(response==null){//check for error 500
                                     response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
                                     response.data.log = "Internal server error";//log message for client
@@ -176,8 +181,8 @@ exports.create_startup = function(requestBody,response){
                                     response.data.success = 0;//flag success
                                     response.end(JSON.stringify(response.data));//send response to client
                                     return;//return statement                
-                                }                                                
-                           }else{
+                                }  
+                            }else{
                                FoundersInvite.findOne({$and: [{startup_id: id},{user_email:requestBody.user_email}]},function(error,data){//fetch session user's invite
                                    if(error){//if error in fetching data
                                         console.log(error);//log error
@@ -236,12 +241,20 @@ exports.create_startup = function(requestBody,response){
                                    }
                                })
                                
-                           }
-                       })
-                   }
-               })
-           }
-       }
+                            }
+                        })
+                    }
+                });
+                
+            }else{//if no data is found
+                response.data = {};
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Startup non-existent";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement 
+            }                
+        }
     });
 }
 
@@ -317,6 +330,8 @@ var foundersSchema = new mongoose.Schema({//define Schema
 });
 
 var Founders = mongoose.model('founders',foundersSchema);
+
+exports.founders_model = Founders;
 
 exports.save_founder_invite = function(requestBody,response){
     
@@ -550,7 +565,8 @@ exports.confirm_founder = function(requestBody,response){
 
 
 function generate_token(){
-    var uniq_id = shortid.generate(); //Math.floor(Math.random()*(999999-100000+1))+100000;
+    
+    var uniq_id = Math.floor(Math.random()*(9999-1000+1))+1000;
     Startups.findOne({token: uniq_id},function(error,data){
        if(error){
            generate_token();//generate new token
@@ -573,16 +589,16 @@ function toFoundersInvite(data,id){
             bucket: data.bucket,
             object_key: data.object_key
         }, 
-        user_email: data.email        
+        user_email: data.user_email        
     });
 }
 
 function toFounders(data){
-    return new FoundersInvite({
+    return new Founders({
         startup_id: data.startup_id,
         founders_agreement:{
-            bucket: data.bucket,
-            object_key: data.object_key
+            bucket: data.founders_agreement.bucket,
+            object_key: data.founders_agreement.object_key
         }, 
         user_email: data.user_email        
     });    
@@ -611,13 +627,14 @@ function toStartup(data){
     console.log(data);
     return new Startups({
         id: data.id,
+        token: data.url_optimizer,
         url_optimizer: data.url_optimizer,
         name: data.name,
         email: data.email,
         type_id: data.type_id,
         founders_agreement: {
-            bucket: data.bucket,
-            object_key: data.object_key
+            bucket: data.founders_agreement.bucket,
+            object_key: data.founders_agreement.object_key
         },
         address: data.address,
         town: data.town,

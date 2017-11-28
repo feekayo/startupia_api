@@ -1,7 +1,9 @@
 var mongoose = require("mongoose"),
 	shortid = require("shortid"),
 	Sessions = require('./sessions'),
-	Users = require('./users');
+	Users = require('./users'),
+    Startups = require('./startups'),
+    Personnel = require('./personnel');
 
 var sendgrid = require("sendgrid")(process.env.SENDGRID_API_KEY);
 
@@ -28,6 +30,151 @@ var privilegesQueueSchema = new mongoose.Schema({
 var PrivilegesQueue = mongoose.model('PrivilegesQueue',privilegesQueueSchema)
 
 var exports = module.exports;
+
+exports.validate_startup_access = function(email,startup_id,response){
+
+    response.data = {};
+    
+    Startups.founders_model.findOne({$and: [{startup_id: startup_id},{user_email: email}]},function(error,data){
+        if(error){
+			//console.log(error);//log error
+			if(response==null){//check for error 500
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+				return;
+			}else{
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Database Error";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+				return;                
+            }             
+        }else{
+            if(data){
+                response.data.general_access = 1;
+                //check access parameters
+                Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
+                    if(error){
+                        //console.log(error);//log error
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Database Error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                
+                        }                         
+                    }else{
+                        if(data){
+                            
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Limited Access";//send message to user
+                            response.data.success = 1;//success flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                              
+                        }
+                    }
+                })
+            }else{
+                Personnel.personnel_model.findOne({$and: [{personnel_email: email},{startup_id: startup_id},{accepted: true}]},function(error,data){
+                    if(error){
+                        //console.log(error);//log error
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Database Error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                
+                        }                         
+                    }else{
+                        if(data){
+                            response.data.general_access = 1;
+                            //check access parameters
+                            Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
+                                if(error){
+                                    //console.log(error);//log error
+                                    if(response==null){//check for error 500
+                                        response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Internal server error";//send message to user
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;
+                                    }else{
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Database Error";//send message to user
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;                
+                                    }                         
+                                }else{
+                                    if(data){
+
+                                    }else{
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Limited Access";//send message to user
+                                        response.data.success = 1;//success flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;                              
+                                    }
+                                }
+                            })
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Access Denied!";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                                            
+                        }
+                    }
+                })
+            }
+        }
+    })
+}
+
+exports.validate_access = function(compartment,user_email,company_id, root_access, access_level, callback){
+    if(root_access==0){
+        Privileges.findOne({$and: [{compartment: compartment},{user_email:user_email},{company_id:company_id}, {$or: [{root_access: root_access},{access_level:access_level}]}]},function(error,data){
+            if(error){
+                console.log(error);
+                callback(false);
+            }else{
+                if(data){
+                    callback(true);
+                }else{
+                    callback(false);
+                }
+            }
+        });
+    }else{
+        Privileges.findOne({$and: [{compartment: compartment},{user_email:user_email},{company_id:company_id},{access_level:access_level}]},function(error,data){
+            if(error){
+                console.log(error);
+                callback(false);
+            }else{
+                if(data){
+                    callback(true);
+                }else{
+                    callback(false);
+                }
+            }
+        });        
+    }
+}
 
 exports.check_privilege_callback = function(user_email,company_id,compartment,callback){
 	Privileges.findOne({$and: [{user_email:user_email},{company_id:company_id},{compartment:compartment}]},function(error,data){
