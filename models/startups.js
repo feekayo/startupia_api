@@ -483,6 +483,7 @@ exports.fetch_founders_queue = function(requestBody,response){
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "Database Error";//log message for client
+                response.data.error = error;
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement                
