@@ -65,7 +65,7 @@ exports.save_startup_queue = function(requestBody,response){
     
     url_optimizer = url_optimizer.replace(/[^A-Z0-9]+/ig,'-');
     
-    url_optimizer = url_optimizer+"_"+generate_token();
+    url_optimizer = url_optimizer;
     var StartupQueue = toStartupQueue(requestBody,token,url_optimizer);//save startup to startup queue
     
     StartupQueue.save(function(error){//save queue
@@ -589,7 +589,7 @@ function toFoundersInvite(data,id){
             bucket: data.bucket,
             object_key: data.object_key
         }, 
-        user_email: data.user_email        
+        user_email: data.email        
     });
 }
 

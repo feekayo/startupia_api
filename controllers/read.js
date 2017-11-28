@@ -11,8 +11,19 @@ module.exports = {
     validate_startup_access: function(request,response){
         var get_params = url.parse(request.url,true);
         
-        if((Object.keys(get_params.query).length==2) && (get_params.query.user_email!=undefined) && (get_params.query.startup_id)){
-            Privileges.validate_startup_access(get_params.query.user_email,get_params.query.startup_id,response);
+        if((Object.keys(get_params.query).length==3) && (get_params.query.user_id!=undefined)&& (get_params.query.user_email!=undefined) && (get_params.query.startup_id)){
+            Sessions.validate_email(request.params.session_id, get_params.query.user_id,get_params.query.user_email,function(validated){
+                if(validated){
+                    Privileges.validate_startup_access(get_params.query.user_email,get_params.query.startup_id,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid Session";//log message for client
+                    response.data.success = 0; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client        
+                }
+            });    
+                
         }else{
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
