@@ -40,8 +40,7 @@ module.exports = function(app){
     router.post('/create/personnel/:session_id',create.accept_personnel_invite);//route for accepting personnel invite
     
     router.post('/update/validate_personnel/:session_id',update.personnel_verification);//for verifying a user 
-    
-    
+        
     router.get('/read/validate_startup_access/:session_id',read.validate_startup_access);//for validating a user access to a startup
     
     //router.post('/create/click',create.crm_create_click);

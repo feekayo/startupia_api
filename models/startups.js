@@ -338,7 +338,7 @@ exports.save_founder_invite = function(requestBody,response){
     response.data = {};//set response array
     
     var id = shortid.generate();
-    var Invite = toFoundersInvite(requestBody,id);
+    var Invite = toFoundersInvite2(requestBody,id);
     
     Invite.save(function(error){
         if(error){//if error in saving
@@ -483,7 +483,7 @@ exports.fetch_founders_queue = function(requestBody,response){
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "Database Error";//log message for client
-                response.data.error = error;
+                //response.data.error = error;
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement                
@@ -584,6 +584,18 @@ function generate_token(){
 
 
 function toFoundersInvite(data,id){
+    return new FoundersInvite({
+        id: id,
+        startup_id: data.startup_id,
+        founders_agreement:{
+            bucket: data.bucket,
+            object_key: data.object_key
+        }, 
+        user_email: data.user_email        
+    });
+}
+
+function toFoundersInvite2(data,id){
     return new FoundersInvite({
         id: id,
         startup_id: data.startup_id,

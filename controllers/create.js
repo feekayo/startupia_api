@@ -176,7 +176,7 @@ module.exports = {
     **/
     
     save_startup: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined) && (request.body.type_id!=undefined) && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined)  && (request.params.session_id!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined) && (request.body.type_id!=undefined) && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined)  && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.name!="") && (request.body.email!="") && (request.body.type_id!="") && (request.body.user_email!="") && (request.body.bucket!="") && (request.body.object_key!="")  && (request.params.session_id!="")){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.save_startup_queue(request.body,response); 
@@ -198,7 +198,7 @@ module.exports = {
 	},
 
 	create_startup: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.id!=undefined) && (request.body.user_email!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.id!=undefined) && (request.body.user_email!=undefined) && (request.body.user_id!="") && (request.body.id!="") && (request.body.user_email!="")){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.create_startup(request.body,response); 
@@ -221,7 +221,7 @@ module.exports = {
 	},
 
 	create_founder: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.email!=undefined) && (request.body.startup_name!=undefined) && (request.params.session_id!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.email!=undefined) && (request.body.startup_name!=undefined) && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.email!="") && (request.body.startup_name!="") && (request.params.session_id!="")){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.save_founder_invite(request.body,response); 
@@ -243,7 +243,7 @@ module.exports = {
 	},
 
 	create_personnel: function(request,response){ //requires write access to personnel creation (HR1)
-		if((request.body.user_id!=undefined) && (request.body.user_email) && (request.body.startup_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.startup_name!=undefined) && (request.body.non_compete!=undefined) && (request.params.session_id!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.startup_name!=undefined) && (request.body.non_compete!=undefined) && (request.params.session_id!=undefined)&&(request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.personnel_email!="") && (request.body.startup_name!="") && (request.body.non_compete!="") && (request.params.session_id!="")){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
                     Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can create personnel
@@ -276,7 +276,7 @@ module.exports = {
 	},
 
     accept_personnel_invite: function(request,response){//requires session email verification
-        if((request.body.invite_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.object_key!=undefined) && (request.body.bucket!=undefined)){
+        if((request.body.invite_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.object_key!=undefined) && (request.body.bucket!=undefined) && (request.body.invite_id!="") && (request.body.personnel_email!="") && (request.body.object_key!="") && (request.body.bucket!="")){
           Sessions.validate_email(request.params.session_id,request.body.user_id,request.body.personnel_email,function(validated){
     			if(validated){
                     Personnel.save_personnel(request.body,response);    				
@@ -297,7 +297,7 @@ module.exports = {
         }
     },
 	create_privilege: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined)){
+		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.startup_name!="") && (request.body.email!="") && (request.body.compartment!="") && (request.body.access_level!="") && (request.body.description!="")){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Privileges.create_privilege(request.body,response); 

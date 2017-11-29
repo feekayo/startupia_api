@@ -73,7 +73,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                         }                         
                     }else{
                         if(data){
-                            data.forEach(function(element){
+                            /**data.forEach(function(element){
                                 //ROOT, FM, PD, HR, CRM, BP
                                 if(element.compartment=="ROOT"){
                                     response.data.root_access = true;
@@ -88,7 +88,30 @@ exports.validate_startup_access = function(email,startup_id,response){
                                 }else if(element.compartment=="BP"){
                                     response.data.bp_access = true;
                                 }
-                            });
+                            });**/
+                            
+                            for(var i=0; i<data.length; i++){
+                                var element = data[i];
+                                
+                                if(element.compartment=="ROOT"){
+                                    response.data.root_access = true;
+                                }else if(element.compartment=="FM"){ 
+                                    response.data.fm_access = true;
+                                }else if(element.compartment=="PD"){
+                                    response.data.pd_access = true;
+                                }else if(element.compartment=="HR"){
+                                    response.data.hr_access = true;
+                                }else if(element.compartment=="CRM"){
+                                    response.data.crm_access = true;
+                                }else if(element.compartment=="BP"){
+                                    response.data.bp_access = true;
+                                }
+                            }
+                            response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Access Flags Fetched";//send message to user
+                            response.data.success = 1;//success flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return; 
                         }else{
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Limited Access";//send message to user

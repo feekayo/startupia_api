@@ -33,7 +33,32 @@ module.exports = {
         }
     },
     
-	crm_fetch_apps: function(request,response){
+    fetch_user_invites: function(request,response){
+        var get_params = url.parse(request.url,true);
+        
+        if((Object.keys(get_params.query).length==2) && (get_params.query.user_id!=undefined)&& (get_params.query.user_email!=undefined)){
+            Sessions.validate_email(request.params.session_id, get_params.query.user_id,get_params.query.user_email,function(validated){
+                if(validated){
+                    Users.fetch_user_invites(get_params.query.user_email,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid Session";//log message for client
+                    response.data.success = 0; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client        
+                }
+            });    
+                
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }        
+    },
+    
+	/**crm_fetch_apps: function(request,response){
 		if(request.body.company_id!=undefined){
 			CRM_apps.fetch_apps_callback(request.body.company_id,function(apps){
 				if(apps){
@@ -162,7 +187,7 @@ module.exports = {
             response.data.success = 0; // success variable for client
             response.end(JSON.stringify(response.data)); //send response to client 			
 		}
-	},
+	},**/
 
 	startup_founders_queue: function(request,response){
 		var get_params = url.parse(request.url,true);
