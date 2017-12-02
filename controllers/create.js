@@ -241,6 +241,28 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client 			
 		}
 	},
+    
+    accept_founder_invite: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.invite_id!=undefined) && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.invite_id!="") && (request.params.session_id!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    Startups.confirm_founder(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client             
+        }
+    },
 
 	create_personnel: function(request,response){ //requires write access to personnel creation (HR1)
 		if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.startup_name!=undefined) && (request.body.non_compete!=undefined) && (request.params.session_id!=undefined)&&(request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.personnel_email!="") && (request.body.startup_name!="") && (request.body.non_compete!="") && (request.params.session_id!="")){
@@ -276,7 +298,7 @@ module.exports = {
 	},
 
     accept_personnel_invite: function(request,response){//requires session email verification
-        if((request.body.invite_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.object_key!=undefined) && (request.body.bucket!=undefined) && (request.body.invite_id!="") && (request.body.personnel_email!="") && (request.body.object_key!="") && (request.body.bucket!="")){
+        if((request.body.invite_id!=undefined) && (request.body.user_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.object_key!=undefined) && (request.body.bucket!=undefined) && (request.body.invite_id!="") && (request.body.user_id!="") && (request.body.personnel_email!="") && (request.body.object_key!="") && (request.body.bucket!="")){
           Sessions.validate_email(request.params.session_id,request.body.user_id,request.body.personnel_email,function(validated){
     			if(validated){
                     Personnel.save_personnel(request.body,response);    				
@@ -296,6 +318,7 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client             
         }
     },
+    
 	create_privilege: function(request,response){
 		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.startup_name!="") && (request.body.email!="") && (request.body.compartment!="") && (request.body.access_level!="") && (request.body.description!="")){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
@@ -316,5 +339,28 @@ module.exports = {
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client			
 		}
-	}
+	},
+
+    accept_privilege_invite: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.invite_id!=undefined) && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.invite_id!="") && (request.params.session_id!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    Privileges.save_privilege(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client             
+        }
+    }
+
 } 

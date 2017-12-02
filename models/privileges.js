@@ -13,7 +13,8 @@ var privilegesSchema = new mongoose.Schema({
 	user_email: String,
 	description: String,
     compartment: String, // ROOT, FM, PD, HR, CRM, BP
-	access_level: Number //1: Super Admin, 2: Administrator, 3
+	access_level: Number, //1: Super Admin, 2: Administrator, 3
+    timestamp: {type:Date, 'default': Date.now }
 });
 
 var Privileges = mongoose.model('Privileges',privilegesSchema)
@@ -24,7 +25,8 @@ var privilegesQueueSchema = new mongoose.Schema({
 	user_email: String,
     description: String,
 	compartment: String, // ROOT, FM, PD, HR, CRM, BP
-	access_level: Number //1: Super Admin, 2: Administrator, 3
+	access_level: Number, //1: Super Admin, 2: Administrator, 3
+    timestamp: {type:Date, 'default': Date.now }
 });
 
 var PrivilegesQueue = mongoose.model('PrivilegesQueue',privilegesQueueSchema)
@@ -397,7 +399,7 @@ exports.create_privilege = function(requestBody,response){
                             content: [
                                 {
                                     type: 'text/html',
-                                    value: "You have received an invite for a privileged role at "+requestBody.startup_name+". Click here for more details <a href='https://startupia-frontend.herokuapp.com/startups/privilege_invites/"+id+"'>DETAILS</a>"
+                                    value: "You have received an invite for a Role at "+requestBody.startup_name+". Click here for more details <a href='https://startupia-frontend.herokuapp.com/invites'>DETAILS</a>"
                                     },
                                 ],
                             },
@@ -431,7 +433,7 @@ exports.create_privilege = function(requestBody,response){
 exports.save_privilege = function(requestBody,response){
 
 	response.data = {};//set response object
-	Privileges.findOne({$and: [{company_id:requestBody.startup_id},{compartment:requestBody.compartment},{access_level:requestBody.access_level}]},function(error,data){//check if privilege has already been granted to someone else
+	PrivilegesQueue.findOne({id: requestBody.invite_id},function(error,data){//check if privilege has already been granted to someone else
 		if(error){
 			//console.log(error);//log error
 			if(response==null){//check for error 500
@@ -443,71 +445,7 @@ exports.save_privilege = function(requestBody,response){
 			}
 		}else{
 			if(data){
-				//update data
-				data.email = requestBody.email;//reset access email
-				
-				data.save(function(error){
-					if(error){
-						if(response==null){//check for error 500
-							response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-							response.data.log = "Internal server error";//send message to user
-							response.data.success = 0;//failed flag
-							response.end(JSON.stringify(response.data));//send message to user
-							return;
-						}
-					}else{
-
-						var request = sendgrid.emptyRequest({
-							method: 'POST',
-							path: '/v3/mail/send',
-							body: {
-							    personalizations: [
-							      {
-							        to: [
-							          {
-							            email: requestBody.email,
-							          },
-							        ],
-							        subject: 'Startupia account privileges! Do not reply',
-							      },
-							    ],
-							    from: {
-							      email: 'privileges@startupia.io',
-							    },
-							    content: [
-							      {
-							        type: 'text/html',
-							        value: requestBody.startup_name+" has granted you a new role, visit your dashboard to find out more"
-							      },
-							    ],
-							  },
-							});
-							//With callback
-							sendgrid.API(request, function(error, qresponse) {
-							  if (error) {
-							  	console.log(error);
-								//send email here
-								response.writeHead(200,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Trouble sending confirmation email";//log response
-								response.data.success = 1;
-								response.end(JSON.stringify(response.data));
-							  }else{
-								//send email here
-								response.writeHead(201,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Updated Privileges";//log response
-								response.data.success = 1;
-								response.end(JSON.stringify(response.data));
-							  }
-							  //console.log(qresponse.statusCode);
-							  //console.log(qresponse.body);
-							  //console.log(qresponse.headers);
-							});							
-					}
-				})
-
-			}else{
-				//create data
-				var Privilege = toPrivilege(requestBody);//reset access email
+				var Privilege = toPrivilege(data);//reset access email
 				
 				Privilege.save(function(error){
 					if(error){
@@ -517,60 +455,132 @@ exports.save_privilege = function(requestBody,response){
 							response.data.success = 0;//failed flag
 							response.end(JSON.stringify(response.data));//send message to user
 							return;
-						}
+						}else{
+							response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+							response.data.log = "Database Error";//send message to user
+							response.data.success = 0;//failed flag
+							response.end(JSON.stringify(response.data));//send message to user
+							return;                            
+                        }
 					}else{
-
-						var request = sendgrid.emptyRequest({
-							method: 'POST',
-							path: '/v3/mail/send',
-							body: {
-							    personalizations: [
-							      {
-							        to: [
-							          {
-							            email: requestBody.email,
-							          },
-							        ],
-							        subject: 'Startupia account privileges! Do not reply',
-							      },
-							    ],
-							    from: {
-							      email: 'privileges@startupia.io',
-							    },
-							    content: [
-							      {
-							        type: 'text/html',
-							        value: "You've been granted a new privilege, visit your dashboard to see what"
-							      },
-							    ],
-							  },
-							});
-							//With callback
-							sendgrid.API(request, function(error, qresponse) {
-							  if (error) {
-							  	console.log(error);
-								//send email here
-								response.writeHead(200,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Trouble sending confirmation email";//log response
-								response.data.success = 1;
-								response.end(JSON.stringify(response.data));
-							  }else{
-								//send email here
-								response.writeHead(201,{'Content-Type':'application/json'});//set response type
-								response.data.log = "Updated Privileges";//log response
-								response.data.success = 1;
-								response.end(JSON.stringify(response.data));
-							  }
-							  //console.log(qresponse.statusCode);
-							  //console.log(qresponse.body);
-							  //console.log(qresponse.headers);
-							});							
-					}
-				});				
-			}
+						response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+						response.data.log = "Privilege Saved";//send message to user
+						response.data.success = 0;//failed flag
+						response.end(JSON.stringify(response.data));//send message to user
+				        return;                          
+                    }
+                });
+                    
+            }else{
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Invite non-existent";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+                return;
+            }
 		}
 	});
 }
+
+exports.fetch_user_invites = function(user_email,response){
+    
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {user_email: user_email}
+    },{
+        $lookup: {
+            from: "startups",
+            foreignField: "id",
+            localField: "startup_id",
+            as: "startup_data"
+        }   
+    }]    
+    PrivilegesQueue.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});
+				response.data.log = "Internal server error";
+				response.data.success = 0;
+				response.end(JSON.stringify(response.data));    
+            }else{
+                console.log(error);
+				response.writeHead(200,{'Content-Type':'application/json'});
+				response.data.log = "Database Error";
+				response.data.success = 0;
+				response.end(JSON.stringify(response.data));    
+            }
+        }else{
+            if(data && Object.keys(data).length!=0){
+                response.writeHead(201,{'Content-Type':'application/json'});
+				response.data.log = "Invites Fetched";
+                response.data.data = data;
+				response.data.success = 1;
+				response.end(JSON.stringify(response.data));    
+            }else{
+				response.writeHead(200,{'Content-Type':'application/json'});
+				response.data.log = "No Active Invite";
+				response.data.success = 0;
+				response.end(JSON.stringify(response.data));                
+            }
+        }
+    })
+}
+
+exports.reject_privilege_invite = function(requestBody,response){
+    PersonnelQueue.findOne({id:requestBody.invite_id},function(error,data){
+       if(error){
+            console.log(error);//log error
+            if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Internal server error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                          
+       }else{
+           if(data){
+               data.remove(function(error){
+                   if(error){
+                        console.log(error);//log error
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Internal server error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Database Error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement                
+                        }                                      
+                   }else{
+                        response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                        response.data.log = "Invite Rejected";//log message for client
+                        response.data.success = 1;//flag success
+                        response.end(JSON.stringify(response.data));//send response to client
+                        return;//return statement                        
+                   }
+               })
+           }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Data";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+           }
+       } 
+    });    
+}
+
 
 function toPrivilegeQueue(id,data){
 	return new PrivilegesQueue({

@@ -30,18 +30,37 @@ module.exports = function(app){
     //router.post('/crm/create_product',create.crm_create_product);
     //router.post('/crm/create_button',create.crm_create_button);
 
+    
+    //create startup founders, personnel and privileges
     router.put('/create/startup/:session_id',create.save_startup);//route for saving startups in the queue before confirmation    
     router.post('/create/startup/:session_id',create.create_startup);//route for creating startups
-    router.put('/create/founder/:session_id',create.create_founder);//route for creating founder
-    router.post('/create/personnel/:session_id',create.create_personnel);//route for creating personnel
-    router.post('/create/privilege/:session_id',create.create_privilege);//route for creating personnel privilege
-
-    router.put('/create/personnel/:session_id',create.create_personnel);//route for sending email invite
-    router.post('/create/personnel/:session_id',create.accept_personnel_invite);//route for accepting personnel invite
     
+    //for founder creation and confirmation 
+    router.put('/create/founder/:session_id',create.create_founder);//route for creating founder
+    router.post('/create/founder/:session_id',create.accept_founder_invite);//route for accepting founder invite
+    router.post('/delete/founder_invite/:session_id',remove.reject_founder_invite);//route for rejecting founder invite
+    
+    
+    //for privilege creation and confirmation
+    router.put('/create/privilege/:session_id',create.create_privilege);//route for creating personnel privilege
+    router.post('/create/privilege/:session_id',create.accept_privilege_invite);//route for creating personnel privilege
+    router.post('/delete/privilege_invite/:session_id',remove.reject_privilege_invite);//route for rejecting founder invite
+    
+    //for personnel creation and confirmation
+    router.put('/create/personnel/:session_id',create.create_personnel);//route for sending email invite    
+    router.post('/create/personnel/:session_id',create.accept_personnel_invite);//route for accepting personnel invite
+    router.post('/delete/job_invite/:session_id',remove.reject_personnel_invite);//route for rejecting founder invite
+    
+    //validate startup access
+    router.get('/read/validate_startup_access/:session_id',read.validate_startup_access);//for validating a user access to a startup
     router.post('/update/validate_personnel/:session_id',update.personnel_verification);//for verifying a user 
         
-    router.get('/read/validate_startup_access/:session_id',read.validate_startup_access);//for validating a user access to a startup
+    
+    //user invite routes
+    router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites
+    router.get('/read/user_founder_invites/:session_id',read.user_founder_invites);//for fetching a user's job invites
+    router.get('/read/user_privilege_invites/:session_id',read.user_privilege_invites);//for fetching a user's job invites
+    
     
     //router.post('/create/click',create.crm_create_click);
     //router.post('/create/order',create.crm_create_order);
@@ -58,8 +77,7 @@ module.exports = function(app){
     //router.post('/crm/fetch_app_overview',read.crm_app_stats);//route for fetching orders
     //router.post('/crm/fetch_app_usage',read.crm_live_app_usage);//route for fetching orders
 
-    //read routes
-    
+    //read routes 
     router.get('/startups/fetch_invited_founders',read.startup_founders_queue);//route for fetching startup founders queue
     router.get('/startups/fetch_founders',read.startup_founders);//route for fetching startup founders
     router.get('/startups/fetch_personnel',read.startup_personnel);//route for fetching startup personnel

@@ -369,7 +369,7 @@ exports.save_founder_invite = function(requestBody,response){
 				           email: requestBody.email,
 				         },
 				       ],
-				       subject: 'Founder Invite Sent',
+				       subject: 'Startupia new Founder Invite',
 				     },
 				   ],
 				   from: {
@@ -378,7 +378,7 @@ exports.save_founder_invite = function(requestBody,response){
 				   content: [
 				     {
 				       type: 'text/html',
-				       value: "You have received an invite to Join a Startup as a Founder. Click here for more detaials <a href='https://startupia-frontend.herokuapp.com/startups/founder_invites/"+id+"'>DETAILS</a>"
+				       value: "You have received an invite to Join a Startup as a Founder. Click here for more details <a href='https://startupia-frontend.herokuapp.com/invites'>DETAILS</a>"
 				     },
 				   ],
 				 },
@@ -439,6 +439,51 @@ exports.fetch_founder_invite = function(requestBody,response){
            }
        } 
     });
+}
+
+exports.fetch_user_invites = function(user_email,response){
+    
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {user_email: user_email}
+    },{
+        $lookup: {
+            from: "startups",
+            foreignField: "id",
+            localField: "startup_id",
+            as: "startup_data"
+        }   
+    }]    
+    FoundersInvite.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});
+				response.data.log = "Internal server error";
+				response.data.success = 0;
+				response.end(JSON.stringify(response.data));    
+            }else{
+                console.log(error);
+				response.writeHead(200,{'Content-Type':'application/json'});
+				response.data.log = "Database Error";
+				response.data.success = 0;
+				response.end(JSON.stringify(response.data));    
+            }
+        }else{
+            if(data && Object.keys(data).length!=0){
+                response.writeHead(201,{'Content-Type':'application/json'});
+				response.data.log = "Invites Fetched";
+                response.data.data = data;
+				response.data.success = 1;
+				response.end(JSON.stringify(response.data));    
+            }else{
+				response.writeHead(200,{'Content-Type':'application/json'});
+				response.data.log = "No Active Invite";
+				response.data.success = 0;
+				response.end(JSON.stringify(response.data));                
+            }
+        }
+    })
 }
 
 exports.fetch_founders_queue = function(requestBody,response){
@@ -508,8 +553,8 @@ exports.fetch_founders_queue = function(requestBody,response){
     });
 }
 
-exports.confirm_founder = function(requestBody,response){
-    FoundersInvite.findOne({id:requestBody.id},function(error,data){
+exports.reject_founder_invite = function(requestBody,response){
+    FoundersInvite.findOne({id:requestBody.invite_id},function(error,data){
        if(error){
             console.log(error);//log error
             if(response==null){//check for error 500
@@ -527,8 +572,61 @@ exports.confirm_founder = function(requestBody,response){
             }                          
        }else{
            if(data){
-                var Founder = toFounders(data);
-               
+               data.remove(function(error){
+                   if(error){
+                        console.log(error);//log error
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Internal server error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Database Error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement                
+                        }                                      
+                   }else{
+                        response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                        response.data.log = "Invite Rejected";//log message for client
+                        response.data.success = 1;//flag success
+                        response.end(JSON.stringify(response.data));//send response to client
+                        return;//return statement                        
+                   }
+               })
+           }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Data";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+           }
+       } 
+    });    
+}
+
+exports.confirm_founder = function(requestBody,response){
+    FoundersInvite.findOne({id:requestBody.invite_id},function(error,data){
+       if(error){
+            console.log(error);//log error
+            if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Internal server error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                          
+       }else{
+           if(data){
+               var Founder = toFounders(data);
                Founder.save(function(error){
                    if(error){
                         console.log(error);//log error
@@ -547,7 +645,7 @@ exports.confirm_founder = function(requestBody,response){
                         }                                      
                    }else{
                         response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-                        response.data.log = "Fetch Data";//log message for client
+                        response.data.log = "Invite Accepted";//log message for client
                         response.data.success = 1;//flag success
                         response.end(JSON.stringify(response.data));//send response to client
                         return;//return statement                        

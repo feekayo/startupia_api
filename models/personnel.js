@@ -31,7 +31,8 @@ var personnelQueueSchema = new mongoose.Schema({
     },
     non_compete: {type: Boolean},
     accepted: {type: Boolean, 'default': false},
-    rejected: {type: Boolean, 'default': false}
+    rejected: {type: Boolean, 'default': false},
+    timestamp: {type:Date, 'default': Date.now }
 });
 
 var PersonnelQueue = mongoose.model('personnel_queue',personnelQueueSchema);
@@ -251,11 +252,12 @@ exports.fetch_company_invites = function(requestBody,response){
     })
 }
 
-exports.fetch_user_invites = function(requestBody,response){
-    var user_email = requestBody.user_email;
+exports.fetch_user_invites = function(user_email,response){
+    
+    response.data = {};
     
     var aggregate = [{
-        $match: [{$and: [{personnel_email: user_email},{accepted: false},{rejected: false}]}]
+        $match: {$and: [{personnel_email: user_email},{accepted: false},{rejected: false}]}
     },{
         $lookup: {
             from: "startups",
@@ -263,24 +265,6 @@ exports.fetch_user_invites = function(requestBody,response){
             localField: "startup_id",
             as: "startup_data"
         }   
-    },{
-        $project: {
-            id: 1,
-            token: 1, 
-            logo: {
-                bucket: 1,
-                object_key: 1
-            },
-            name: 1,
-            type_id: 1,
-            url: 1,
-            phone_no: 1,
-            email: 1,
-            address: 1,
-            town: 1,
-            country: 1,
-            zip_code: 1
-        }
     }]
     
     PersonnelQueue.aggregate(aggregate,function(error,data){
@@ -306,7 +290,7 @@ exports.fetch_user_invites = function(requestBody,response){
                 response.end(JSON.stringify(response.data));                  
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//set response type
-                response.data.log = "No Active Personnel Invites";//log response
+                response.data.log = "No Active Invites";//log response
                 response.data.success = 0;
                 response.end(JSON.stringify(response.data));                   
             }
@@ -314,7 +298,7 @@ exports.fetch_user_invites = function(requestBody,response){
     })    
 }
 
-exports.delete_invites = function(requestBody,response){
+exports.reject_personnel_invite = function(requestBody,response){
     var id = requestBody.invite_id;
     
     response.data = {};
@@ -430,9 +414,7 @@ exports.save_personnel = function(requestBody,response){
     var bucket = requestBody.bucket;
     
     response.data = {};
-    
-    PersonnelQueue.findOne({$and: [{personnel_email: personnel_email}, {id: id},{accepted: false},{rejected: false}]}, function(error,data){
-        
+    Personnel.findOne({$and: [{personnel_email: personnel_email},{non_compete:true}]},function(error,data){
         if(error){
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
@@ -445,13 +427,16 @@ exports.save_personnel = function(requestBody,response){
                 response.data.log = "Database Error";//log response
                 response.data.success = 0;
                 response.end(JSON.stringify(response.data));                
-            }
+            }            
         }else{
-            if(data && Object.keys(data).length!=0){
-                
-                data.accepted = true;//update acceptance boolean
-                
-                data.save(function(error){
+            if(data && Object.keys(data)>0){
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "You're already covered by non-compete clause";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                 
+            }else{
+                PersonnelQueue.findOne({$and: [{personnel_email: personnel_email}, {id: id},{accepted: false},{rejected: false}]}, function(error,data){
+
                     if(error){
                         if(response==null){
                             response.writeHead(500,{'Content-Type':'application/json'});//set response type
@@ -464,46 +449,68 @@ exports.save_personnel = function(requestBody,response){
                             response.data.log = "Database Error";//log response
                             response.data.success = 0;
                             response.end(JSON.stringify(response.data));                
-                        }                        
+                        }
                     }else{
-                        
-                        var Personnel = toPersonnel(data, bucket, object_key);
-                        
-                        Personnel.save(function(error){
-                            if(error){
-                                if(response==null){
-                                    response.writeHead(500,{'Content-Type':'application/json'});//set response type
-                                    response.data.log = "Internal server error";//log response
-                                    response.data.success = 0;
-                                    response.end(JSON.stringify(response.data));
+                        if(data && Object.keys(data).length!=0){
+
+                            data.accepted = true;//update acceptance boolean
+
+                            data.save(function(error){
+                                if(error){
+                                    if(response==null){
+                                        response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                                        response.data.log = "Internal server error";//log response
+                                        response.data.success = 0;
+                                        response.end(JSON.stringify(response.data));
+                                    }else{
+                                        console.log(error);
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                        response.data.log = "Database Error";//log response
+                                        response.data.success = 0;
+                                        response.end(JSON.stringify(response.data));                
+                                    }                        
                                 }else{
-                                    console.log(error);
-                                    response.writeHead(200,{'Content-Type':'application/json'});//set response type
-                                    response.data.log = "Database Error";//log response
-                                    response.data.success = 0;
-                                    response.end(JSON.stringify(response.data));                
-                                }                                 
-                            }else{
-                                console.log(error);
-                                response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                                response.data.log = "Invite Accepted!";//log response
-                                response.data.success = 1;
-                                response.end(JSON.stringify(response.data));                                 
-                            }
-                        });
+
+                                    var Personnel = toPersonnel(data, bucket, object_key);
+
+                                    Personnel.save(function(error){
+                                        if(error){
+                                            if(response==null){
+                                                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                                                response.data.log = "Internal server error";//log response
+                                                response.data.success = 0;
+                                                response.end(JSON.stringify(response.data));
+                                            }else{
+                                                console.log(error);
+                                                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                                response.data.log = "Database Error";//log response
+                                                response.data.success = 0;
+                                                response.end(JSON.stringify(response.data));                
+                                            }                                 
+                                        }else{
+                                            console.log(error);
+                                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                            response.data.log = "Invite accepted, pending verification!";//log response
+                                            response.data.success = 1;
+                                            response.end(JSON.stringify(response.data));                                 
+                                        }
+                                    });
+                                }
+                            });
+
+                        }else{
+                            //send email here
+                            response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Invite Non-Existent";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));                
+                        }
                     }
                 });
-                
-            }else{
-                //send email here
-                response.writeHead(200,{'Content-Type':'application/json'});//set response type
-                response.data.log = "Invite Non-Existent";//log response
-                response.data.success = 0;
-                response.end(JSON.stringify(response.data));                
             }
         }
-    })
-    
+    });                
+
 }
 
 exports.validate_personnel = function(requestBody,response){
