@@ -55,8 +55,9 @@ exports.validate_startup_access = function(email,startup_id,response){
             }             
         }else{
             if(data){
-                response.data.general_access = 1;
+                response.data.general_access = true;
                 //check access parameters
+                console.log(startup_id+" - "+email);
                 Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
                     if(error){
                         //console.log(error);//log error
@@ -74,26 +75,10 @@ exports.validate_startup_access = function(email,startup_id,response){
                             return;                
                         }                         
                     }else{
-                        if(data){
-                            /**data.forEach(function(element){
-                                //ROOT, FM, PD, HR, CRM, BP
-                                if(element.compartment=="ROOT"){
-                                    response.data.root_access = true;
-                                }else if(element.compartment=="FM"){ 
-                                    response.data.fm_access = true;
-                                }else if(element.compartment=="PD"){
-                                    response.data.pd_access = true;
-                                }else if(element.compartment=="HR"){
-                                    response.data.hr_access = true;
-                                }else if(element.compartment=="CRM"){
-                                    response.data.crm_access = true;
-                                }else if(element.compartment=="BP"){
-                                    response.data.bp_access = true;
-                                }
-                            });**/
-                            
+                        
+                        if(data && Object.keys(data).length>0){
+                            response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
                             for(var i=0; i<data.length; i++){
-                                var element = data[i];
                                 
                                 if(element.compartment=="ROOT"){
                                     response.data.root_access = true;
@@ -109,14 +94,13 @@ exports.validate_startup_access = function(email,startup_id,response){
                                     response.data.bp_access = true;
                                 }
                             }
-                            response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Access Flags Fetched";//send message to user
                             response.data.success = 1;//success flag
                             response.end(JSON.stringify(response.data));//send message to user
                             return; 
                         }else{
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Limited Access";//send message to user
+                            response.data.log = "Limited Access Granted";//send message to user
                             response.data.success = 1;//success flag
                             response.end(JSON.stringify(response.data));//send message to user
                             return;                              
@@ -142,7 +126,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                         }                         
                     }else{
                         if(data){
-                            response.data.general_access = 1;
+                            response.data.general_access = true;
                             //check access parameters
                             Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
                                 if(error){
@@ -161,9 +145,11 @@ exports.validate_startup_access = function(email,startup_id,response){
                                         return;                
                                     }                         
                                 }else{
-                                    if(data){
-                                        data.forEach(function(element){
-                                            //ROOT, FM, PD, HR, CRM, BP
+                                    if(data && Object.keys(data).length>0){
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                        
+                                        for(var i=0; i<data.length; i++){
+                                            var element = data[i];
                                             if(element.compartment=="ROOT"){
                                                 response.data.root_access = true;
                                             }else if(element.compartment=="FM"){ 
@@ -177,10 +163,14 @@ exports.validate_startup_access = function(email,startup_id,response){
                                             }else if(element.compartment=="BP"){
                                                 response.data.bp_access = true;
                                             }
-                                        });
+                                        }
+                                        response.data.log = "Access Flags Fetched";//send message to user
+                                        response.data.success = 1;//success flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;
                                     }else{
                                         response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                        response.data.log = "Limited Access";//send message to user
+                                        response.data.log = "Limited Access Granted";//send message to user
                                         response.data.success = 1;//success flag
                                         response.end(JSON.stringify(response.data));//send message to user
                                         return;                              
@@ -189,7 +179,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                             })
                         }else{
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Access Denied!";//send message to user
+                            response.data.log = "You have not been granted access to this page!";//send message to user
                             response.data.success = 0;//failed flag
                             response.end(JSON.stringify(response.data));//send message to user
                             return;                                            
@@ -258,7 +248,7 @@ exports.validate_privilege = function(user_email,company_id,compartment,required
 exports.create_privilege = function(requestBody,response){
     response.data = {};
     
-    PrivilegesQueue.findOne({$and: [{company_id:requestBody.startup_id},{compartment:requestBody.compartment},{access_level:requestBody.access_level}]},function(error,data){
+    PrivilegesQueue.findOne({$and: [{company_id:requestBody.startup_id},{compartment:requestBody.compartment},{access_level:requestBody.access_level},{user_email: requestBody.email}]},function(error,data){
        if(error){
 			//console.log(error);//log error
 			if(response==null){//check for error 500
@@ -463,11 +453,30 @@ exports.save_privilege = function(requestBody,response){
 							return;                            
                         }
 					}else{
-						response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-						response.data.log = "Privilege Saved";//send message to user
-						response.data.success = 0;//failed flag
-						response.end(JSON.stringify(response.data));//send message to user
-				        return;                          
+                        data.remove(function(error){
+                            if(error){
+                                if(response==null){//check for error 500
+                                    response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                    response.data.log = "Internal server error";//send message to user
+                                    response.data.success = 0;//failed flag
+                                    response.end(JSON.stringify(response.data));//send message to user
+                                    return;
+                                }else{
+                                    response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                    response.data.log = "Database Error";//send message to user
+                                    response.data.success = 0;//failed flag
+                                    response.end(JSON.stringify(response.data));//send message to user
+                                    return;                            
+                                }                                
+                            }else{
+                                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                response.data.log = "Privilege Saved";//send message to user
+                                response.data.success = 1;//success
+                                response.end(JSON.stringify(response.data));//send message to user
+                                return;                                    
+                            }
+                        })
+                      
                     }
                 });
                     
@@ -595,8 +604,8 @@ function toPrivilegeQueue(id,data){
 
 function toPrivilege(data){
 	return new Privileges({
-		company_id: data.startup_id,
-		user_email: data.email,
+		company_id: data.company_id,
+		user_email: data.user_email,
         description: data.description,
 		compartment: data.compartment,
 		access_level: data.access_level		

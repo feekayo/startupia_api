@@ -333,6 +333,7 @@ module.exports = {
     			}				
 			});
 		}else{
+            console.log(request.body);
 			response.data = {};
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete data"; //log message for client

@@ -154,7 +154,7 @@ exports.register = function(requestBody,response){
 				}else{
 
 					var user_key = shortid.generate();
-					var TempUser = toTempuser(user_key,email,fullname,password);
+                    var TempUser = toTempUser(user_key,email,fullname,password);
 
 					TempUser.save(function(error){
 						if(error){
@@ -299,11 +299,11 @@ exports.edit = function(requestBody,response){
 			}
 		}
 	});
-},
+}
     
 
 
-function toTempuser(id,email, fullname, password){
+function toTempUser(id,email, fullname, password){
 	return new TempUsers({
 		id: id,
 		email: email,

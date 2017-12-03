@@ -608,6 +608,9 @@ exports.reject_founder_invite = function(requestBody,response){
 }
 
 exports.confirm_founder = function(requestBody,response){
+    
+    response.data = {};
+    
     FoundersInvite.findOne({id:requestBody.invite_id},function(error,data){
        if(error){
             console.log(error);//log error
