@@ -504,6 +504,13 @@ exports.fetch_user_invites = function(user_email,response){
             localField: "startup_id",
             as: "startup_data"
         }   
+    },{
+        $lookup: {
+            from: "startupsqueue",
+            foreignField: "id",
+            localField: "startup_id",
+            as: "temp_startup_data"
+        }
     }]    
     PrivilegesQueue.aggregate(aggregate,function(error,data){
         if(error){
