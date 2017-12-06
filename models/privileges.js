@@ -191,6 +191,74 @@ exports.validate_startup_access = function(email,startup_id,response){
     })
 }
 
+
+exports.validate_hr_access = function(email,startup_id,response){
+    response.data = {};
+    
+    Privileges.find({$or: [{
+        $and: [{user_email: email},{company_id: startup_id},{compartment: "HR"}]  
+    },{
+        $and: [{user_email: email},{company_id: startup_id},{compartment: "ROOT"}] 
+        
+    }]},function(error,data){
+       if(error){
+           //console.log(error);//log error
+           if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Internal server error";//send message to user
+                response.data.success = 0;//failed flag
+                response.end(JSON.stringify(response.data));//send message to user
+                return;
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Database Error";//send message to user
+                response.data.success = 0;//failed flag
+                response.end(JSON.stringify(response.data));//send message to user
+                return;                
+            }            
+       }else{
+           if(data && Object.keys(data).length>0){
+               response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+               response.data.log = "Access flags fetched";
+               for(var i=0; i<data.length; i++){
+                   var element = data[i];
+                   if(element.compartment=="ROOT"){
+                        response.data.root_access = true;
+                    }else if(element.access_level=="0"){
+                        response.data.general_access = true;
+                    }if(element.access_level=="HR1"){ 
+                        response.data.add_invites_access = true;
+                    }else if(element.access_level=="HR2"){
+                        response.data.track_invites_access = true;
+                    }else if(element.access_level=="HR3"){
+                        response.data.staff_allocation_access = true;
+                    }else if(element.access_level=="HR4"){
+                        response.data.publish_vacancies_access = true;
+                    }else if(element.access_level=="HR5"){
+                        response.data.track_applicants_access = true;
+                    }else if(element.access_level=="HR6"){
+                        response.data.staff_assessment_access = true;
+                    }else if(element.access_level=="HR7"){
+                        response.data.work_logs_access = true;
+                    }else if(element.access_level=="HR8"){
+                        response.data.hr_staff_access = true;
+                    }
+                }
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));//send response to user
+                return;
+               
+           }else{
+               response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+               response.data.log = "Access Denied";//user log message
+               response.data.success = 0;//failed flag
+               response.end(JSON.stringify(response.data));//send message to user
+               return;
+           }
+       } 
+    });
+}
+
 exports.validate_access = function(compartment,user_email,company_id, root_access, access_level, callback){
     if(root_access==0){
         Privileges.findOne({$and: [{compartment: compartment},{user_email:user_email},{company_id:company_id}, {$or: [{root_access: root_access},{access_level:access_level}]}]},function(error,data){
