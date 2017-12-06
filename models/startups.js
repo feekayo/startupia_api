@@ -57,6 +57,46 @@ var startupQueueSchema = new mongoose.Schema({
 var StartupsQueue = mongoose.model('startupsQueue',startupQueueSchema);
 var exports = module.exports;
 
+
+exports.startups_model = Startups;
+
+exports.startup_details = function(requestBody,response){
+    Startups.findOne({id: requestBody.startup_id},function(error,data){
+        if(error){
+ 			console.log(error);//log error
+			if(response==null){//check for error 500
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error"; //send client log message
+				response.data.success = 0;//flag success
+				response.end(JSON.stringify(response.data));//send response to client 
+				return;//return
+			}else{
+                response.data = {};
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Data Fetched";//log message for client
+                response.data.success = 1;//flag success
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                 
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Data!";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                                
+            }
+        }
+    })
+}
+
 exports.save_startup_queue = function(requestBody,response){
     response.data = {};
     var token = shortid.generate();//generate unique token
@@ -332,6 +372,71 @@ var foundersSchema = new mongoose.Schema({//define Schema
 var Founders = mongoose.model('founders',foundersSchema);
 
 exports.founders_model = Founders;
+
+exports.fetch_user_startups = function(requestBody,response){
+    var email = requestBody.user_email;
+    
+    var aggregate = [{
+        $match: {user_email: email}
+    },{
+        $lookup: {
+            from: "startups",
+            foreignField: "id",
+            localField: "startup_id",
+            as: "startup_data"
+        }   
+    },{
+        $lookup: {
+            from: "startupsqueue",
+            foreignField: "id",
+            localField: "startup_id",
+            as: "temp_startup_data"
+        }
+    },{
+        $project: {
+            id: 0,
+            startup_id: 0,
+            founders_agreement_url: 0,
+            user_email: 0,
+            startup_data: 1,
+            temp_startup_data: 1
+        }
+    }];
+    
+    Founders.aggregate(aggregate,function(error,data){
+        if(error){
+            console.log(error);//log error
+            if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Internal server error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }                
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Data Fetched"//log message for client
+                response.data.data = data;
+                response.data.success = 1;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement 
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Startups!";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                 
+            }
+        }
+    })
+}
 
 exports.save_founder_invite = function(requestBody,response){
     

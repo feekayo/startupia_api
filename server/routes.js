@@ -55,6 +55,12 @@ module.exports = function(app){
     router.get('/read/validate_startup_access/:session_id',read.validate_startup_access);//for validating a user access to a startup
     router.post('/update/validate_personnel/:session_id',update.personnel_verification);//for verifying a user 
         
+    //fetch a user's startups
+    router.get('/read/user_startups/:session_id',read.fetch_user_startups);//for fetching a user's startups
+    router.get('/read/startup_details/:session_id',read.startup_details);//for fetching a singular startup's details
+    
+    //HR functions
+    router.get('/read/validate_hr_access/:session_id',read.validate_hr_access);//for validating a user access to a startup
     
     //user invite routes
     router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites

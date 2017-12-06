@@ -34,6 +34,56 @@ module.exports = {
         }
     },
     
+    validate_hr_access: function(request,response){
+        var get_params = url.parse(request.url,true);
+        
+        if((Object.keys(get_params.query).length==3) && (get_params.query.user_id!=undefined)&& (get_params.query.user_email!=undefined) && (get_params.query.startup_id)){
+            Sessions.validate_email(request.params.session_id, get_params.query.user_id,get_params.query.user_email,function(validated){
+                if(validated){
+                    Privileges.validate_hr_access(get_params.query.user_email,get_params.query.startup_id,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid Session";//log message for client
+                    response.data.success = 2; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client        
+                }
+            });    
+                
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }
+    },
+    
+    
+    fetch_user_startups: function(request,response){
+        var get_params = url.parse(request.url,true);
+        
+        if((Object.keys(get_params.query).length==2) && (get_params.query.user_id!=undefined)&& (get_params.query.user_email!=undefined)){
+            Sessions.validate_email(request.params.session_id, get_params.query.user_id,get_params.query.user_email,function(validated){
+                if(validated){
+                    Startups.fetch_user_startups(get_params.query,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid Session";//log message for client
+                    response.data.success = 2; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client        
+                }
+            });    
+                
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }
+    },    
     user_personnel_invites: function(request,response){
         var get_params = url.parse(request.url,true);
         
@@ -108,6 +158,31 @@ module.exports = {
             response.end(JSON.stringify(response.data)); //send response to client             
         }        
     },    
+    
+    startup_details: function(request,response){
+        var get_params = url.parse(request.url,true);
+        
+        if((Object.keys(get_params.query).length==2) && (get_params.query.user_id!=undefined)&& (get_params.query.startup_id!=undefined)){
+            Sessions.validate(request.params.session_id, get_params.query.user_id,function(validated){
+                if(validated){
+                    Startups.startup_details(get_params.query,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid Session";//log message for client
+                    response.data.success = 2; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client        
+                }
+            });    
+                
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }          
+    },
     
 	/**crm_fetch_apps: function(request,response){
 		if(request.body.company_id!=undefined){

@@ -13,6 +13,7 @@ var personnelSchema = new mongoose.Schema({
         bucket: String,
         object_key: String
     },
+    position_title: {type: String},
     non_compete: {type: Boolean},
     verified: {type: Boolean, 'default': false},
     timestamp: {type: Date, 'default': Date.now}
@@ -29,6 +30,7 @@ var personnelQueueSchema = new mongoose.Schema({
         bucket: String,
         object_key: String
     },
+    position_title: {type: String},
     non_compete: {type: Boolean},
     accepted: {type: Boolean, 'default': false},
     rejected: {type: Boolean, 'default': false},
@@ -594,6 +596,7 @@ function toPersonnel (data,bucket,object_key){
             bucket: bucket,
             object_key: object_key
         },
+        position_title: data.position_title,
         non_compete: data.non_compete
     });
 }
@@ -607,6 +610,7 @@ function toPersonnelQueue(data,id){
             bucket: data.bucket,
             object_key: data.object_key
         },        
+        position_title: data.position_title,
         non_compete: data.non_compete
     })
 }
