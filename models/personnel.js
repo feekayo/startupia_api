@@ -366,7 +366,7 @@ exports.reject_invites = function(requestBody,response){
     
     response.data = {};
     
-    Personnel.findOne({$and: [{personnel_email: personnel_email}, {id: id},{accepted: false},{rejected: false}]},function(error,data){
+    PersonnelQueue.findOne({$and: [{personnel_email: personnel_email}, {id: id},{accepted: false},{rejected: false}]},function(error,data){
         if(error){
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
