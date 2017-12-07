@@ -13,8 +13,3 @@ mongoose.connect('mongodb://startupia:FIkk**164499@ds145312.mlab.com:45312/herok
 mongoose.connection.on('open',function(){
    console.log('Mongoose Connected.');
 });
-
-
-app.listen(app.get('port'),function(){
-    console.log (app.get('port'));
-});
