@@ -666,6 +666,7 @@ exports.fetch_founders_queue = function(requestBody,response){
 }
 
 exports.reject_founder_invite = function(requestBody,response){
+    response.data = {};
     FoundersInvite.findOne({id:requestBody.invite_id},function(error,data){
        if(error){
             console.log(error);//log error

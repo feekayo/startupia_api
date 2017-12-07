@@ -100,6 +100,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                             return; 
                         }else{
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Limited Access Granted";//send message to user
                             response.data.success = 1;//success flag
                             response.end(JSON.stringify(response.data));//send message to user
@@ -391,7 +392,7 @@ exports.create_privilege = function(requestBody,response){
                                         content: [
                                           {
                                             type: 'text/html',
-                                            value: "You have received an invite for a privileged role at "+requestBody.startup_name+" Click here for more detaials <a href='https://startupia-frontend.herokuapp.com/startups/privilege_invites/"+id+"'>DETAILS</a>"
+                                            value: "You have received an invite for a privileged role at "+requestBody.startup_name+" Click here for more details <a href='https://startupia-frontend.herokuapp.com/#/app/invites'>DETAILS</a>"
                                           },
                                         ],
                                       },
@@ -612,7 +613,8 @@ exports.fetch_user_invites = function(user_email,response){
 }
 
 exports.reject_privilege_invite = function(requestBody,response){
-    PersonnelQueue.findOne({id:requestBody.invite_id},function(error,data){
+    response.data = {};
+    PrivilegesQueue.findOne({id:requestBody.invite_id},function(error,data){
        if(error){
             console.log(error);//log error
             if(response==null){//check for error 500
