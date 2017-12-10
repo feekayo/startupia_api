@@ -254,6 +254,79 @@ exports.fetch_company_invites = function(requestBody,response){
     })
 }
 
+
+exports.fetch_startups_job_invites = function(requestBody,response){
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {$and: [{startup_id: requestBody.startup_id},{accepted: false},{rejected: false}]}
+    },{
+        $lookup: {
+            from: "users",
+            foreignField: "email",
+            localField: "personnel_email",
+            as: "user_data"
+        }   
+    },{
+        $project: {
+            id: 1,
+            personnel_email: 1,
+            startup_id: 1,
+            message: 1,
+            employment_contract: {
+                bucket: 1,
+                object_key: 1
+            },
+            position_title: 1,
+            non_compete: 1,
+            accepted: 1,
+            rejected: 1,
+            timestamp: 1,
+            user_data: {
+               id: 1,
+	           fullname: 1,
+               password: 0,
+	           email: 0,
+                dp: {
+                    bucket: 1,
+                    object_key: 1
+                },
+	           phone: 1,
+                bio: 1
+            }
+        }
+    }]    
+  PersonnelQueue.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }            
+        }else{
+            if(data && Object.keys(data).length!=0){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.data = data;
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));                  
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Active Invites";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                   
+            }
+        }
+    });     
+}
+
 exports.fetch_user_invites = function(user_email,response){
     
     response.data = {};
@@ -350,6 +423,42 @@ exports.reject_personnel_invite = function(requestBody,response){
                         response.end(JSON.stringify(response.data));                         
                     }
                 })
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Offer Non-Existent";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                  
+            }
+        }
+    });    
+}
+
+exports.fetch_personnel_invite = function(requestBody,response){
+    var id = requestBody.invite_id;
+    
+    response.data = {};
+    
+    PersonnelQueue.findOne({$and: [{id: id},{accepted: false},{rejected: false}]},function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }            
+        }else{
+            if(data && Object.keys(data).length!=0){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Invite fetched";//log response
+                response.data.success = 1;
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));                 
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Offer Non-Existent";//log response

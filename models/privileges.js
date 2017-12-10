@@ -262,7 +262,7 @@ exports.validate_hr_access = function(email,startup_id,response){
 
 exports.validate_access = function(compartment,user_email,company_id, root_access, access_level, callback){
     if(root_access==0){
-        Privileges.findOne({$and: [{compartment: compartment},{user_email:user_email},{company_id:company_id}, {$or: [{root_access: root_access},{access_level:access_level}]}]},function(error,data){
+        Privileges.findOne({$and: [{compartment: compartment},{user_email:user_email},{company_id:company_id}, {$or: [{access_level: root_access},{access_level:access_level}]}]},function(error,data){
             if(error){
                 console.log(error);
                 callback(false);
@@ -458,7 +458,7 @@ exports.create_privilege = function(requestBody,response){
                             content: [
                                 {
                                     type: 'text/html',
-                                    value: "You have received an invite for a Role at "+requestBody.startup_name+". Click here for more details <a href='https://startupia-frontend.herokuapp.com/invites'>DETAILS</a>"
+                                    value: "You have received an invite for a Role at "+requestBody.startup_name+". Click here for more details <a href='https://startupia-frontend.herokuapp.com/#/app/invites'>DETAILS</a>"
                                     },
                                 ],
                             },

@@ -376,6 +376,9 @@ exports.founders_model = Founders;
 exports.fetch_user_startups = function(requestBody,response){
     var email = requestBody.user_email;
     
+    
+    response.data = {};
+    
     var aggregate = [{
         $match: {user_email: email}
     },{
@@ -394,10 +397,6 @@ exports.fetch_user_startups = function(requestBody,response){
         }
     },{
         $project: {
-            id: 0,
-            startup_id: 0,
-            founders_agreement_url: 0,
-            user_email: 0,
             startup_data: 1,
             temp_startup_data: 1
         }

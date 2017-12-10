@@ -10,7 +10,10 @@ var usersSchema = new mongoose.Schema({
 	fullname: {type: String, require: true},
 	password: {type: String, require: true},
 	email: {type: String, require: true},
-	dp: String,
+	dp: {
+        bucket:String,
+        object_key: String
+    },
 	phone: String,
 	bio: String,
 	address: String,
