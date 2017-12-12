@@ -469,6 +469,119 @@ exports.fetch_personnel_invite = function(requestBody,response){
     });    
 }
 
+exports.update_invite = function(requestBody,response){
+    var id = requestBody.invite_id;
+    
+    response.data = {};
+    
+    PersonnelQueue.findOne({$and: [{id: id},{accepted: false},{rejected: false}]},function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }            
+        }else{
+            if(data && Object.keys(data).length!=0){
+                
+                data.message = requestBody.message;
+                data.employment_contract.bucket = requestBody.bucket;
+                data.employment_contract.object_key = requestBody.object_key;
+                data.position_title = requestBody.position_title;
+                data.non_compete = requestBody.non_compete;            
+                
+                
+                data.save(function(error){
+                    if(error){
+                        if(response==null){
+                            response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Internal server error";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));
+                        }else{
+                            console.log(error);
+                            response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Database Error";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));                
+                        }                          
+                    }else{
+                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                        response.data.log = "Offer Updated";//log response
+                        response.data.success = 1;
+                        response.end(JSON.stringify(response.data));                         
+                    }
+                })
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Offer can no longer be updated";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                  
+            }
+        }
+    });
+}
+
+exports.delete_invite = function(requestBody,response){
+    var id = requestBody.invite_id;
+    
+    response.data = {};
+    
+    PersonnelQueue.findOne({$and: [{id: id},{accepted: false},{rejected: false}]},function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }            
+        }else{
+            if(data && Object.keys(data).length!=0){
+                
+                data.remove(function(error){
+                    if(error){
+                        if(response==null){
+                            response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Internal server error";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));
+                        }else{
+                            console.log(error);
+                            response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Database Error";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));                
+                        }                          
+                    }else{
+                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                        response.data.log = "Offer Deleted";//log response
+                        response.data.success = 1;
+                        response.end(JSON.stringify(response.data));                         
+                    }
+                })
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Offer can no longer be updated";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                  
+            }
+        }
+    });
+}
+
 exports.reject_invites = function(requestBody,response){
     var id = requestBody.invite_id;
     var personnel_email = requestBody.personal_email;

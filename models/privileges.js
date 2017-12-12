@@ -80,6 +80,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                             response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
                             for(var i=0; i<data.length; i++){
                                 
+                                var element = data[i];
                                 if(element.compartment=="ROOT"){
                                     response.data.root_access = true;
                                 }else if(element.compartment=="FM"){ 

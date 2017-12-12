@@ -61,6 +61,9 @@ module.exports = function(app){
     
     //HR functions
     router.get('/read/validate_hr_access/:session_id',read.validate_hr_access);//for validating a user access to a startup
+    //router.get('/read/validate_access/:session_id',read.validate_access);//for validating user access to an aspect of work
+    router.get('/read/fetch_startup_job_invite/:session_id',read.startup_job_invites);//for fetching a startup's job invites 
+    router.post('/update/job_invite/:session_id',update.job_invite);// for updating job invites
     
     //user invite routes
     router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites
