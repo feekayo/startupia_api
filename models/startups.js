@@ -421,7 +421,7 @@ exports.fetch_user_startups = function(requestBody,response){
         }else{
             if(data && Object.keys(data).length>0){
                 response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-                response.data.log = "Data Fetched"//log message for client
+                response.data.log = "Data Fetched";//log message for client
                 response.data.data = data;
                 response.data.success = 1;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
