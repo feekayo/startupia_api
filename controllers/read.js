@@ -18,25 +18,27 @@ module.exports = {
                 console.log("Error: 3");
                 if(validated){
                     console.log("Error: 4");
-                    alert("issue from privilege validation")
+                    //alert("issue from privilege validation")
                     //Privileges.validate_startup_access(get_params.query.user_email,get_params.query.startup_id,response);
                 }else{
                     console.log("Error: 5");
-                    response.data = {};
+                    /**response.data = {};
                     response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid Session";//log message for client
                     response.data.success = 2; // success variable for client
-                    response.end(JSON.stringify(response.data)); //send response to client        
+                    response.end(JSON.stringify(response.data)); //send response to client**/        
                 }
             });    
                 
         }else{
+            
             console.log("Error: 6");
+            /**
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0; // success variable for client
-            response.end(JSON.stringify(response.data)); //send response to client             
+            response.end(JSON.stringify(response.data)); //send response to client**/             
         }
     },
     
