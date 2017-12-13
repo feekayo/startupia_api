@@ -18,7 +18,8 @@ module.exports = {
                 console.log("Error: 3");
                 if(validated){
                     console.log("Error: 4");
-                    Privileges.validate_startup_access(get_params.query.user_email,get_params.query.startup_id,response);
+                    alert("issue from privilege validation")
+                    //Privileges.validate_startup_access(get_params.query.user_email,get_params.query.startup_id,response);
                 }else{
                     console.log("Error: 5");
                     response.data = {};
