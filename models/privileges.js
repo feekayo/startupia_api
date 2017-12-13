@@ -36,17 +36,22 @@ var exports = module.exports;
 exports.validate_startup_access = function(email,startup_id,response){
 
     response.data = {};
+    console.log("Error: 14");
     
     Startups.founders_model.findOne({$and: [{startup_id: startup_id},{user_email: email}]},function(error,data){
+        console.log("Error: 15");
         if(error){
+            console.log("Error: 16");
 			//console.log(error);//log error
 			if(response==null){//check for error 500
+                console.log("Error: 17");
 				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
 				response.data.log = "Internal server error";//send message to user
 				response.data.success = 0;//failed flag
 				response.end(JSON.stringify(response.data));//send message to user
 				return;
 			}else{
+                console.log("Error: 18");
 				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
 				response.data.log = "Database Error";//send message to user
 				response.data.success = 0;//failed flag
@@ -55,19 +60,24 @@ exports.validate_startup_access = function(email,startup_id,response){
             }             
         }else{
             if(data){
+                console.log("Error: 19");
                 response.data.general_access = true;
                 //check access parameters
                 console.log(startup_id+" - "+email);
                 Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
+                    console.log("Error: 20");
                     if(error){
+                        console.log("Error: 21");
                         //console.log(error);//log error
                         if(response==null){//check for error 500
+                            console.log("Error: 22");
                             response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Internal server error";//send message to user
                             response.data.success = 0;//failed flag
                             response.end(JSON.stringify(response.data));//send message to user
                             return;
                         }else{
+                            console.log("Error: 23");
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Database Error";//send message to user
                             response.data.success = 0;//failed flag
@@ -75,11 +85,11 @@ exports.validate_startup_access = function(email,startup_id,response){
                             return;                
                         }                         
                     }else{
-                        
+                        console.log("Error: 24");
                         if(data && Object.keys(data).length>0){
                             response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+                            console.log("Error: 25");
                             for(var i=0; i<data.length; i++){
-                                
                                 var element = data[i];
                                 if(element.compartment=="ROOT"){
                                     response.data.root_access = true;
@@ -95,11 +105,13 @@ exports.validate_startup_access = function(email,startup_id,response){
                                     response.data.bp_access = true;
                                 }
                             }
+                            console.log("Error: 26");
                             response.data.log = "Access Flags Fetched";//send message to user
                             response.data.success = 1;//success flag
                             response.end(JSON.stringify(response.data));//send message to user
                             return; 
                         }else{
+                            console.log("Error: 27");
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Limited Access Granted";//send message to user
@@ -110,16 +122,21 @@ exports.validate_startup_access = function(email,startup_id,response){
                     }
                 })
             }else{
+                console.log("Error: 28");
                 Personnel.personnel_model.findOne({$and: [{personnel_email: email},{startup_id: startup_id},{accepted: true}]},function(error,data){
+                    console.log("Error: 29");
                     if(error){
+                        console.log("Error: 30");
                         //console.log(error);//log error
                         if(response==null){//check for error 500
+                            console.log("Error: 31");
                             response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Internal server error";//send message to user
                             response.data.success = 0;//failed flag
                             response.end(JSON.stringify(response.data));//send message to user
                             return;
                         }else{
+                            console.log("Error: 32");
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Database Error";//send message to user
                             response.data.success = 0;//failed flag
@@ -127,19 +144,25 @@ exports.validate_startup_access = function(email,startup_id,response){
                             return;                
                         }                         
                     }else{
+                        console.log("Error: 33");
                         if(data){
+                            console.log("Error: 34");
                             response.data.general_access = true;
                             //check access parameters
                             Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
+                                console.log("Error: 35");
                                 if(error){
+                                    console.log("Error: 36");
                                     //console.log(error);//log error
                                     if(response==null){//check for error 500
+                                        console.log("Error: 37");
                                         response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
                                         response.data.log = "Internal server error";//send message to user
                                         response.data.success = 0;//failed flag
                                         response.end(JSON.stringify(response.data));//send message to user
                                         return;
                                     }else{
+                                        console.log("Error: 38");
                                         response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                                         response.data.log = "Database Error";//send message to user
                                         response.data.success = 0;//failed flag
@@ -147,7 +170,9 @@ exports.validate_startup_access = function(email,startup_id,response){
                                         return;                
                                     }                         
                                 }else{
+                                    console.log("Error: 39");
                                     if(data && Object.keys(data).length>0){
+                                        console.log("Error: 40");
                                         response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                                         
                                         for(var i=0; i<data.length; i++){
@@ -171,6 +196,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                                         response.end(JSON.stringify(response.data));//send message to user
                                         return;
                                     }else{
+                                        console.log("Error: 41");
                                         response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                                         response.data.log = "Limited Access Granted";//send message to user
                                         response.data.success = 1;//success flag
@@ -180,6 +206,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                                 }
                             })
                         }else{
+                            console.log("Error: 42");
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "You have not been granted access to this page!";//send message to user
                             response.data.success = 0;//failed flag

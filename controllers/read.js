@@ -11,12 +11,16 @@ module.exports = {
     
     validate_startup_access: function(request,response){
         var get_params = url.parse(request.url,true);
-        
+        console.log("Error: 1");
         if((Object.keys(get_params.query).length==3) && (get_params.query.user_id!=undefined)&& (get_params.query.user_email!=undefined) && (get_params.query.startup_id)){
+            console.log("Error: 2");
             Sessions.validate_email(request.params.session_id, get_params.query.user_id,get_params.query.user_email,function(validated){
+                console.log("Error: 3");
                 if(validated){
+                    console.log("Error: 4");
                     Privileges.validate_startup_access(get_params.query.user_email,get_params.query.startup_id,response);
                 }else{
+                    console.log("Error: 5");
                     response.data = {};
                     response.writeHead(200,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid Session";//log message for client
@@ -26,6 +30,7 @@ module.exports = {
             });    
                 
         }else{
+            console.log("Error: 6");
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client

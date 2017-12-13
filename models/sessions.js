@@ -29,25 +29,35 @@ exports.create = function(session_id,user_id,callback){
 
 exports.validate = function(session_id,user_id,callback){
 	Sessions.findOne({$and:[{user_id:user_id},{session_id:session_id}]},function(error,data){
-		if(data){
+		console.log("Error: 5");
+        if(data){
+            console.log("Error: 6");
 			callback(true);
 		}else{
+            console.log("Error: 7");
 			callback(false);
 		}
 	});	
 }
 
 exports.validate_email = function(session_id, user_id,email,callback){
-	Sessions.findOne({$and:[{user_id:user_id},{session_id:session_id}]},function(error,data){
-		if(data){
+	console.log("Error: 7");
+    Sessions.findOne({$and:[{user_id:user_id},{session_id:session_id}]},function(error,data){
+		console.log("Error: 8");
+        if(data){
+            console.log("Error: 9");
 			Users.users_model.findOne({$and: [{id: user_id},{email:email}]},function(error,data){
+                console.log("Error: 10");
                 if(data){
+                    console.log("Error: 11");
                     callback(true);
                 }else{
+                    console.log("Error: 12");
                     callback(false);
                 }                
             });
 		}else{
+            console.log("Error: 13");
 			callback(false);
 		}
 	});	    

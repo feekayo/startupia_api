@@ -82,13 +82,16 @@ module.exports = {
     verify_session: function(request,response){//for validating sessions
         if(request.body.user_id!=undefined){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                console.log("Error: 1");
                 if (validated) {
+                    console.log("Error: 2");
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Valid session";//log message for client
                     response.data.success = 1; // success variable for client
                     response.end(JSON.stringify(response.data)); //send response to client 
                 }else{
+                    console.log("Error: 3");
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
@@ -97,6 +100,7 @@ module.exports = {
                 }
             });
         }else{
+            console.log("Error: 4");
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
