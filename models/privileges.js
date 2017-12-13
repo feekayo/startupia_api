@@ -41,9 +41,17 @@ exports.validate_startup_access = function(email,startup_id,response){
        if(error){
             console.log(error);
            if(response==null){//check for error 500
-               console.log("Error 500");
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+				return;
            }else{
-               console.log("database error");
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Database Error";//send message to user
+				response.data.success = 0;//failed flag
+				response.end(JSON.stringify(response.data));//send message to user
+				return;
            }
        }else{
            if(data){
@@ -53,15 +61,49 @@ exports.validate_startup_access = function(email,startup_id,response){
                     if(error){
                         console.log(error);
                        if(response==null){//check for error 500
-                           console.log("Error 500 2");
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
                        }else{
-                           console.log("database error 2");
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Database Error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
                        }
                     }else{
-                        if(data){
-                            console.log(data);
+                        if(data && Object.keys(data)){
+                            response.data.general_access = true;
+                            response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+                            for(var i=0; i<data.length; i++){
+                                
+                                var element = data[i];
+                                if(element.compartment=="ROOT"){
+                                    response.data.root_access = true;
+                                }else if(element.compartment=="FM"){ 
+                                    response.data.fm_access = true;
+                                }else if(element.compartment=="PD"){
+                                    response.data.pd_access = true;
+                                }else if(element.compartment=="HR"){
+                                    response.data.hr_access = true;
+                                }else if(element.compartment=="CRM"){
+                                    response.data.crm_access = true;
+                                }else if(element.compartment=="BP"){
+                                    response.data.bp_access = true;
+                                }
+                            }
+                            response.data.log = "Access Flags Fetched";//send message to user
+                            response.data.success = 1;//success flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return; 
                         }else{
-                            console.log("No Data");
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Limited Access Granted";//send message to user
+                            response.data.success = 1;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;
                         }
                     }
                });
@@ -72,29 +114,77 @@ exports.validate_startup_access = function(email,startup_id,response){
                     if(error){
                         console.log(error);//log error
                         if(response==null){//check for error 500
-                            console.log("Error 500 3");    
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;     
                         }else{
-                            console.log("Error 500 3");              
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Database Error";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;             
                         }                         
                     }else{
-                        if(data){
+                        if(data && Object.keys(data).length>0){
+                            response.data.general_access = true;
                             //check access parameters
                             Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){  
                                 if(error){
                                     console.log(error);//log error
                                     if(response==null){//check for error 500
-                                        console.log("Error 500 3");    
+                                        response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Internal server error";//send message to user
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;  
                                     }else{
-                                        console.log("Error 500 3");              
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Database Error";//send message to user
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;               
                                     }                                      
                                 }else{
-                                    if(data){
-                                        console.log(data);
+                                    if(data && Object.keys(data).length>0){
+                                            response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+                                            for(var i=0; i<data.length; i++){
+
+                                                var element = data[i];
+                                                if(element.compartment=="ROOT"){
+                                                    response.data.root_access = true;
+                                                }else if(element.compartment=="FM"){ 
+                                                    response.data.fm_access = true;
+                                                }else if(element.compartment=="PD"){
+                                                    response.data.pd_access = true;
+                                                }else if(element.compartment=="HR"){
+                                                    response.data.hr_access = true;
+                                                }else if(element.compartment=="CRM"){
+                                                    response.data.crm_access = true;
+                                                }else if(element.compartment=="BP"){
+                                                    response.data.bp_access = true;
+                                                }
+                                            }
+                                            response.data.log = "Access Flags Fetched";//send message to user
+                                            response.data.success = 1;//success flag
+                                            response.end(JSON.stringify(response.data));//send message to user
+                                            return; 
                                     }else{
-                                        console.log("No Data");
+                                        response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Limited Access granted";//send message to user
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;  
                                     }
                                 } 
                             });
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Access To Startup Denied!";//send message to user
+                            response.data.success = 0;//failed flag
+                            response.end(JSON.stringify(response.data));//send message to user
+                            return;                                                                        
                         }
                     }
                });
@@ -166,7 +256,6 @@ exports.validate_startup_access = function(email,startup_id,response){
                             response.end(JSON.stringify(response.data));//send message to user
                             return; 
                         }else{
-                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Limited Access Granted";//send message to user
                             response.data.success = 1;//success flag
