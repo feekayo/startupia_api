@@ -14,10 +14,12 @@ module.exports = {
 
     login: function(request,response){
         var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
-        console.log(ip);
+        
         var get_params = url.parse(request.url,true);
 
         if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.password!=undefined)){
+            get_params.query.source_ip_address = ip;//add ip address to get params for logging
+            
             Users.login(get_params.query,response);
         }else{
             response.data = {};

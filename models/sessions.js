@@ -29,7 +29,7 @@ exports.create = function(session_id,user_id,callback){
 
 exports.validate = function(session_id,user_id,callback){
 	Sessions.findOne({$and:[{user_id:user_id},{session_id:session_id}]},function(error,data){
-		console.log("Error: 5");
+		//console.log(session_id+" , "+user_id);
         if(data){
             console.log("Error: 6");
 			callback(true);

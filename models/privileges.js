@@ -13,7 +13,7 @@ var privilegesSchema = new mongoose.Schema({
 	user_email: String,
 	description: String,
     compartment: String, // ROOT, FM, PD, HR, CRM, BP
-	access_level: Number, //1: Super Admin, 2: Administrator, 3
+	access_level: String, //1: Super Admin, 2: Administrator, 3
     timestamp: {type:Date, 'default': Date.now }
 });
 
@@ -25,7 +25,7 @@ var privilegesQueueSchema = new mongoose.Schema({
 	user_email: String,
     description: String,
 	compartment: String, // ROOT, FM, PD, HR, CRM, BP
-	access_level: Number, //1: Super Admin, 2: Administrator, 3
+	access_level: String, //1: Super Admin, 2: Administrator, 3
     timestamp: {type:Date, 'default': Date.now }
 });
 
@@ -192,160 +192,7 @@ exports.validate_startup_access = function(email,startup_id,response){
                                             
        } 
     });
-    
-    /**Startups.founders_model.findOne({$and: [{startup_id: startup_id},{user_email: email}]},function(error,data){
-        if(error){
-			//console.log(error);//log error
-			if(response==null){//check for error 500
-				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-				response.data.log = "Internal server error";//send message to user
-				response.data.success = 0;//failed flag
-				response.end(JSON.stringify(response.data));//send message to user
-				return;
-			}else{
-				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-				response.data.log = "Database Error";//send message to user
-				response.data.success = 0;//failed flag
-				response.end(JSON.stringify(response.data));//send message to user
-				return;                
-            }             
-        }else{
-            if(data){
-                response.data.general_access = true;
-                //check access parameters
-                console.log(startup_id+" - "+email);
-                Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
-                    if(error){
-                        //console.log(error);//log error
-                        if(response==null){//check for error 500
-                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Internal server error";//send message to user
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;
-                        }else{
-                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Database Error";//send message to user
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;                
-                        }                         
-                    }else{
-                        
-                        if(data && Object.keys(data).length>0){
-                            response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
-                            for(var i=0; i<data.length; i++){
-                                
-                                var element = data[i];
-                                if(element.compartment=="ROOT"){
-                                    response.data.root_access = true;
-                                }else if(element.compartment=="FM"){ 
-                                    response.data.fm_access = true;
-                                }else if(element.compartment=="PD"){
-                                    response.data.pd_access = true;
-                                }else if(element.compartment=="HR"){
-                                    response.data.hr_access = true;
-                                }else if(element.compartment=="CRM"){
-                                    response.data.crm_access = true;
-                                }else if(element.compartment=="BP"){
-                                    response.data.bp_access = true;
-                                }
-                            }
-                            response.data.log = "Access Flags Fetched";//send message to user
-                            response.data.success = 1;//success flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return; 
-                        }else{
-                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Limited Access Granted";//send message to user
-                            response.data.success = 1;//success flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;                              
-                        }
-                    }
-                })
-            }else{
-                Personnel.personnel_model.findOne({$and: [{personnel_email: email},{startup_id: startup_id},{accepted: true}]},function(error,data){
-                    if(error){
-                        //console.log(error);//log error
-                        if(response==null){//check for error 500
-                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Internal server error";//send message to user
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;
-                        }else{
-                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Database Error";//send message to user
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;                
-                        }                         
-                    }else{
-                        if(data){
-                            response.data.general_access = true;
-                            //check access parameters
-                            Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
-                                if(error){
-                                    //console.log(error);//log error
-                                    if(response==null){//check for error 500
-                                        response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-                                        response.data.log = "Internal server error";//send message to user
-                                        response.data.success = 0;//failed flag
-                                        response.end(JSON.stringify(response.data));//send message to user
-                                        return;
-                                    }else{
-                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                        response.data.log = "Database Error";//send message to user
-                                        response.data.success = 0;//failed flag
-                                        response.end(JSON.stringify(response.data));//send message to user
-                                        return;                
-                                    }                         
-                                }else{
-                                    if(data && Object.keys(data).length>0){
-                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                        
-                                        for(var i=0; i<data.length; i++){
-                                            var element = data[i];
-                                            if(element.compartment=="ROOT"){
-                                                response.data.root_access = true;
-                                            }else if(element.compartment=="FM"){ 
-                                                response.data.fm_access = true;
-                                            }else if(element.compartment=="PD"){
-                                                response.data.pd_access = true;
-                                            }else if(element.compartment=="HR"){
-                                                response.data.hr_access = true;
-                                            }else if(element.compartment=="CRM"){
-                                                response.data.crm_access = true;
-                                            }else if(element.compartment=="BP"){
-                                                response.data.bp_access = true;
-                                            }
-                                        }
-                                        response.data.log = "Access Flags Fetched";//send message to user
-                                        response.data.success = 1;//success flag
-                                        response.end(JSON.stringify(response.data));//send message to user
-                                        return;
-                                    }else{
-                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                        response.data.log = "Limited Access Granted";//send message to user
-                                        response.data.success = 1;//success flag
-                                        response.end(JSON.stringify(response.data));//send message to user
-                                        return;                              
-                                    }
-                                }
-                            })
-                        }else{
-                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "You have not been granted access to this page!";//send message to user
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;                                            
-                        }
-                    }
-                })
-            }
-        }
-    })**/
+
 }
 
 
@@ -418,14 +265,17 @@ exports.validate_hr_access = function(email,startup_id,response){
 
 exports.validate_access = function(compartment,user_email,company_id, root_access, access_level, callback){
     if(root_access==0){
-        Privileges.findOne({$and: [{compartment: compartment},{user_email:user_email},{company_id:company_id}, {$or: [{access_level: root_access},{access_level:access_level}]}]},function(error,data){
+        Privileges.findOne({$and:[{compartment: compartment},{user_email:user_email},{company_id:company_id}]},function(error,data){
+            console.log("compartment: "+compartment+", user_email: "+user_email+", company_id: "+company_id)
             if(error){
                 console.log(error);
                 callback(false);
             }else{
                 if(data){
+                    console.log(data);
                     callback(true);
                 }else{
+                    //console.log("No Bueno");
                     callback(false);
                 }
             }
@@ -694,11 +544,25 @@ exports.save_privilege = function(requestBody,response){
                                     return;                            
                                 }                                
                             }else{
-                                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                response.data.log = "Privilege Saved";//send message to user
-                                response.data.success = 1;//success
-                                response.end(JSON.stringify(response.data));//send message to user
-                                return;                                    
+                                
+                                var message = data.user_email+" accepted a privilege invite",//log message
+                                    user_email = data.user_email, //user email
+                                    startup_id = data.company_id,//no startup involved
+                                    task_id = null,//no task involved
+                                    project_id = null,//no project involved
+                                    compartment = "HR",
+                                    private = true;
+                                
+                                Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log    
+                                    //send email here
+                                    response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                    response.data.log = "Privilege Saved";//send message to user
+                                    response.data.success = 1;//success
+                                    response.end(JSON.stringify(response.data));//send message to user
+                                    return;   
+                                });                                 
+                                
+                                   
                             }
                         })
                       

@@ -49,12 +49,13 @@ module.exports = function(app){
     //for personnel creation and confirmation
     router.put('/create/personnel/:session_id',create.create_personnel);//route for sending email invite    
     router.post('/create/personnel/:session_id',create.accept_personnel_invite);//route for accepting personnel invite
-    router.post('/delete/job_invite/:session_id',remove.reject_personnel_invite);//route for rejecting founder invite
+    router.post('/delete/job_invite/:session_id',remove.reject_personnel_invite);//route for rejecting personnel invite
     
     //validate startup access
     router.get('/read/validate_startup_access/:session_id',read.validate_startup_access);//for validating a user access to a startup
     router.post('/update/validate_personnel/:session_id',update.personnel_verification);//for verifying a user 
-        
+    router.post('/delete/retract_validation/:session_id',remove.retract_validation);//for doing the opposite of validation
+    
     //fetch a user's startups
     router.get('/read/user_startups/:session_id',read.fetch_user_startups);//for fetching a user's startups
     router.get('/read/startup_details/:session_id',read.startup_details);//for fetching a singular startup's details
@@ -62,8 +63,11 @@ module.exports = function(app){
     //HR functions
     router.get('/read/validate_hr_access/:session_id',read.validate_hr_access);//for validating a user access to a startup
     //router.get('/read/validate_access/:session_id',read.validate_access);//for validating user access to an aspect of work
-    router.get('/read/fetch_startup_job_invite/:session_id',read.startup_job_invites);//for fetching a startup's job invites 
+    router.get('/read/startup_job_invites/:session_id',read.startup_job_invites);//for fetching a startup's job invites 
     router.post('/update/job_invite/:session_id',update.job_invite);// for updating job invites
+    router.get('/read/job_invite/:session_id',read.personnel_invite);//for fetching a singular job invite
+    router.post('/delete/remove_job_invite/:session_id',remove.delete_job_invites);//for deleting job invites
+    router.get('/read/unvalidated_staff/:session_id',read.unvalidated_staff);//for fetching list of staff in need of validation
     
     //user invite routes
     router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites

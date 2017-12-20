@@ -9,7 +9,7 @@ var Sessions = require('../models/sessions'),
 
 module.exports = {
     personnel_verification: function(request,response){
-        if((request.body.personnel_email!=undefined)&&(request.body.startup_id!=undefined) && (request.body.user_email!=undefined)){
+        if((request.body.user_id!=undefined) && (request.body.personnel_email!=undefined)&&(request.body.startup_id!=undefined) && (request.body.user_email!=undefined)){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
                     Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR2", function(validated){//0 here means someone wif root access can create personnel

@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
 	shortid = require('shortid'),
-	Privileges = require('./privileges');
+	Privileges = require('./privileges'),
+    Log = require('./logs');
 
 //var sendgrid = require("sendgrid")("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");
 var sendgrid = require("sendgrid")(process.env.SENDGRID_API_KEY);
@@ -148,12 +149,22 @@ exports.save_startup_queue = function(requestBody,response){
                         return;//return statement                
                     }                                      
                 }else{//if no error
-                    response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
-                    response.data.log = "Startup Queued!";//log message for client
-                    response.data.startup_id= token;//return startup_id
-                    response.data.success = 1;//success flag
-                    response.end(JSON.stringify(response.data));//send response to client 
-                    return;//return statement
+                    var message = requestBody.user_email+" started up creation of "+requestBody.name,//log message
+                        user_email = requestBody.user_email, //user email
+                        startup_id = token,//no startup involved
+                        task_id = null,//no task involved
+                        project_id = null,//no project involve
+                        compartment = "Startup",
+                        private = false;
+                            
+                    Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log
+                        response.writeHead(201,{'Content-Type':'application/json'});//set content resolution vars
+                        response.data.log = "Startup Queued!";//log message for client
+                        response.data.startup_id = token;
+                        response.data.success = 1;//flag success
+                        response.end(JSON.stringify(response.data));//send response to client
+                        return;//return statement                                                   
+                    });
                 }
             });
         }
@@ -263,14 +274,24 @@ exports.create_startup = function(requestBody,response){
                                                         return;//return statement                
                                                     }                  
                                                }else{
-                                                   data.remove();//delete associated data
-                                                   response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
-                                                   response.data.log = "Startup saved!";//log message for client
-                                                   response.data.success = 1;//flag success
-                                                   response.end(JSON.stringify(response.data));//send response to client
-                                                   return;//return statement                                                   
-                                               }
-                                           })
+                                                   var message = requestBody.user_email+" completed startup creation",//log message
+                                                       user_email = requestBody.user_email, //user email
+                                                       startup_id = id,//no startup involved
+                                                       task_id = null,//no task involved
+                                                       project_id = null,//no project involve
+                                                       compartment = "Startup",
+                                                       private = false;
+                            
+                                                    Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log confirmation
+                                                           data.remove();//delete associated data
+                                                           response.writeHead(201,{'Content-Type':'application/json'});//set content resolution vars
+                                                           response.data.log = "Startup saved!";//log message for client
+                                                           response.data.success = 1;//flag success
+                                                           response.end(JSON.stringify(response.data));//send response to client
+                                                           return;//return statement                                                   
+                                                    });
+                                                }
+                                           });
                                        }else{
                                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                                             response.data.log = "Setup failed!"
@@ -498,11 +519,10 @@ exports.save_founder_invite = function(requestBody,response){
 					response.data.success = 0;
 					response.end(JSON.stringify(response.data));
 				 }else{
-				    //send email here
-					response.writeHead(201,{'Content-Type':'application/json'});//set response type
-					response.data.log = "Invite sent to Co-Founder";//log response
-					response.data.success = 1;
-					response.end(JSON.stringify(response.data));
+                    response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                    response.data.log = "Invite sent to Co-Founder";//log response
+                    response.data.success = 1;
+                    response.end(JSON.stringify(response.data));                     
 				}
             });	            
         }
@@ -701,11 +721,21 @@ exports.reject_founder_invite = function(requestBody,response){
                             return;//return statement                
                         }                                      
                    }else{
-                        response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-                        response.data.log = "Invite Rejected";//log message for client
-                        response.data.success = 1;//flag success
-                        response.end(JSON.stringify(response.data));//send response to client
-                        return;//return statement                        
+                        var message = data.user_email+" rejected founder invite",//log message
+                            user_email = data.user_email, //user email
+                            startup_id = data.startup_id,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "Founders",
+                            private = false;
+
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            //send email here
+                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Invite sent to Co-Founder";//log response
+                            response.data.success = 1;
+                            response.end(JSON.stringify(response.data));
+                        });  
                    }
                })
            }else{
@@ -759,13 +789,24 @@ exports.confirm_founder = function(requestBody,response){
                             return;//return statement                
                         }                                      
                    }else{
-                        response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-                        response.data.log = "Invite Accepted";//log message for client
-                        response.data.success = 1;//flag success
-                        response.end(JSON.stringify(response.data));//send response to client
-                        return;//return statement                        
+                        var message = data.user_email+" accepted founder invite",//log message
+                            user_email = data.user_email, //user email
+                            startup_id = data.startup_id,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "Founders",
+                            private = false;
+
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Invite Accepted";//log message for client
+                            response.data.success = 1;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement   
+                        });                         
+                     
                    }
-               })
+               });
            }else{
                 response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "No Data";//log message for client

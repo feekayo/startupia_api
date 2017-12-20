@@ -1,6 +1,7 @@
 var mongoose = require("mongoose"),//requirements
 	shortid = require("shortid"),
-	Sessions = require("./sessions");
+	Sessions = require("./sessions")
+    Log = require('./logs');
 
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
@@ -8,7 +9,7 @@ var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 var usersSchema = new mongoose.Schema({
 	id: {type: String, unique: true, 'default': shortid.generate},
 	fullname: {type: String, require: true},
-	password: {type: String, require: true},
+	password: {type: String, require: true, unique: true},
 	email: {type: String, require: true},
 	dp: {
         bucket:String,
@@ -96,13 +97,26 @@ exports.login = function(requestBody,response){
 					Sessions.create(session_id,data.id,function(session_generate){
 
 						if(session_generate){
-							response.writeHead(201,{'Content-Type':'application/json'});
-							response.data.log = "Login Success";
-							response.data.success = 1;
-							response.data.data = data;
-							response.data.session_id = session_id;
-							response.end(JSON.stringify(response.data));
-							return;
+                        
+                            var message = email+" logged in from IP: "+requestBody.source_ip_address,//log message
+                                user_email = email, //user email
+                                startup_id = null,//no startup involved
+                                task_id = null,//no task involved
+                                project_id = null,//no project involved
+                                compartment = "Accounts",
+                                private = true;
+                            console.log("new session");
+                            Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log confirmation
+                                console.log("NYQUIL");
+                                response.writeHead(201,{'Content-Type':'application/json'});
+                                response.data.log = "Login Success";
+                                response.data.success = 1;
+                                response.data.data = data;
+                                response.data.session_id = session_id;
+                                response.end(JSON.stringify(response.data));
+                                return;                                
+                            });
+
 						}else{
 							response.writeHead(201,{'Content-Type':'application/json'});
 							response.data.log = "Error setting up";
@@ -241,8 +255,18 @@ exports.confirm_user = function(uniq_id,response){
 							response.end("Internal server error");
 						}
 					}else{
-						data.remove();//delete data instance
-						response.writeHead(301,{'Location' : 'https://startupia-frontend.herokuapp.com/#/login?confirmed=true'});//server response is in text format
+                        var message = data.email+" confirmed user email for account creation",//log message
+                            user_email = data.email, //user email
+                            startup_id = null,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "Accounts",
+                            private = true;
+                            
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log confirmation
+                            data.remove();//delete data instance
+                            response.writeHead(301,{'Location' : 'https://startupia-frontend.herokuapp.com/#/login?confirmed=true'});//server response is in text format
+                        });
 					}
 				})
 			}else{
@@ -288,10 +312,20 @@ exports.edit = function(requestBody,response){
 							response.end(JSON.stringify(response.data));
 						}
 					}else{
-						response.writeHead(201,{'Content-Type':'application/json'});
-						response.data.log = requestBody.type+" updated";
-						response.data.success = 1;
-						response.end(JSON.stringify(response.data));
+                        var message = data.email+" updated account details",//log message
+                            user_email = data.email, //user email
+                            startup_id = null,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "Accounts",
+                            private = true;
+                            
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            response.writeHead(201,{'Content-Type':'application/json'});
+                            response.data.log = requestBody.type+" updated";
+                            response.data.success = 1;
+                            response.end(JSON.stringify(response.data));
+                        });
 					}
 				});			
 			}else{

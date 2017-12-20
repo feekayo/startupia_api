@@ -1,7 +1,8 @@
 var mongoose = require("mongoose"),
     shortid = require("shortid"),
     Sessions = require('./sessions'),
-    Users = require('./users');
+    Users = require('./users'),
+    Log = require('./logs');
 
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
@@ -67,7 +68,7 @@ exports.create_personnel = function(requestBody,response){
                response.data.success = 0;
                response.end(JSON.stringify(response.data));   
            }else{
-                Personnel.findOne({$and: [{personnel_email: requestBody.personnel_email},{startup_id: requestBody.startup_id}]},function(requestBody,response){
+                Personnel.findOne({$and: [{personnel_email: requestBody.personnel_email},{startup_id: requestBody.startup_id}]},function(error,data){
                    if(error){
                        if(response==null){//check for 500 error
                             response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
@@ -91,7 +92,7 @@ exports.create_personnel = function(requestBody,response){
                             response.end(JSON.stringify(response.data));//send message to user
                             return;
                         }else{
-                            PersonnelQueue.findOne({$and: [{personnel_email: requestBody.personnel_email},{startup_id: requestBody.startup_id}]},function(requestBody,response){//check personnel queue
+                            PersonnelQueue.findOne({$and: [{personnel_email: requestBody.personnel_email},{startup_id: requestBody.startup_id}]},function(error,data){//check personnel queue
                                if(error){
                                    if(response==null){//check for 500 error
                                         response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
@@ -118,7 +119,7 @@ exports.create_personnel = function(requestBody,response){
                                         //insert into database
                                         var id = shortid.generate();
 
-                                        var Invite = toPersonnelQueue(data,id);
+                                        var Invite = toPersonnelQueue(requestBody,id);
 
                                         Invite.save(function(error){
                                             if(error){
@@ -169,11 +170,23 @@ exports.create_personnel = function(requestBody,response){
                                                         response.data.success = 1;
                                                         response.end(JSON.stringify(response.data));
                                                      }else{
-                                                        //send email here
-                                                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                                                        response.data.log = "Job Invite Sent";//log response
-                                                        response.data.success = 1;
-                                                        response.end(JSON.stringify(response.data));
+                                                         
+                                                        var message = requestBody.user_email+" sent a personnel invite to "+requestBody.personnel_email,//log message
+                                                            user_email = requestBody.user_email, //user email
+                                                            startup_id = requestBody.startup_id,//no startup involved
+                                                            task_id = null,//no task involved
+                                                            project_id = null,//no project involved
+                                                            compartment = "HR",
+                                                            private = true;
+
+                                                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                                                            //send email here
+                                                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                                            response.data.log = "Job Invite Sent";//log response
+                                                            response.data.success = 1;
+                                                            response.end(JSON.stringify(response.data));  
+                                                        });                                                         
+                                                        
                                                     }
                                                 });							
 
@@ -194,7 +207,7 @@ exports.fetch_company_invites = function(requestBody,response){
     var startup_id = requestBody.startup_id;
     
     var aggregate = [{
-        $match: [{$and: [{startup_id: startup_id},{accepted: false},{rejected: false}]}]
+        $match: {$and: [{startup_id: startup_id},{accepted: false},{rejected: false}]}
     },{
         $lookup: {
             from: "users",
@@ -285,8 +298,6 @@ exports.fetch_startups_job_invites = function(requestBody,response){
             user_data: {
                id: 1,
 	           fullname: 1,
-               password: 0,
-	           email: 0,
                 dp: {
                     bucket: 1,
                     object_key: 1
@@ -417,10 +428,20 @@ exports.reject_personnel_invite = function(requestBody,response){
                             response.end(JSON.stringify(response.data));                
                         }                          
                     }else{
-                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                        response.data.log = "Offer Rescinded";//log response
-                        response.data.success = 1;
-                        response.end(JSON.stringify(response.data));                         
+                        var message = data.personnel_email+" rejected job invite",//log message
+                            user_email = data.personnel_email, //user email
+                            startup_id = data.startup_id,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "HR",
+                            private = true;
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            //send email here
+                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Offer Rescinded";//log response
+                            response.data.success = 1;
+                            response.end(JSON.stringify(response.data));  
+                        });                          
                     }
                 })
             }else{
@@ -513,10 +534,20 @@ exports.update_invite = function(requestBody,response){
                             response.end(JSON.stringify(response.data));                
                         }                          
                     }else{
-                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                        response.data.log = "Offer Updated";//log response
-                        response.data.success = 1;
-                        response.end(JSON.stringify(response.data));                         
+                        var message = requestBody.user_email+" updated a job offer to "+data.personnel_email,//log message
+                            user_email = requestBody.user_email, //user email
+                            startup_id = data.startup_id,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "HR",
+                            private = true;
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            //send email here
+                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Offer Updated";//log response
+                            response.data.success = 1;
+                            response.end(JSON.stringify(response.data));  
+                        });                          
                     }
                 })
             }else{
@@ -566,10 +597,20 @@ exports.delete_invite = function(requestBody,response){
                             response.end(JSON.stringify(response.data));                
                         }                          
                     }else{
-                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                        response.data.log = "Offer Deleted";//log response
-                        response.data.success = 1;
-                        response.end(JSON.stringify(response.data));                         
+                        var message = requestBody.user_email+" deleted a job offer to "+data.personnel_email,//log message
+                            user_email = requestBody.user_email, //user email
+                            startup_id = data.startup_id,//no startup involved
+                            task_id = null,//no task involved
+                            project_id = null,//no project involved
+                            compartment = "HR",
+                            private = true;
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            //send email here
+                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Offer Updated";//log response
+                            response.data.success = 1;
+                            response.end(JSON.stringify(response.data));  
+                        });                         
                     }
                 })
             }else{
@@ -719,11 +760,22 @@ exports.save_personnel = function(requestBody,response){
                                                 response.end(JSON.stringify(response.data));                
                                             }                                 
                                         }else{
-                                            console.log(error);
+                                            var message = requestBody.personnel_email+" accepted job invite",//log message
+                                                user_email = requestBody.user_email, //user email
+                                                startup_id = data.startup_id,//no startup involved
+                                                task_id = null,//no task involved
+                                                project_id = null,//no project involved
+                                                compartment = "HR",
+                                                private = true;
+
+                                                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+
                                             response.writeHead(201,{'Content-Type':'application/json'});//set response type
                                             response.data.log = "Invite accepted, pending verification!";//log response
                                             response.data.success = 1;
                                             response.end(JSON.stringify(response.data));                                 
+                                                        });
+                                            
                                         }
                                     });
                                 }
@@ -744,9 +796,177 @@ exports.save_personnel = function(requestBody,response){
 
 }
 
+exports.fetch_unvalidated_staff = function(requestBody,response){
+    
+    response.data = {};
+    
+    var startup_id = requestBody.startup_id;
+    var aggregate = [{
+            $match: {$and: [{startup_id: startup_id},{verified: false}]}
+        },{
+            $lookup: {
+                from: "users",
+                foreignField: "email",
+                localField: "personnel_email",
+                as: "user_data"
+            }   
+        },{
+            $project: {
+                id: 1,
+                personnel_email: 1,
+                message: 1,
+                startup_id: 1,
+                employment_contract: {
+                    bucket: 1,
+                    object_key: 1
+                },        
+                non_compete: 1,
+                user_data: {
+                    id: 1,
+                    fullname: 1,
+                    dp: 1,
+                    phone: 1,
+                    bio: 1
+                }
+            }
+        }];
+    
+    Personnel.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.data = data;
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));                
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Unverified Staff";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }
+        }
+    })
+}
+
+exports.retract_validation = function(requestBody,response){
+    response.data = {};
+    
+    Personnel.findOne({$and: [{id: requestBody.personnel_id},{verified: false}]},function(error,data){ //find personnel file
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }             
+        }else{
+            if(data){
+                PersonnelQueue.findOne({$and: [{personnel_email: data.personnel_email},{startup_id: data.startup_id}]},function(error,edata){//find job invite
+                    if(error){
+                        if(response==null){
+                            response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Internal server error";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));
+                        }else{
+                            console.log(error);
+                            response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Database Error";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));                
+                        }                         
+                    }else{
+                        if(edata){
+                            //update invite data & reactivate it
+                            edata.rejected = false;
+                            edata.accepted = false;
+                            edata.message = requestBody.message;
+                            
+                            edata.save(function(error){
+                                if(error){
+                                    if(response==null){
+                                        response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                                        response.data.log = "Internal server error";//log response
+                                        response.data.success = 0;
+                                        response.end(JSON.stringify(response.data));
+                                    }else{
+                                        console.log(error);
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                        response.data.log = "Database Error";//log response
+                                        response.data.success = 0;
+                                        response.end(JSON.stringify(response.data));                
+                                    }                                     
+                                }else{
+                                    data.remove(function(error){ //delete employee file
+                                        if(error){
+                                            if(response==null){
+                                                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                                                response.data.log = "Internal server error";//log response
+                                                response.data.success = 0;
+                                                response.end(JSON.stringify(response.data));
+                                            }else{
+                                                console.log(error);
+                                                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                                response.data.log = "Database Error";//log response
+                                                response.data.success = 0;
+                                                response.end(JSON.stringify(response.data));                
+                                            }                                             
+                                        }else{
+                                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                            response.data.log = "Successful Retraction";//log response
+                                            response.data.success = 1;
+                                            response.end(JSON.stringify(response.data));                                               
+                                        }
+                                    })
+                                }
+                            })
+                            
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Invite reactivation failed";//log response
+                            response.data.success = 0;
+                            response.end(JSON.stringify(response.data));                             
+                        }
+                    }
+                })
+                
+                
+                var Personnel = toPersonnel(data, bucket, object_key);
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Data";//log response
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));                 
+            }
+        }
+    })    
+}
+
 exports.validate_personnel = function(requestBody,response){
     var email = requestBody.personnel_email;
     var startup_id = requestBody.startup_id;
+    
+    response.data = {};
     
     Personnel.findOne({$and: [{personnel_email: email},{startup_id: startup_id}]},function(error,data){
         if(error){

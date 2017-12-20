@@ -19,7 +19,15 @@ var Log = mongoose.model('Log',logSchema)
 var exports = module.exports;
 
 exports.create_log_message = function(message,user_email,startup_id,task_id,project_id,compartment,private,callback){
+    var Log = toLog(message,user_email,startup_id,task_id,project_id,compartment,private);
     
+    Log.save(function(error){
+        if(error){
+            callback(false);
+        }else{
+            callback(true);
+        }
+    })
 }
    
 exports.fetch_startup_logs = function(requestBody,response){
@@ -46,7 +54,7 @@ exports.fetch_user_project_work_logs = function(requestBody,response){
     //fetch where user_email: user_email, startup_id: startup_id, project_id: project_id
 }
 
-function toLog =  function(message,user_email,startup_id,task_id,project_id,compartment,private){
+function toLog(message,user_email,startup_id,task_id,project_id,compartment,private){
     return new Log({
 		message: message,
         user_email: user_email,

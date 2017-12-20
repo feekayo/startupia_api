@@ -270,6 +270,7 @@ module.exports = {
     			if(validated){
                     Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can create personnel
                         if(validated){
+                            console.log(request.body.personnel_email);
                             Personnel.create_personnel(request.body,response); 
                         }else{
                             response.data = {};
