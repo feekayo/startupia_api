@@ -932,10 +932,21 @@ exports.retract_validation = function(requestBody,response){
                                                 response.end(JSON.stringify(response.data));                
                                             }                                             
                                         }else{
-                                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                                            response.data.log = "Successful Retraction";//log response
-                                            response.data.success = 1;
-                                            response.end(JSON.stringify(response.data));                                               
+                                           var message = requestBody.user_email+" redacted "+data.personnel_email+"'s employment",//log message
+                                               user_email = requestBody.user_email, //user email
+                                               startup_id = requestBody.startup_id,//no startup involved
+                                               task_id = null,//no task involved
+                                               project_id = null,//no project involved
+                                               compartment = "HR",
+                                               private = true;
+
+                                           Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                                                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                                response.data.log = "Successful Retraction";//log response
+                                                response.data.success = 1;
+                                                response.end(JSON.stringify(response.data)) 
+                                           });                                            
+;                                               
                                         }
                                     })
                                 }
@@ -1001,10 +1012,21 @@ exports.validate_personnel = function(requestBody,response){
                             response.end(JSON.stringify(response.data));                
                         }
                    }else{
-                        response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                        response.data.log = "Employment Validated!";//log response
-                        response.data.success = 1;
-                        response.end(JSON.stringify(response.data));                        
+                       var message = requestBody.user_email+" validated "+requestBody.personnel_email+"'s employment",//log message
+                           user_email = requestBody.user_email, //user email
+                           startup_id = requestBody.startup_id,//no startup involved
+                           task_id = null,//no task involved
+                           project_id = null,//no project involved
+                           compartment = "HR",
+                           private = true;
+
+                       Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                            response.data.log = "Employment Validated!";//log response
+                            response.data.success = 1;
+                            response.end(JSON.stringify(response.data));  
+                       }); 
+                       
                    }
                 });
             }else{
@@ -1032,7 +1054,7 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
 
 function toPersonnel (data,bucket,object_key){
     return new Personnel({
-        personnel_email: {type: String, require: true},
+        personnel_email: data.personnel_email,
         startup_id: data.startup_id,
         signed_employment_contract: {
             bucket: bucket,

@@ -732,7 +732,7 @@ exports.reject_founder_invite = function(requestBody,response){
                         Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
                             //send email here
                             response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                            response.data.log = "Invite sent to Co-Founder";//log response
+                            response.data.log = "Invite Deleted";//log response
                             response.data.success = 1;
                             response.end(JSON.stringify(response.data));
                         });  
@@ -789,21 +789,41 @@ exports.confirm_founder = function(requestBody,response){
                             return;//return statement                
                         }                                      
                    }else{
-                        var message = data.user_email+" accepted founder invite",//log message
-                            user_email = data.user_email, //user email
-                            startup_id = data.startup_id,//no startup involved
-                            task_id = null,//no task involved
-                            project_id = null,//no project involved
-                            compartment = "Founders",
-                            private = false;
-
-                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
-                            response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-                            response.data.log = "Invite Accepted";//log message for client
-                            response.data.success = 1;//flag success
-                            response.end(JSON.stringify(response.data));//send response to client
-                            return;//return statement   
-                        });                         
+                       
+                       data.remove(function(error){
+                          if(error){
+                                console.log(error);//log error
+                                if(response==null){//check for error 500
+                                    response.writeHead(500,{'Content-Type':'application/json'});//setcontent resolution variables
+                                    response.data.log = "Internal server error";//log message for client
+                                    response.data.success = 0;//flag success
+                                    response.end(JSON.stringify(response.data));//send response to client
+                                    return;//return statement
+                                }else{
+                                    response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                                    response.data.log = "Database Error";//log message for client
+                                    response.data.success = 0;//flag success
+                                    response.end(JSON.stringify(response.data));//send response to client
+                                    return;//return statement                
+                                }                              
+                          }else{
+                            var message = data.user_email+" accepted founder invite",//log message
+                                user_email = data.user_email, //user email
+                                startup_id = data.startup_id,//no startup involved
+                                task_id = null,//no task involved
+                                project_id = null,//no project involved
+                                compartment = "Founders",
+                                private = false;
+                            Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
+                                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                                response.data.log = "Invite Accepted";//log message for client
+                                response.data.success = 1;//flag success
+                                response.end(JSON.stringify(response.data));//send response to client
+                                return;//return statement   
+                            });                              
+                          } 
+                       });
+                         
                      
                    }
                });

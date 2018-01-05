@@ -222,7 +222,7 @@ exports.validate_hr_access = function(email,startup_id,response){
             }            
        }else{
            if(data && Object.keys(data).length>0){
-               response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+               response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                response.data.log = "Access flags fetched";
                for(var i=0; i<data.length; i++){
                    var element = data[i];

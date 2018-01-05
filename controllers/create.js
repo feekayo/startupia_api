@@ -2,7 +2,9 @@ var Sessions = require('../models/sessions'),
 	Users = require('../models/users'),
 	Privileges = require('../models/privileges'),
 	Startups = require('../models/startups'),
-    Personnel = require('../models/personnel');
+    Personnel = require('../models/personnel'),
+    Vacancies = require('../models/vacancies'),
+    UserCVs = require('../models/user_cvs');
 	CRM_apps = require('../models/CRM/apps'),
 	CRM_products = require('../models/CRM/products');
 
@@ -320,7 +322,137 @@ module.exports = {
         }
     },
     
-	create_privilege: function(request,response){
+    create_vacancy: function(request,response){ //requires write access to vacancy creation (HR3)
+		if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.position_title!=undefined) && (request.body.job_description!=undefined)&& (request.body.min_experience!=undefined)&& (request.body.age_limit!=undefined)&& (request.body.min_education!=undefined)&& (request.body.open_positions!=undefined) && (request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.position_title!="") && (request.body.job_description!="")&& (request.body.min_experience!="")&& (request.body.age_limit!="")&& (request.body.min_education!="")&& (request.body.open_positions!="")){
+    		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+    			if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR3", function(validated){//0 here means someone wif root access can create personnel
+                        if(validated){
+                            console.log(request.body.personnel_email);
+                            Vacancies.create_vacancy(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    })
+    				
+    			}else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client    				
+    			}
+    		});
+		}else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}
+	},
+    
+    save_vacancy: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.vacancy_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.vacancy_id!="")){
+			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+    			if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR3", function(validated){//0 here means someone wif root access can create personnel
+                        if(validated){
+                            Vacancies.save_vacancy(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    });
+    			}else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client    				
+    			}            
+            });
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client	            
+        }
+    },    
+    
+	create_vacancy_skill: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.vacancy_id!=undefined) && (request.body.skill!=undefined) && (request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.vacancy_id!="") && (request.body.skill!="")){
+			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+    			if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR3", function(validated){//0 here means someone wif root access can create personnel
+                        if(validated){
+                            Vacancies.save_vacancy_skills(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    });
+    			}else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client    				
+    			}            
+            });
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client	            
+        }
+    },
+    
+	create_vacancy_tool: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.vacancy_id!=undefined) && (request.body.tool!=undefined) && (request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.vacancy_id!="") && (request.body.tool!="")){
+			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+    			if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR3", function(validated){//0 here means someone wif root access can create personnel
+                        if(validated){
+                            Vacancies.save_vacancy_tools(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    });
+    			}else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client    				
+    			}            
+            });
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client	            
+        }
+    },    
+    
+    create_privilege: function(request,response){
 		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.startup_name!="") && (request.body.email!="") && (request.body.compartment!="") && (request.body.access_level!="") && (request.body.description!="")){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
@@ -334,7 +466,7 @@ module.exports = {
     			}				
 			});
 		}else{
-            console.log(request.body);
+            //console.log(request.body);
 			response.data = {};
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete data"; //log message for client
@@ -363,6 +495,115 @@ module.exports = {
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client             
         }
-    }
+    },
+    
+    user_cv: function(request,response){        
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.max_education!=undefined) && (request.body.max_education!="") && (request.body.introduction_video_url!=undefined) && (request.body.introduction_video_url!="") && (request.body.cover_letter!=undefined) && (request.body.cover_letter!="") && (request.body.date_of_birth!=undefined) && (request.body.date_of_birth!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    UserCVs.addCV(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }
+    },
 
+    user_certificate: function(request,response){        
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.certificate_name!=undefined) && (request.body.certificate_name!="") && (request.body.certificate_type!=undefined) && (request.body.certificate_type!="") && (request.body.specialization!=undefined) && (request.body.specialization!="") && (request.body.year!=undefined) && (request.body.year!="") && (request.body.bucket!=undefined) && (request.body.bucket!="") && (request.body.object!=undefined) && (request.body.object!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    UserCVs.addCertificate(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }
+    },
+    
+   user_skill: function(request,response){        
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.name!=undefined) && (request.body.name!="") && (request.body.proof_url!=undefined) && (request.body.proof_url!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    UserCVs.addSkill(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }
+    },
+    
+   user_tool: function(request,response){        
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.name!=undefined) && (request.body.name!="") && (request.body.proof_url!=undefined) && (request.body.proof_url!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    UserCVs.addTool(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }
+    },    
+    
+    user_social: function(request,response){        
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.platform!=undefined) && (request.body.platform!="") && (request.body.url!=undefined) && (request.body.url!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    UserCVs.addSocial(request.body,response);
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }
+    }
 } 

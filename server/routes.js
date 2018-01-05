@@ -68,11 +68,30 @@ module.exports = function(app){
     router.get('/read/job_invite/:session_id',read.personnel_invite);//for fetching a singular job invite
     router.post('/delete/remove_job_invite/:session_id',remove.delete_job_invites);//for deleting job invites
     router.get('/read/unvalidated_staff/:session_id',read.unvalidated_staff);//for fetching list of staff in need of validation
+    router.put('/create/vacancy/:session_id',create.create_vacancy);//for saving vacancies to buffer collection
+    router.put('/create/vacancy_skill/:session_id',create.create_vacancy_skill);//for saving a vacancy's required skills
+    router.put('/create/vacancy_tool/:session_id',create.create_vacancy_tool);//for saving a vacancy's required tools
+    router.post('/create/vacancy/:session_id',create.save_vacancy);//for saving vacancies permanently
     
     //user invite routes
     router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites
     router.get('/read/user_founder_invites/:session_id',read.user_founder_invites);//for fetching a user's job invites
     router.get('/read/user_privilege_invites/:session_id',read.user_privilege_invites);//for fetching a user's job invites
+    
+    
+    //user CV creation
+    router.put('/create/user_cv/:session_id',create.user_cv);//for adding a user's cv 
+    router.put('/create/user_certificate/:session_id',create.user_certificate);//for adding a user's certificates to CV
+    router.put('/create/user_skill/:session_id',create.user_skill);//for adding user's skills to cv
+    router.put('/create/user_tool/:session_id',create.user_tool);//for adding user's tools to cv
+    router.put('/create/user_social/:session_id',create.user_social);//for adding user's social media profile to cv
+    
+    //fetching User CV data
+    router.get('/read/user_cv',read.user_cv); //for fetching user's cv
+    router.get('/read/user_certificates',read.user_certificates);//for fetching a user's certificate
+    router.get('/read/user_skills', read.user_skills);//for fetching user skills
+    router.get('/read/user_tools', read.user_tools);//for fetching user tools
+    router.get('/read/user_socials', read.user_socials);//for fetching user socials
     
     
     //router.post('/create/click',create.crm_create_click);
