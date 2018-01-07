@@ -74,7 +74,7 @@ exports.fetch_user_cv = function(requestBody,response){
     response.data = {};
     
     var aggregate = [{
-        $match: [{user_id: requestBody.user_id}]
+        $match: {user_id: requestBody.user_id}
     },{
         $lookup: {
             from: "users",
@@ -116,6 +116,7 @@ exports.fetch_user_cv = function(requestBody,response){
                 response.end(JSON.stringify(response.data));   
                 return;                  
             }else{
+                console.log(error);
                 response.writeHead(201,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Database Error";//log response
                 response.data.success = 0;
@@ -145,7 +146,7 @@ exports.fetch_user_certificates = function(requestBody,response){
     response.data = {};
     
     var aggregate = [{
-        $match: [{user_id: requestBody.user_id}]
+        $match: {user_id: requestBody.user_id}
     }];
     
     UserCertificates.aggregate(aggregate,function(error,data){
@@ -186,7 +187,7 @@ exports.fetch_user_skills = function(requestBody,response){
     response.data = {};
     
     var aggregate = [{
-        $match: [{user_id: requestBody.user_id}]
+        $match: {user_id: requestBody.user_id}
     },{
         $lookup: {
             from: "skills",
@@ -234,7 +235,7 @@ exports.fetch_user_tools = function(requestBody,response){
     response.data = {};
     
     var aggregate = [{
-        $match: [{user_id: requestBody.user_id}]
+        $match: {user_id: requestBody.user_id}
     },{
         $lookup: {
             from: "tools",
@@ -282,7 +283,7 @@ exports.fetch_user_socials = function(requestBody,response){
     response.data = {};
     
     var aggregate = [{
-        $match: [{user_id: requestBody.user_id}]
+        $match: {user_id: requestBody.user_id}
     }];
     
     UserSocial.aggregate(aggregate,function(error,data){

@@ -2,6 +2,7 @@ var Sessions = require('../models/sessions'),
 	Users = require('../models/users'),
 	Privileges = require('../models/privileges'),
 	Startups = require('../models/startups'),
+    UserCVs = require('../models/user_cvs'),
 	Personnel = require('../models/personnel'),
 	CRM_apps = require('../models/CRM/apps'),
 	CRM_products = require('../models/CRM/products'),
@@ -448,6 +449,7 @@ module.exports = {
 		var get_params = url.parse(request.url,true);
 
 		if(get_params.query.user_id!=undefined){
+            console.log("1")
 			UserCVs.fetch_user_cv(get_params.query,response);
 		}else{
             response.data = {};
