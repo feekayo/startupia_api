@@ -72,7 +72,7 @@ module.exports = function(app){
     router.put('/create/vacancy_skill/:session_id',create.create_vacancy_skill);//for saving a vacancy's required skills
     router.put('/create/vacancy_tool/:session_id',create.create_vacancy_tool);//for saving a vacancy's required tools
     router.post('/create/vacancy/:session_id',create.save_vacancy);//for saving vacancies permanently
-    router.get('/read/vacancies/:session_id', read.)
+    router.get('/read/vacancies/:session_id', read.startup_vacancies);
     
     //user invite routes
     router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites
