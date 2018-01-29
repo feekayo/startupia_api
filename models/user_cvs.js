@@ -193,7 +193,7 @@ exports.fetch_user_skills = function(requestBody,response){
             from: "skills",
             foreignField: "id",
             localField: "skill_id",
-            as: "user_data"
+            as: "skill_data"
         }
     }];
     
@@ -241,7 +241,7 @@ exports.fetch_user_tools = function(requestBody,response){
             from: "tools",
             foreignField: "id",
             localField: "tool_id",
-            as: "user_data"
+            as: "tools_data"
         }
     }];
     
@@ -427,11 +427,13 @@ exports.addCertificate = function(requestBody,response){
 }
 
 exports.deleteCertificate = function(requestBody,response){
-    var certificate_id = requestBody.certificate_id;
+    var certificate_id = requestBody.certificate_id,
+        user_id = requestBody.user_id;
+    
     
     response.data = {};
     
-    UserCertificates.remove({id: certificate_id},function(error){
+    UserCertificates.remove({$and: [{id: certificate_id},{user_id: user_id}]},function(error){
         if(error){
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
@@ -465,7 +467,92 @@ exports.deleteCertificate = function(requestBody,response){
         }
     })
 }
+                            
+exports.deleteSkill = function(requestBody,response){
+    var skill_id = requestBody.skill_id,
+        user_id = requestBody.user_id;
+    
+    
+    response.data = {};
+    
+    UserSkills.remove({$and: [{id: skill_id},{user_id: user_id}]},function(error){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal Server Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                  
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                
+            }            
+        }else{
+            var message = requestBody.user_email+" removed skill",
+                 user_email = requestBody.user_email,
+                 startup_id = null,
+                 task_id = null,
+                 project_id = null,
+                 compartment = null,
+                 private = true;
+                                                       
+            Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(yes){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Skill Removed";//log response
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));   
+                return;      
+            });            
+        }
+    })
+}
 
+                      
+exports.deleteTool = function(requestBody,response){
+    var tool_id = requestBody.tool_id,
+        user_id = requestBody.user_id;
+    
+    
+    response.data = {};
+    
+    UserTools.remove({$and: [{id: tool_id},{user_id: user_id}]},function(error){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal Server Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                  
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                
+            }            
+        }else{
+            var message = requestBody.user_email+" removed tool",
+                 user_email = requestBody.user_email,
+                 startup_id = null,
+                 task_id = null,
+                 project_id = null,
+                 compartment = null,
+                 private = true;
+                                                       
+            Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(yes){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Tool Removed";//log response
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));   
+                return;      
+            });            
+        }
+    })
+}                      
+                      
 exports.fetch_user_certificates = function(requestBody,response){
     response.data = {};
     
@@ -524,19 +611,12 @@ exports.updateCV = function(requestBody,response){
             }
         }else{
             if(data && Object.keys(data).length>0){
-                if(requestBody.param=="max_education"){
-                    data.max_education = requestBody.value;
-                }else if(requestBody.param=="introduction_video_url"){
-                    data.introduction_video_url = requestBody.introduction_video_url;
-                }else if(requestBody.param=="cover_letter"){
-                    data.cover_letter = requestBody.cover_letter;
-                }else{
-                    response.writeHead(200,{'Content-Type':'application/json'});//set response type
-                    response.data.log = "Invalid Parameter";
-                    response.data.success = 0;
-                    response.end(JSON.stringify(response.data));
-                    return;                    
-                }
+                
+                data.user_id = requestBody.user_id,
+                data.max_education = requestBody.max_education,
+                data.introduction_video_url = requestBody.introduction_video_url,
+                data.cover_letter = requestBody.cover_letter,
+                data.date_of_birth = requestBody.date_of_birth;
                 
                 data.save(function(error){
                     if(error){
@@ -651,7 +731,7 @@ exports.addSocial = function(requestBody,response){
     });
 }
 
-exports.removeSocial = function(requestBody,response){
+exports.updateSocial = function(requestBody,response){
     
     response.data = {};
     
@@ -672,7 +752,12 @@ exports.removeSocial = function(requestBody,response){
             }                                    
         }else{
             if(data && Object.keys(data).length>0){
-                data.remove(function(error){
+                
+                data.user_id = requestBody.user_id,
+                data.platform = requestBody.platform,
+                data.url = requestBody.url;               
+                
+                data.save(function(error){
                     if(error){
                         if(response==null){
                             response.writeHead(500,{'Content-Type':'application/json'});//set response type
@@ -688,7 +773,7 @@ exports.removeSocial = function(requestBody,response){
                             return;                
                         }                         
                     }else{
-                        var message = requestBody.user_email+" removed "+requestBody.platform+" profile",
+                        var message = requestBody.user_email+" updated "+requestBody.platform+" profile",
                             user_email = requestBody.user_email,
                             startup_id = null,
                             task_id = null,

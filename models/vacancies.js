@@ -2,7 +2,7 @@ var mongoose = require("mongoose"),
     shortid = require("shortid"),
     Sessions = require('./sessions'),
     Users = require('./users'),
-    SkillsnTools = require('./skillsntools') 
+    SkillsnTools = require('./skillsntools'), 
     Log = require('./logs');
 
 var vacanciesQueueSchema = new mongoose.Schema({
@@ -72,6 +72,20 @@ var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 **/
 
 var exports = module.exports;
+
+exports.validate_application_access = function(application_id,user_id,callback){
+    Application.findOne({$and: [{id: application_id},{user_id: user_id}]},function(error,data){
+        if(error){
+            callback(false);
+        }else{
+            if(data){
+                callback(true);
+            }else{
+                callback(false);
+            }
+        }                
+    });
+}
 
 exports.create_vacancy = function(requestBody,response){
     
@@ -434,8 +448,177 @@ exports.save_application =  function(requestBody,response){
     });
 }
 
-exports.fetch_vacancy_applicants = function(requestBody,response){
+exports.fetch_startup_vacancies = function(requestBody,response){
+    response.data = {};
     
+    var aggregate = [{
+        $match: {startup_id: requestBody.startup_id}
+    },{
+        $lookup: {
+            from: "vacancyapplicancts",
+            foreignField: "vacancy_id",
+            localField: "id",
+            as: "vacancy_applicants"            
+        }
+    },{
+        $project: {
+            id: 1,
+            position_title: 1,
+            job_description: 1,
+            min_experience: 1,
+            age_limit: 1,
+            min_education: 1,
+            open_positions: 1,
+            geo_constraint: 1,
+            startup_id: 1,
+            timestamp: 1,            
+            applicants_number: {$size: vacancy_applicants}
+        }
+    }]
+
+    Vacancies.findOne(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal Server Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                  
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                
+            }            
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.data = data;
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));   
+                return;     
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Data Fetched";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                     
+            }
+        }
+    })
+}
+
+exports.fetch_vacancy_applicants = function(requestBody,response){
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {vacancy_id: requestBody.vacancy_id}        
+    },{
+        $lookup: {
+            from: "users",
+            foreignField: "id",
+            localField: "user_id",
+            as: "user_data"
+        }
+    },{
+        $lookup: {
+            from: "user_cvs",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_cv_data"
+        }
+    },{
+        $lookup: {
+            from: "user_social",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_social_data"
+        }
+    },{
+        $lookup: {
+            from: "user_skills",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_skills_data"
+        }
+    },{
+        $lookup: {
+            from: "user_tools",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_tools_data"
+        }
+    },{
+        $lookup: {
+            from: "user_certificates",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_certificates_data"
+        }
+    },{
+        $project: {
+            id: 1,
+            vacancy_id: 1,
+            user_id: 1,
+            timestamp: 1,            
+            user_data: {
+                id: 1,
+                fullname: 1,
+                email: 1,
+                dp: {
+                    bucket:1,
+                    object_key: 1
+                },
+                phone: 1,
+                bio: 1,
+                address: 1,
+                zip_code: 1,
+                town: 1,
+                updated_at: 1,
+                created_at: 1                
+            },
+            user_cv_data: 1,
+            user_social_data: 1,
+            user_skills_data: 1,
+            user_tools_data: 1,
+            user_certificates_data: 1
+        }
+    }];
+    
+    Application.findOne(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal Server Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                  
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                
+            }            
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.data = data;
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));   
+                return;     
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Data Fetched";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                     
+            }
+        }
+    })
 }
 
 function toVacancyQueue(data,id){

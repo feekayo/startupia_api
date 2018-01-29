@@ -25,7 +25,7 @@ module.exports = function(app){
     router.put('/user/verify_email/:session_id',accounts.verify_email);//route for sending verification code to user email
     router.post('/user/verify_email/:session_id',accounts.confirm_verify_email);//route for checking and authorizing email verification
   
-    router.post('/crm/login',accounts.login_compartment);//route for logging into CRM
+    //router.post('/crm/login',accounts.login_compartment);//route for logging into CRM
     //router.post('/crm/create_app',create.crm_create_app);
     //router.post('/crm/create_product',create.crm_create_product);
     //router.post('/crm/create_button',create.crm_create_button);
@@ -61,7 +61,7 @@ module.exports = function(app){
     router.get('/read/startup_details/:session_id',read.startup_details);//for fetching a singular startup's details
     
     //HR functions
-    router.get('/read/validate_hr_access/:session_id',read.validate_hr_access);//for validating a user access to a startup
+    router.get('/read/validate_hr_access/:session_id',read.validate_hr_access);//for validating a user access to a startup's hr module
     //router.get('/read/validate_access/:session_id',read.validate_access);//for validating user access to an aspect of work
     router.get('/read/startup_job_invites/:session_id',read.startup_job_invites);//for fetching a startup's job invites 
     router.post('/update/job_invite/:session_id',update.job_invite);// for updating job invites
@@ -72,6 +72,7 @@ module.exports = function(app){
     router.put('/create/vacancy_skill/:session_id',create.create_vacancy_skill);//for saving a vacancy's required skills
     router.put('/create/vacancy_tool/:session_id',create.create_vacancy_tool);//for saving a vacancy's required tools
     router.post('/create/vacancy/:session_id',create.save_vacancy);//for saving vacancies permanently
+    router.get('/read/vacancies/:session_id', read.)
     
     //user invite routes
     router.get('/read/user_job_invites/:session_id',read.user_personnel_invites);//for fetching a user's job invites
@@ -92,6 +93,20 @@ module.exports = function(app){
     router.get('/read/user_skills', read.user_skills);//for fetching user skills
     router.get('/read/user_tools', read.user_tools);//for fetching user tools
     router.get('/read/user_socials', read.user_socials);//for fetching user socials
+    
+    //updating user CV data
+    router.post('/update/user_cv/:session_id',update.user_cv);//for updating a user's CV
+    router.post('/update/user_social',update.user_social);//for updating a user's social media profile
+    
+    //deleting skills, tools and certificates
+    router.post('/delete/user_certificate/:session_id',remove.user_certificate);//for deleting a user certificate
+    router.post('/delete/user_skill/:session_id',remove.user_skill);//for deleting a user's skill
+    router.post('/delete/user_tool/:session_id',remove.user_tool);//for deleting a user's skill
+    
+    
+    
+    //Financial Management Routes
+    router.get('/read/validate_fm_access/:session_id',read.validate_fm_access);//for validating a user access to a startup's FM module
     
     
     //router.post('/create/click',create.crm_create_click);

@@ -1,28 +1,31 @@
-//accounts controllers
-var Sessions = require('../models/sessions'),
-    Users = require('../models/users'),
-    PasswordChange = require('../models/passwordchange'),
-    Verification = require('../models/verify'),
-    Privileges = require('../models/privileges'),
-    CRM_apps = require('../models/CRM/apps'),
-    url = require('url');
+//accounts controller controls all account based models, things to do with creating and managing a user's account are done here
+
+
+var Sessions = require('../models/sessions'), // Session model is required
+    Users = require('../models/users'), //users model is required
+    PasswordChange = require('../models/passwordchange'), //password change model is required
+    Verification = require('../models/verify'), //verification model is required
+    Privileges = require('../models/privileges'), //privileges model is required
+    url = require('url'); //url parser is required
 
 module.exports = {
-    index: function(request,response) {
-        response.send("Startupia API");
+    index: function(request,response) { //index link
+        response.send("Welcome to Startupia API"); //show welcome message
     },
+    
 
-    login: function(request,response){
-        var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
+    login: function(request,response){ //login function
+        var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress; //check source IP Address
         
-        var get_params = url.parse(request.url,true);
+        var get_params = url.parse(request.url,true); //parser url with url parser to get GET parameters being sent
 
-        if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.password!=undefined)){
+        if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.password!=undefined) && (get_params.query.email!="") && (get_params.query.password!="")){ //validate request parameters
             get_params.query.source_ip_address = ip;//add ip address to get params for logging
             
-            Users.login(get_params.query,response);
+            Users.login(get_params.query,response); //perform login action
         }else{
-            response.data = {};
+            
+            response.data = {}; //set response data object
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0; // success variable for client
@@ -30,8 +33,9 @@ module.exports = {
         }
     },
 
+    
     signup: function(request,response){
-        if((request.body.fullname != undefined) && (request.body.email != undefined) && (request.body.password != undefined)){
+        if((request.body.fullname != undefined) && (request.body.email != undefined) && (request.body.password != undefined) && (request.body.fullname != "") && (request.body.email != "") && (request.body.password != "")){ //Check 
             Users.register(request.body,response);
         }else{
             response.data = {};
@@ -43,8 +47,8 @@ module.exports = {
         }
     },
 
-    forgot_password: function(request,response){
-        if(request.body.email != undefined){
+    forgot_password: function(request,response){//for sending forgotten password recovery messages
+        if(request.body.email != undefined){ //check for user's email address
             PasswordChange.create(request.body,response);
         }else{
             response.data = {};
@@ -55,15 +59,15 @@ module.exports = {
         }
     },
 
-    confirm: function(request,response){
-        Users.confirm_user(request.params.uniq_id,response);
+    confirm: function(request,response){ //for email confirmations
+        Users.confirm_user(request.params.uniq_id,response); //carry out confirmation action
     },
 
-    edit: function(request,response){
-        if((request.body.type!=undefined) && (request.body.param!=undefined) && (request.body.user_id!=undefined)){
-            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+    edit: function(request,response){ //for editing user profiles
+        if((request.body.type!=undefined) && (request.body.param!=undefined) && (request.body.user_id!=undefined)){ //validate request parameters
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){ //validate user session
                 if (validated) {
-                    Users.edit(request.body,response);
+                    Users.edit(request.body,response); //validate editing
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
@@ -82,18 +86,15 @@ module.exports = {
     },
     
     verify_session: function(request,response){//for validating sessions
-        if(request.body.user_id!=undefined){
-            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
-                console.log("Error: 1");
+        if(request.body.user_id!=undefined && request.body.user_id!=""){ //validate request
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){ 
                 if (validated) {
-                    console.log("Error: 2");
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Valid session";//log message for client
                     response.data.success = 1; // success variable for client
                     response.end(JSON.stringify(response.data)); //send response to client 
                 }else{
-                    console.log("Error: 3");
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
@@ -102,7 +103,6 @@ module.exports = {
                 }
             });
         }else{
-            console.log("Error: 4");
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
@@ -113,13 +113,13 @@ module.exports = {
     
     
 
-    verify_email: function(request,response){//for sending email verification codes
-        if((request.body.email!=undefined) && (request.body.user_id!=undefined)){
+    verify_email: function(request,response){//for creating and sending email verification codes
+        if((request.body.email!=undefined) && (request.body.user_id!=undefined) && (request.body.email!="") && (request.body.user_id!="")){ //validate request
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//async function for validating sessions
-                if(validated){
-                    Verification.create_for_email(request.body,response);
+                if(validated){//if session is validated
+                    Verification.create_for_email(request.body,response); //create verification code for emails
                 }else{
-                    response.data = {};
+                    response.data = {}; 
                     response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
                     response.data.log = "Invalid session";
                     response.success = 2;//success variable for client
@@ -127,21 +127,21 @@ module.exports = {
                 }
             });
         }else{
-            response.data = {};//declare response array
-            response,writeHead(201,{'Content-Type':'application/json'});//server response is in json format
+            response.data = {};//declare response data array
+            response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client
         }
     },
 
-    verify_phone: function(request,response){
-        if((request.body.user_id!=undefined)&&(request.body.type!=undefined)&&(request.body.country_code!=undefined)&&(request.body.number!=undefined)){
-            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
-                if (validated) {
-                    Verification.create_for_phone(request.body,response);
+    verify_phone: function(request,response){ //for creating phone number verification token and sending it
+        if((request.body.user_id!=undefined)&&(request.body.type!=undefined)&&(request.body.country_code!=undefined)&&(request.body.number!=undefined) && (request.body.user_id!="")&&(request.body.type!="")&&(request.body.country_code!="")&&(request.body.number!="")){ //validate request
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){ // async session validation
+                if (validated) {//if validated
+                    Verification.create_for_phone(request.body,response); //create validation for phone
                 }else{
-                    response.data = {};
+                    response.data = {}; //create response data object
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
                     response.data.success = 2; // success variable for client
@@ -149,7 +149,7 @@ module.exports = {
                 }
             });            
         }else{
-            response.data = {};
+            response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0; // success variable for client
@@ -157,13 +157,13 @@ module.exports = {
         }
     },
 
-    confirm_verify_phone: function(request,response){
-        if((request.body.user_id!=undefined)&&(request.body.key!=undefined)){
-            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
-                if (validated) {
-                    Verification.confirm_phone(request.body,response);
+    confirm_verify_phone: function(request,response){ //for confirming phone number verification
+        if((request.body.user_id!=undefined)&&(request.body.key!=undefined) && (request.body.user_id!="")&&(request.body.key!="")){//validate request
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){ //async session validation
+                if (validated) { //if validated
+                    Verification.confirm_phone(request.body,response); //confirm validation code
                 }else{
-                    response.data = {};
+                    response.data = {};//declare response data array
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
                     response.data.success = 2; // success variable for client
@@ -171,7 +171,7 @@ module.exports = {
                 }
             }); 
         }else{
-            response.data = {};
+            response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0;//success variable for client
@@ -179,13 +179,13 @@ module.exports = {
         }
     },
 
-    confirm_verify_email: function(request,response){
-        if((request.body.user_id!=undefined)&&(request.body.key!=undefined) && (request.body.email!=undefined)){
-            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
-                if (validated) {
-                    Verification.confirm_email(request.body,response);
+    confirm_verify_email: function(request,response){ //for confirming email verification
+        if((request.body.user_id!=undefined)&&(request.body.key!=undefined) && (request.body.email!=undefined) && (request.body.user_id!="")&&(request.body.key!="") && (request.body.email!="")){ //validate request
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){ //async session validation 
+                if (validated) { //if validated
+                    Verification.confirm_email(request.body,response);//confirm validation code
                 }else{
-                    response.data = {};
+                    response.data = {}; //declare response data array
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
                     response.data.success = 2; // success variable for client
@@ -193,7 +193,7 @@ module.exports = {
                 }
             }); 
         }else{
-            response.data = {};
+            response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
             response.data.success = 0;//success variable for client
@@ -204,11 +204,10 @@ module.exports = {
     check_passwordchange_token: function(request,response){//function for checking password change variables
         var get_params = url.parse(request.url,true);//parse url
 
-        if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.token!=undefined)){//check request params
+        if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.token!=undefined)  && (get_params.query.email!="") && (get_params.query.token!="")){//check request params
             PasswordChange.verify_token(get_params.query,response);//perform action
         }else{
-            console.log(get_params.query);
-            response.data = {};
+            response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete Request"; //log message for client
             response.data.success = 0;//success variable for client
@@ -217,59 +216,17 @@ module.exports = {
     },
 
     change_password: function(request,response){//function to change up the user password
-        if((request.body.email!=undefined) && (request.body.password!=undefined) && (request.body.token!=undefined)){//check password change variables
+        if((request.body.email!=undefined) && (request.body.password!=undefined) && (request.body.token!=undefined) && (request.body.email!="") && (request.body.password!="") && (request.body.token!="")){//check password change variables
             PasswordChange.change_password(request.body,response);//do changing of password
         }else{
-            response.data = {};
+            response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete Request"; //log message for client
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client            
         }
 
-    },    
+    },  
 
-    //Delete later on
-    login_compartment: function(request,response){
-        if((request.body.email!=undefined) && (request.body.password!=undefined) && (request.body.company_id!=undefined) && (request.body.compartment!=undefined)){//add session_id later on
-
-            Users.callback_login(request.body.email,request.body.password,function(success){
-
-                if(success){
-                    //success == user_id
-                    Privileges.check_privilege_callback(request.body.email,request.body.company_id,request.body.compartment,function(access){
-                        if(!access){
-                            response.data = {};
-                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-                            response.data.log = "Access Denied!"; //log message for client
-                            response.data.success = 0;//success variable for client
-                            response.end(JSON.stringify(response.data));//send response to client                                        
-                        }else{
-                            //add create session here to make fool proof
-                            response.data = {};
-                            response.writeHead(200,{'Content-Type':'application/json'});//server response set to json format
-                            response.data.log = "Access Granted!"; //log message for client
-                            response.data.access_level = access;
-                            response.data.user_id = success;
-                            response.data.success = 1;//success variable for client
-                            response.end(JSON.stringify(response.data));//send response to client
-                        }
-                    });
-                }else{
-                    response.data = {};
-                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-                    response.data.log = "Invalid Login"; //log message for client
-                    response.data.success = 0;//success variable for client
-                    response.end(JSON.stringify(response.data));//send response to client 
-                }
-            });
-        }else{
-            response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client 
-        }
-        
-    }
+   
 }
