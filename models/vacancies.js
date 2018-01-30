@@ -597,7 +597,7 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
         }
     }];
     
-    Application.findOne(aggregate,function(error,data){
+    Application.aggregate(aggregate,function(error,data){
         if(error){
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
