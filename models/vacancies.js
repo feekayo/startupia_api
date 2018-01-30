@@ -480,8 +480,9 @@ exports.fetch_startup_vacancies = function(requestBody,response){
     }]
     
 
-    /**
+
     Vacancies.findOne(aggregate,function(error,data){
+            /**
         if(error){
             console.log(error);
             if(response==null){
@@ -513,9 +514,10 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 return;                     
             }
         }
+            **/
     })
     
-    **/
+
 }
 
 exports.fetch_vacancy_applicants = function(requestBody,response){
