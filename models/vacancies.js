@@ -478,7 +478,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
     
 
 
-    Vacancies.findOne(aggregate,function(error,data){
+    Vacancies.aggregate(aggregate,function(error,data){
            
         if(error){
             response.end(error);
