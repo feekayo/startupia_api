@@ -178,7 +178,22 @@ module.exports = {
     **/
     
     save_startup: function(request,response){
-		if((request.body.user_id!=undefined) && (request.body.name!=undefined) && (request.body.email!=undefined) && (request.body.type_id!=undefined) && (request.body.user_email!=undefined) && (request.body.bucket!=undefined) && (request.body.object_key!=undefined)  && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.name!="") && (request.body.email!="") && (request.body.type_id!="") && (request.body.user_email!="") && (request.body.bucket!="") && (request.body.object_key!="")  && (request.params.session_id!="")){
+		if((request.body.user_id!=undefined) &&
+            (request.body.name!=undefined) &&
+            (request.body.email!=undefined) &&
+            (request.body.type_id!=undefined) &&
+            (request.body.user_email!=undefined) &&
+            (request.body.bucket!=undefined) &&
+            (request.body.object_key!=undefined)  &&
+            (request.params.session_id!=undefined) &&
+            (request.body.user_id!="") &&
+            (request.body.name!="") &&
+            (request.body.email!="") &&
+            (request.body.type_id!="") &&
+            (request.body.user_email!="") &&
+            (request.body.bucket!="") &&
+            (request.body.object_key!="")  &&
+            (request.params.session_id!="")){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
     			if(validated){
     				Startups.save_startup_queue(request.body,response); 
