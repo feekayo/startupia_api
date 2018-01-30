@@ -481,8 +481,8 @@ exports.fetch_startup_vacancies = function(requestBody,response){
     Vacancies.findOne(aggregate,function(error,data){
            
         if(error){
-            console.log(error);
-            if(response==null){
+            response.end(error);
+            /**if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Internal Server Error";//log response
                 response.data.success = 0;
@@ -494,11 +494,10 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 response.data.success = 0;
                 response.end(JSON.stringify(response.data));   
                 return;                
-            }            
+            } **/           
         }else{
     
-            response.end("No Errors")            
-            /**
+            
             if(data && Object.keys(data).length>0){
                 response.writeHead(201,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Data Fetched";//log response
@@ -513,7 +512,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 response.end(JSON.stringify(response.data));   
                 return;                     
             }
-            **/
+            
         }
             
     })
