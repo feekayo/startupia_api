@@ -588,13 +588,14 @@ module.exports = {
     			if(validated){
                     Privileges.validate_access('HR',get_params.query.user_email,get_params.query.startup_id, 0, "HR3", function(validated){//0 here means someone wif root access can also fetch invites
                         if(validated){
-                            Vacancies.fetch_startup_vacancies(get_params.query,response); 
+                   console.log("Error 1");//         Vacancies.fetch_startup_vacancies(get_params.query,response); 
                         }else{
-                            response.data = {};
+                            console.log("Error 2") 
+                            /**response.data = {};
                             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                             response.data.log = "User Unauthorized!";//log message for client
                             response.data.success = 0; // success variable for client
-                            response.end(JSON.stringify(response.data)); //send response to client                             
+                            response.end(JSON.stringify(response.data)); //send response to client                         **/    
                         }
                     })
     				
