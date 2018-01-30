@@ -453,7 +453,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
     
     response.end("No Errors")
     
-    /**
+
     var aggregate = [{
         $match: {startup_id: requestBody.startup_id}
     },{
@@ -480,7 +480,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
     }]
     
 
-
+    /**
     Vacancies.findOne(aggregate,function(error,data){
         if(error){
             console.log(error);
