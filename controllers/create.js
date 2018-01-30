@@ -237,6 +237,8 @@ module.exports = {
 		}
 	},
 
+
+
 	create_founder: function(request,response){
 		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.email!=undefined) && (request.body.startup_name!=undefined) && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.email!="") && (request.body.startup_name!="") && (request.params.session_id!="")){
     		Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
@@ -280,6 +282,9 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client             
         }
     },
+
+
+
 
 	create_personnel: function(request,response){ //requires write access to personnel creation (HR1)
 		if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.personnel_email!=undefined) && (request.body.startup_name!=undefined) && (request.body.non_compete!=undefined) && (request.params.session_id!=undefined)&&(request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.personnel_email!="") && (request.body.startup_name!="") && (request.body.non_compete!="") && (request.params.session_id!="")){
@@ -336,6 +341,8 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client             
         }
     },
+
+
     
     create_vacancy: function(request,response){ //requires write access to vacancy creation (HR3)
 		if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.position_title!=undefined) && (request.body.job_description!=undefined)&& (request.body.min_experience!=undefined)&& (request.body.age_limit!=undefined)&& (request.body.min_education!=undefined)&& (request.body.open_positions!=undefined) && (request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.position_title!="") && (request.body.job_description!="")&& (request.body.min_experience!="")&& (request.body.age_limit!="")&& (request.body.min_education!="")&& (request.body.open_positions!="")){
@@ -401,8 +408,7 @@ module.exports = {
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client	            
         }
-    },    
-    
+    },
 	create_vacancy_skill: function(request,response){
         if((request.body.user_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined) && (request.body.vacancy_id!=undefined) && (request.body.skill!=undefined) && (request.body.user_id!="") && (request.body.user_email!="") && (request.body.startup_id!="") && (request.body.vacancy_id!="") && (request.body.skill!="")){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
@@ -466,7 +472,9 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client	            
         }
     },    
-    
+
+
+
     create_privilege: function(request,response){
 		if((request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.startup_name!="") && (request.body.email!="") && (request.body.compartment!="") && (request.body.access_level!="") && (request.body.description!="")){
 			Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
@@ -511,6 +519,9 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client             
         }
     },
+
+
+
     
     user_cv: function(request,response){        
         if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.max_education!=undefined) && (request.body.max_education!="") && (request.body.introduction_video_url!=undefined) && (request.body.introduction_video_url!="") && (request.body.cover_letter!=undefined) && (request.body.cover_letter!="") && (request.body.date_of_birth!=undefined) && (request.body.date_of_birth!="")){

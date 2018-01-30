@@ -1,22 +1,22 @@
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
 	shortid = require('shortid'),
 	Users = require('./users');
 
-var sendgrid = require("sendgrid")("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");
+let sendgrid = require("sendgrid")("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");
 
-var passwordChangeSchema = new mongoose.Schema({
+let passwordChangeSchema = new mongoose.Schema({
 	id: {type: String, unique: true},
 	email: String,
 	created_at: {type: Date, 'default': Date.now}
 });
 
-var passwordChange = mongoose.model('PasswordChange',passwordChangeSchema);
+let passwordChange = mongoose.model('PasswordChange',passwordChangeSchema);
 
-var exports = module.exports;
+let exports = module.exports;
 
 exports.create = function(requestBody,response){
 	response.data = {};
-	var uniq_id = shortid.generate();
+	let uniq_id = shortid.generate();
 	//send email to user
 	Users.check_param_exists(requestBody.email,function(exists){
 		
@@ -26,16 +26,16 @@ exports.create = function(requestBody,response){
 				if(error){ //if error arises from data deletion
 					console.log(error);//log error
 					if(response==null){//check for error 500
-						response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+						response.writeHead(500,{'Content-Type':'application/json'});//set content resolution letiables
 						response.data.log = "Internal server error";//send message to user
 						response.data.success = 0;//failed flag
 						response.end(JSON.stringify(response.data));//send message to user
 						return;
 					}
 				}else{
-					var uniq_id = Math.floor(Math.random()*(999999-100000+1))+100000;
+					let uniq_id = Math.floor(Math.random()*(999999-100000+1))+100000;
 					uniq_id = ""+uniq_id+"";
-					var PasswordChange = toForgotPassword(requestBody.email,uniq_id);//create password change schema
+					let PasswordChange = toForgotPassword(requestBody.email,uniq_id);//create password change schema
 
 					PasswordChange.save(function(error){
 						if(error){
@@ -48,7 +48,7 @@ exports.create = function(requestBody,response){
 							}
 						}else{
 
-							var request = sendgrid.emptyRequest({
+							let request = sendgrid.emptyRequest({
 							  method: 'POST',
 							  path: '/v3/mail/send',
 							  body: {
@@ -109,14 +109,14 @@ exports.create = function(requestBody,response){
 
 exports.verify_token = function(requestBody,response){//for verifying token sent to the user mail
 	response.data = {};//initialize response sent to user
-	 var email = requestBody.email,//initialize instance variables
+	 let email = requestBody.email,//initialize instance letiables
 	 	token = requestBody.token;
 
 	passwordChange.findOne({$and: [{email: email},{id:token}]},function(error,data){//for checking if data supplied is valid
 		if(error){//if error is found
 			console.log(error);//log error
 			if(response==null){//check for error 500
-				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution letiables
 				response.data.log = "Internal server error";//send message to user
 				response.data.success = 0;//failed flag
 				response.end(JSON.stringify(response.data));//send message to user
@@ -124,13 +124,13 @@ exports.verify_token = function(requestBody,response){//for verifying token sent
 			}
 		}else{
 			if(data){//if token is valid
-				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variable
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution letiable
 				response.data.log = "Valid token";//send user response
 				response.data.success = 1;//successful flag
 				response.end(JSON.stringify(response.data));//send message to user
 				return;
 			}else{
-				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variable
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution letiable
 				response.data.log = "Invalid token";//send user response
 				response.data.success = 0;//failed flag
 				response.end(JSON.stringify(response.data));//send message to user
@@ -143,7 +143,7 @@ exports.verify_token = function(requestBody,response){//for verifying token sent
 exports.change_password = function(requestBody,response){//for carrying out password change
 
 	response.data = {};//initialize response sent to client
-	var email = requestBody.email,//initialize instance variablls
+	let email = requestBody.email,//initialize instance letiablls
 		token = requestBody.token,
 		password = requestBody.password;
 
@@ -151,7 +151,7 @@ exports.change_password = function(requestBody,response){//for carrying out pass
 		if(error){//if error is found
 			console.log(error);//log error
 			if(response==null){//check for error 500
-				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution letiables
 				response.data.log = "Internal server error";//send message to user
 				response.data.success = 0;//failed flag
 				response.end(JSON.stringify(response.data));//send message to user
@@ -163,7 +163,7 @@ exports.change_password = function(requestBody,response){//for carrying out pass
 					if(error){//if error is found
 						console.log(error);//log error
 						if(response==null){//check for error 500
-							response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+							response.writeHead(500,{'Content-Type':'application/json'});//set content resolution letiables
 							response.data.log = "Internal server error";//send message to user
 							response.data.success = 0;//failed flag
 							response.end(JSON.stringify(response.data));//send message to user
@@ -177,14 +177,14 @@ exports.change_password = function(requestBody,response){//for carrying out pass
 								if(error){
 									console.log(error);//log error
 									if(response==null){//check for error 500
-										response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+										response.writeHead(500,{'Content-Type':'application/json'});//set content resolution letiables
 										response.data.log = "Internal server error";//send message to user
 										response.data.success = 0;//failed flag
 										response.end(JSON.stringify(response.data));//send message to user
 										return;//return on operation
 									}						
 								}else{
-									response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+									response.writeHead(201,{'Content-Type':'application/json'});//set content resolution letiables
 									response.data.log = "Password Updated";//message for client
 									response.data.success = 1;//success flag	
 									response.end(JSON.stringify(response.data));//send message to user
@@ -192,7 +192,7 @@ exports.change_password = function(requestBody,response){//for carrying out pass
 								}
 							})
 						}else{//if no user matches email
-							response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+							response.writeHead(200,{'Content-Type':'application/json'});//set content resolution letiables
 							response.data.log = "Oops email not found!";//message for client
 							response.data.success = 0;//success flag	
 							response.end(JSON.stringify(response.data));//send message to user
@@ -202,7 +202,7 @@ exports.change_password = function(requestBody,response){//for carrying out pass
 				});
 
 			}else{
-				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variable
+				response.writeHead(200,{'Content-Type':'application/json'});//set content resolution letiable
 				response.data.log = "Invalid token";//send user response
 				response.data.success = 0;//failed flag
 				response.end(JSON.stringify(response.data));//send message to user
