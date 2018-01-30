@@ -472,7 +472,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
             geo_constraint: 1,
             startup_id: 1,
             timestamp: 1,            
-            applicants_number: {$size: vacancy_applicants}
+            applicants_number: {$size: "vacancy_applicants"}
         }
     }]
     
@@ -482,7 +482,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
            
         if(error){
             response.end(error);
-            /**if(response==null){
+            if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Internal Server Error";//log response
                 response.data.success = 0;
@@ -494,7 +494,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 response.data.success = 0;
                 response.end(JSON.stringify(response.data));   
                 return;                
-            } **/           
+            }            
         }else{
     
             
