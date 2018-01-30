@@ -451,9 +451,6 @@ exports.save_application =  function(requestBody,response){
 exports.fetch_startup_vacancies = function(requestBody,response){
     response.data = {};
     
-    response.end("No Errors")
-    
-
     var aggregate = [{
         $match: {startup_id: requestBody.startup_id}
     },{
@@ -482,7 +479,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
 
 
     Vacancies.findOne(aggregate,function(error,data){
-            /**
+           
         if(error){
             console.log(error);
             if(response==null){
@@ -499,6 +496,9 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 return;                
             }            
         }else{
+    
+            response.end("No Errors")            
+            /**
             if(data && Object.keys(data).length>0){
                 response.writeHead(201,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Data Fetched";//log response
@@ -513,8 +513,9 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 response.end(JSON.stringify(response.data));   
                 return;                     
             }
-        }
             **/
+        }
+            
     })
     
 
