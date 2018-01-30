@@ -451,7 +451,9 @@ exports.save_application =  function(requestBody,response){
 exports.fetch_startup_vacancies = function(requestBody,response){
     response.data = {};
     
+    response.end("No Errors")
     
+    /**
     var aggregate = [{
         $match: {startup_id: requestBody.startup_id}
     },{
@@ -476,6 +478,8 @@ exports.fetch_startup_vacancies = function(requestBody,response){
             applicants_number: {$size: vacancy_applicants}
         }
     }]
+    
+
 
     Vacancies.findOne(aggregate,function(error,data){
         if(error){
@@ -510,6 +514,8 @@ exports.fetch_startup_vacancies = function(requestBody,response){
             }
         }
     })
+    
+    **/
 }
 
 exports.fetch_vacancy_applicants = function(requestBody,response){
