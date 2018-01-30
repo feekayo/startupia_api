@@ -481,7 +481,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
     Vacancies.aggregate(aggregate,function(error,data){
            
         if(error){
-            response.end(error);
+            console.log(error);
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Internal Server Error";//log response
