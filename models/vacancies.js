@@ -451,6 +451,7 @@ exports.save_application =  function(requestBody,response){
 exports.fetch_startup_vacancies = function(requestBody,response){
     response.data = {};
     
+    
     var aggregate = [{
         $match: {startup_id: requestBody.startup_id}
     },{
@@ -476,8 +477,10 @@ exports.fetch_startup_vacancies = function(requestBody,response){
         }
     }]
 
-    Vacancies.findOne(aggregate,function(error,data){
+    console.log("Papa Fiki");
+    /**Vacancies.findOne(aggregate,function(error,data){
         if(error){
+            console.log(error);
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Internal Server Error";//log response
@@ -507,7 +510,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 return;                     
             }
         }
-    })
+    })**
 }
 
 exports.fetch_vacancy_applicants = function(requestBody,response){
