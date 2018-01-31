@@ -472,7 +472,7 @@ exports.fetch_startup_vacancies = function(requestBody,response){
             geo_constraint: 1,
             startup_id: 1,
             timestamp: 1,            
-            applicants_number: {$size: vacancy_applicants}
+            applicants_number: {$count: "vacancy_applicants"}
         }
     }]
     
