@@ -1,5 +1,6 @@
-var express = require('express'),
+let express = require('express'),
     router = express.Router(),
+    fm_expenditure = require('./fmExpenditureRoutes');
     //url = require('url'), //download url module
     accounts =require('../controllers/accounts'),//define controllers
     create = require('../controllers/create'),
@@ -8,7 +9,9 @@ var express = require('express'),
     remove = require('../controllers/delete');
 
 module.exports = function(app){
-    
+   // console.log('I get here')
+    //fm expenditure
+    router.use('/expenditure',fm_expenditure);
     //accounts routes
     router.get('/',accounts.index);//hello message
     router.get('/user/login',accounts.login);//login route 

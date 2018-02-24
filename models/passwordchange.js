@@ -12,9 +12,9 @@ let passwordChangeSchema = new mongoose.Schema({
 
 let passwordChange = mongoose.model('PasswordChange',passwordChangeSchema);
 
-let exports = module.exports;
+//let module.exports = module.module.exports;
 
-exports.create = function(requestBody,response){
+module.exports.create = function(requestBody,response){
 	response.data = {};
 	let uniq_id = shortid.generate();
 	//send email to user
@@ -107,7 +107,7 @@ exports.create = function(requestBody,response){
 	});
 }
 
-exports.verify_token = function(requestBody,response){//for verifying token sent to the user mail
+module.exports.verify_token = function(requestBody,response){//for verifying token sent to the user mail
 	response.data = {};//initialize response sent to user
 	 let email = requestBody.email,//initialize instance letiables
 	 	token = requestBody.token;
@@ -140,7 +140,7 @@ exports.verify_token = function(requestBody,response){//for verifying token sent
 	});
 }
 
-exports.change_password = function(requestBody,response){//for carrying out password change
+module.exports.change_password = function(requestBody,response){//for carrying out password change
 
 	response.data = {};//initialize response sent to client
 	let email = requestBody.email,//initialize instance letiablls
