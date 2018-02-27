@@ -62,6 +62,10 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    * @option options service [AWS.DynamoDB] An optional pre-configured instance
    *  of the AWS.DynamoDB service object to use for requests. The object may
    *  bound parameters used by the document client.
+   * @option options convertEmptyValues [Boolean] set to true if you would like
+   *  the document client to convert empty values (0-length strings, binary
+   *  buffers, and sets) to be converted to NULL types when persisting to
+   *  DynamoDB.
    * @see AWS.DynamoDB.constructor
    *
    */
@@ -126,9 +130,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    }
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.batchGet(params, function(err, data) {
+   *  documentClient.batchGet(params, function(err, data) {
    *    if (err) console.log(err);
    *    else console.log(data);
    *  });
@@ -177,9 +181,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    }
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.batchWrite(params, function(err, data) {
+   *  documentClient.batchWrite(params, function(err, data) {
    *    if (err) console.log(err);
    *    else console.log(data);
    *  });
@@ -213,9 +217,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    }
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.delete(params, function(err, data) {
+   *  documentClient.delete(params, function(err, data) {
    *    if (err) console.log(err);
    *    else console.log(data);
    *  });
@@ -248,9 +252,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    }
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.get(params, function(err, data) {
+   *  documentClient.get(params, function(err, data) {
    *    if (err) console.log(err);
    *    else console.log(data);
    *  });
@@ -288,9 +292,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    }
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.put(params, function(err, data) {
+   *  documentClient.put(params, function(err, data) {
    *    if (err) console.log(err);
    *    else console.log(data);
    *  });
@@ -329,9 +333,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    }
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.update(params, function(err, data) {
+   *  documentClient.update(params, function(err, data) {
    *     if (err) console.log(err);
    *     else console.log(data);
    *  });
@@ -363,9 +367,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    *    ExpressionAttributeValues : {':this_year' : 2015}
    *  };
    *
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
-   *  docClient.scan(params, function(err, data) {
+   *  documentClient.scan(params, function(err, data) {
    *     if (err) console.log(err);
    *     else console.log(data);
    *  });
@@ -400,9 +404,9 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
     *    }
     *  };
     *
-    *  var docClient = new AWS.DynamoDB.DocumentClient();
+    *  var documentClient = new AWS.DynamoDB.DocumentClient();
     *
-    *  docClient.query(params, function(err, data) {
+    *  documentClient.query(params, function(err, data) {
     *     if (err) console.log(err);
     *     else console.log(data);
     *  });
@@ -430,21 +434,17 @@ AWS.DynamoDB.DocumentClient = AWS.util.inherit({
    * @param options [map]
    *  * **validate** [Boolean] set to true if you want to validate the type
    *    of each element in the set. Defaults to `false`.
-   *  * **convertEmptyValues** [Boolean] set to true if you would like the
-   *    document client to convert empty values (0-length strings, binary
-   *    buffers, and sets) to be converted to NULL types when persisting to
-   *    DynamoDB.
    * @example Creating a number set
-   *  var docClient = new AWS.DynamoDB.DocumentClient();
+   *  var documentClient = new AWS.DynamoDB.DocumentClient();
    *
    *  var params = {
    *    Item: {
    *      hashkey: 'hashkey'
-   *      numbers: docClient.createSet([1, 2, 3]);
+   *      numbers: documentClient.createSet([1, 2, 3]);
    *    }
    *  };
    *
-   *  docClient.put(params, function(err, data) {
+   *  documentClient.put(params, function(err, data) {
    *    if (err) console.log(err);
    *    else console.log(data);
    *  });
