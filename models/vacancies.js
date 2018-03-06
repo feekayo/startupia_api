@@ -471,13 +471,17 @@ exports.fetch_startup_vacancies = function(requestBody,response){
             open_positions: 1,
             geo_constraint: 1,
             startup_id: 1,
-            timestamp: 1,            
-            applicants_number: {$size: vacancy_applicants}
+            timestamp: 1            
+            //applicants_number: {$count: "vacancy_applicants"}
         }
     }]
+    
 
-    Vacancies.findOne(aggregate,function(error,data){
+
+    Vacancies.aggregate(aggregate,function(error,data){
+           
         if(error){
+            console.log(error);
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Internal Server Error";//log response
@@ -492,6 +496,8 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 return;                
             }            
         }else{
+    
+            
             if(data && Object.keys(data).length>0){
                 response.writeHead(201,{'Content-Type':'application/json'});//set response type
                 response.data.log = "Data Fetched";//log response
@@ -506,8 +512,12 @@ exports.fetch_startup_vacancies = function(requestBody,response){
                 response.end(JSON.stringify(response.data));   
                 return;                     
             }
+            
         }
+            
     })
+    
+
 }
 
 exports.fetch_vacancy_applicants = function(requestBody,response){
@@ -587,7 +597,7 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
         }
     }];
     
-    Application.findOne(aggregate,function(error,data){
+    Application.aggregate(aggregate,function(error,data){
         if(error){
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type

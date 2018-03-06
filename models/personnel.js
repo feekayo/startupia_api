@@ -137,58 +137,50 @@ exports.create_personnel = function(requestBody,response){
                                             }else{
 
                                                 var request = sendgrid.emptyRequest({
-                                                method: 'POST',
-                                                path: '/v3/mail/send',
-                                                body: {
+                                                  method: 'POST',
+                                                  path: '/v3/mail/send',
+                                                  body: {
                                                     personalizations: [
-                                                        {
-                                                        to: [{
-                                                           email: requestBody.email,
-                                                        },
+                                                      {
+                                                        to: [
+                                                          {
+                                                            email: email,
+                                                          },
                                                         ],
-                                                            subject: 'Startupia Job Alert! Do not reply',
-                                                              },
+                                                        subject: 'Startupia Job Invites! Do not reply',
+                                                      },
                                                     ],
                                                     from: {
-                                                        email: 'jobs@startupia.io',
+                                                      email: 'jobs@startupia.io',
                                                     },
                                                     content: [
-                                                        {
-                                                            type: 'text/html',
-                                                            value: "<h1>"+requestBody.startup_name+" Job Invite</h1><br/><h5>"+requestBody.message+"</h5><br/>Click here for more details <a href='https://startupia-frontend.herokuapp.com/startups/staff_invites/"+id+"'>DETAILS</a>"
-                                                            },
-                                                        ],
-                                                    },
+                                                      {
+                                                        type: 'text/html',
+                                                        value: "<h1>"+requestBody.startup_name+" Job Invite</h1><br/><h5>"+requestBody.message+"</h5><br/>Click here for more details <a href='https://startupia-frontend.herokuapp.com/startups/staff_invites/"+id+"'>DETAILS</a>",
+                                                      },
+                                                    ],
+                                                  },
                                                 });
                                                 //With callback
                                                 sendgrid.API(request, function(error, qresponse) {
-                                                     if (error) {
-                                                        console.log(error);
-                                                        //send email here
-                                                        response.writeHead(200,{'Content-Type':'application/json'});//set response type
-                                                        response.data.log = "Trouble sending Invite Mail";//log response
-                                                        response.data.success = 1;
-                                                        response.end(JSON.stringify(response.data));
-                                                     }else{
-                                                         
-                                                        var message = requestBody.user_email+" sent a personnel invite to "+requestBody.personnel_email,//log message
-                                                            user_email = requestBody.user_email, //user email
-                                                            startup_id = requestBody.startup_id,//no startup involved
-                                                            task_id = null,//no task involved
-                                                            project_id = null,//no project involved
-                                                            compartment = "HR",
-                                                            private = true;
-
-                                                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log update      
-                                                            //send email here
-                                                            response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                                                            response.data.log = "Job Invite Sent";//log response
-                                                            response.data.success = 1;
-                                                            response.end(JSON.stringify(response.data));  
-                                                        });                                                         
-                                                        
-                                                    }
-                                                });							
+                                                  if (error) {
+                                                    console.log(error);
+                                                    //send email here
+                                                    response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                                                    response.data.log = "Invite Created, Trouble sending Invite Mail";//log response
+                                                    response.data.success = 1;
+                                                    response.end(JSON.stringify(response.data));
+                                                  }else{
+                                                    //send email here
+                                                    response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                                                    response.data.log = "Invite Sent";//log response
+                                                    response.data.success = 1;
+                                                    response.end(JSON.stringify(response.data));
+                                                  }
+                                                  console.log(qresponse.statusCode);
+                                                  console.log(qresponse.body);
+                                                  console.log(qresponse.headers);
+                                                });                                                
 
                                             }
                                         })
