@@ -1,7 +1,7 @@
 //accounts controller controls all account based models, things to do with creating and managing a user's account are done here
 
 
-var Sessions = require('../models/sessions'), // Session model is required
+let Sessions = require('../models/sessions'), // Session model is required
     Users = require('../models/users'), //users model is required
     PasswordChange = require('../models/passwordchange'), //password change model is required
     Verification = require('../models/verify'), //verification model is required
@@ -15,9 +15,9 @@ module.exports = {
     
 
     login: function(request,response){ //login function
-        var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress; //check source IP Address
+        let ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress; //check source IP Address
         
-        var get_params = url.parse(request.url,true); //parser url with url parser to get GET parameters being sent
+        let get_params = url.parse(request.url,true); //parser url with url parser to get GET parameters being sent
 
         if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.password!=undefined) && (get_params.query.email!="") && (get_params.query.password!="")){ //validate request parameters
             get_params.query.source_ip_address = ip;//add ip address to get params for logging
@@ -28,7 +28,7 @@ module.exports = {
             response.data = {}; //set response data object
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0; // success variable for client
+            response.data.success = 0; // success letiable for client
             response.end(JSON.stringify(response.data)); //send response to client                   
         }
     },
@@ -42,7 +42,7 @@ module.exports = {
             console.log(request);
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0; // success variable for client
+            response.data.success = 0; // success letiable for client
             response.end(JSON.stringify(response.data)); //send response to client                   
         }
     },
@@ -54,7 +54,7 @@ module.exports = {
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0; // success variable for client
+            response.data.success = 0; // success letiable for client
             response.end(JSON.stringify(response.data)); //send response to client              
         }
     },
@@ -72,7 +72,7 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 2; // success variable for client
+                    response.data.success = 2; // success letiable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             });
@@ -80,7 +80,7 @@ module.exports = {
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0; // success variable for client
+            response.data.success = 0; // success letiable for client
             response.end(JSON.stringify(response.data)); //send response to client             
         }
     },
@@ -92,13 +92,13 @@ module.exports = {
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Valid session";//log message for client
-                    response.data.success = 1; // success variable for client
+                    response.data.success = 1; // success letiable for client
                     response.end(JSON.stringify(response.data)); //send response to client 
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 2; // success variable for client
+                    response.data.success = 2; // success letiable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             });
@@ -106,7 +106,7 @@ module.exports = {
             response.data = {};
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0; // success variable for client
+            response.data.success = 0; // success letiable for client
             response.end(JSON.stringify(response.data)); //send response to client             
         }        
     },
@@ -122,7 +122,7 @@ module.exports = {
                     response.data = {}; 
                     response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
                     response.data.log = "Invalid session";
-                    response.success = 2;//success variable for client
+                    response.success = 2;//success letiable for client
                     response.end(JSON.stringify(response.data));//send response to client
                 }
             });
@@ -130,7 +130,7 @@ module.exports = {
             response.data = {};//declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0;//success variable for client
+            response.data.success = 0;//success letiable for client
             response.end(JSON.stringify(response.data));//send response to client
         }
     },
@@ -144,7 +144,7 @@ module.exports = {
                     response.data = {}; //create response data object
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 2; // success variable for client
+                    response.data.success = 2; // success letiable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             });            
@@ -152,7 +152,7 @@ module.exports = {
             response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0; // success variable for client
+            response.data.success = 0; // success letiable for client
             response.end(JSON.stringify(response.data)); //send response to client             
         }
     },
@@ -166,7 +166,7 @@ module.exports = {
                     response.data = {};//declare response data array
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 2; // success variable for client
+                    response.data.success = 2; // success letiable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             }); 
@@ -174,7 +174,7 @@ module.exports = {
             response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0;//success variable for client
+            response.data.success = 0;//success letiable for client
             response.end(JSON.stringify(response.data));
         }
     },
@@ -188,7 +188,7 @@ module.exports = {
                     response.data = {}; //declare response data array
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
                     response.data.log = "Invalid session";//log message for client
-                    response.data.success = 2; // success variable for client
+                    response.data.success = 2; // success letiable for client
                     response.end(JSON.stringify(response.data)); //send response to client                     
                 }
             }); 
@@ -196,13 +196,13 @@ module.exports = {
             response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response is in json format
             response.data.log = "Incomplete Request";//log message for client
-            response.data.success = 0;//success variable for client
+            response.data.success = 0;//success letiable for client
             response.end(JSON.stringify(response.data));
         }
     },
 
-    check_passwordchange_token: function(request,response){//function for checking password change variables
-        var get_params = url.parse(request.url,true);//parse url
+    check_passwordchange_token: function(request,response){//function for checking password change letiables
+        let get_params = url.parse(request.url,true);//parse url
 
         if((Object.keys(get_params.query).length==2) && (get_params.query.email!=undefined) && (get_params.query.token!=undefined)  && (get_params.query.email!="") && (get_params.query.token!="")){//check request params
             PasswordChange.verify_token(get_params.query,response);//perform action
@@ -210,19 +210,19 @@ module.exports = {
             response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
+            response.data.success = 0;//success letiable for client
             response.end(JSON.stringify(response.data));//send response to client
         }
     },
 
     change_password: function(request,response){//function to change up the user password
-        if((request.body.email!=undefined) && (request.body.password!=undefined) && (request.body.token!=undefined) && (request.body.email!="") && (request.body.password!="") && (request.body.token!="")){//check password change variables
+        if((request.body.email!=undefined) && (request.body.password!=undefined) && (request.body.token!=undefined) && (request.body.email!="") && (request.body.password!="") && (request.body.token!="")){//check password change letiables
             PasswordChange.change_password(request.body,response);//do changing of password
         }else{
             response.data = {}; //declare response data array
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
+            response.data.success = 0;//success letiable for client
             response.end(JSON.stringify(response.data));//send response to client            
         }
 
