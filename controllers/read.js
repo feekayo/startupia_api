@@ -5,6 +5,7 @@ var Sessions = require('../models/sessions'),
     UserCVs = require('../models/user_cvs'),
 	Personnel = require('../models/personnel'),
 	Vacancies = require('../models/vacancies'),
+	Interviews = require('../models/interview'),
 	CRM_apps = require('../models/CRM/apps'),
 	CRM_products = require('../models/CRM/products'),
 	url = require('url');
@@ -545,12 +546,12 @@ module.exports = {
     admin_interview_room: function(request,response){
         var get_params = url.parse(request.url,true);
         
-        if((get_params.query.application_id!=undefined) && (get_params.query.application_id!="") && (get_params.query.personnel_email!=undefined) && (get_params.query.personnel_email!="") && (get_params.query.user_email!=undefined) && (get_params.query.user_email!="") && (get_params.query.startup_id!=undefined) && (get_params.query.startup_id!="")){
+        if((get_params.query.user_email!=undefined) && (get_params.query.user_email!="") && (get_params.query.user_id!=undefined) && (get_params.query.user_id!="") && (get_params.query.startup_id!=undefined) && (get_params.query.startup_id!="") && (get_params.query.interview_id!=undefined) && (get_params.query.interview_id!="")){
     		Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
     			if(validated){
                     Privileges.validate_access('HR',get_params.query.user_email,get_params.query.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can also fetch invites
                         if(validated){
-                            Vacancies.fetch_admin_interview(get_params.query,response); 
+                            Interviews.fetch_admin_interview(get_params.query,response); 
                         }else{
                             response.data = {};
                             response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
@@ -579,6 +580,32 @@ module.exports = {
         }
     },
     
+    
+    user_interview_room: function(request,response){
+        var get_params = url.parse(request.url,true);
+        
+        if((get_params.query.application_id!=undefined) && (get_params.query.application_id!="") (get_params.query.user_id!=undefined) && (get_params.query.user_id!="") && (get_params.query.interview_id!=undefined) && (get_params.query.interview_id!="")){
+    		Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+                    Interviews.fetch_user_interview(get_params.query,response); 
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client    				
+    			}
+    		});            
+            
+            
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }
+    },    
     
     startup_vacancies: function(request,response){
         var get_params = url.parse(request.url,true);

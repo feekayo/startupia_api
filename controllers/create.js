@@ -4,6 +4,7 @@ var Sessions = require('../models/sessions'),
 	Startups = require('../models/startups'),
     Personnel = require('../models/personnel'),
     Vacancies = require('../models/vacancies'),
+    Interviews = require('../models/interview'),
     UserCVs = require('../models/user_cvs');
 	CRM_apps = require('../models/CRM/apps'),
 	CRM_products = require('../models/CRM/products');
@@ -605,5 +606,115 @@ module.exports = {
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client              
         }
+    },
+    
+    admin_interview_file: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.startup_id!=undefined) && (request.body.startup_id!="") && (request.body.bucket!=undefined) && (request.body.bucket!="") &&(request.body.object!=undefined) && (request.body.object!="") ){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//validate session
+                if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can also fetch invites
+                        if(validated){
+                            Interviews.admin_add_file(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    })                    
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });              
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }
+    },
+    
+    user_interview_file: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.application_id!=undefined) && (request.body.application_id!="") && (request.body.bucket!=undefined) && (request.body.bucket!="") && (request.body.object!=undefined) && (request.body.object!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//validate session
+                if(validated){
+                    Interviews.user_add_file(request.body,response);                    
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client             
+        }
+    },
+    
+    admin_interview_message: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.startup_id!=undefined) && (request.body.startup_id!="") && (request.body.application_id!=undefined) && (request.body.application_id!="") && (request.body.message!=undefined) && (request.body.message!="") && (request.body.files_attached!=undefined) && (request.body.files_attached!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//validate session
+                if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can also fetch invites
+                        if(validated){
+                            Interviews.admin_create_message(request.body,response); 
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    })                    
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });              
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client              
+        }        
+    },
+    
+    user_interview_message: function(request,response){
+        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.application_id!=undefined) && (request.body.application_id!="") && (request.body.message!=undefined) && (request.body.message!="") && (request.body.files_attached!=undefined) && (request.body.files_attached!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//validate session
+                if(validated){
+                    Interviews.user_create_message(request.body,response);                    
+                }else{
+            		response.data = {};
+            		response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            		response.data.log = "Invalid session";//log message for client
+            		response.data.success = 2; // success variable for client
+            		response.end(JSON.stringify(response.data)); //send response to client                     
+                } 
+            });            
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client             
+        }        
     }
+    
+    
 } 
