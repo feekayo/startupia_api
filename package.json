@@ -17,6 +17,7 @@
     "mongoose": "^4.6.0",
     "morgan": "^1.7.0",
     "nodemon": "^1.14.11",
+    "sendgrid": "^5.2.3",
     "shortid": "^2.2.8",
     "sparkpost": "^2.0.1"
   },
