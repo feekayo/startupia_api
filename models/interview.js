@@ -63,7 +63,7 @@ exports.admin_terminate_interview = function(requestBody,response){
             }
         }else{
             if(data){//if application is found
-                data.terminated_at = date.now(); //set termination date
+                data.terminated_at = Date.now(); //set termination date
                 data.terminated = true; //terminate shii
                 data.terminated_buy = requestBody.user_email; //set terminator email
                 
@@ -92,7 +92,7 @@ exports.admin_terminate_interview = function(requestBody,response){
                             private = true;
                                                     
                         
-                        Logs.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(t){
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(t){
                             response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
                             response.data.log = "Interview Terminated";//user log message
                             response.data.success = 1;//success flag
@@ -188,6 +188,9 @@ exports.fetch_admin_interview = function(requestBody,response){
 }
 
 exports.admin_create_message = function(requestBody,response){
+    
+    response.data = {};
+    
     //step 1, check if interview room exists
     InterviewRooms.findOne({$and: [{application_id: requestBody.application_id},{terminated: false}]},function(error,data){
         if(error){
@@ -290,7 +293,7 @@ exports.admin_create_message = function(requestBody,response){
                                 }             
                             }else{
                                 response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                response.data.log = "File Added";//user log message
+                                response.data.log = "Message Sent";//user log message
                                 response.data.message_id = message_id;
                                 response.data.success = 1;//failed flag
                                 response.end(JSON.stringify(response.data));//send message to user
@@ -307,6 +310,9 @@ exports.admin_create_message = function(requestBody,response){
 
 
 exports.admin_add_file = function(requestBody,response){
+    
+    response.data = {};
+    
     if(requestBody.message_id!=null && requestBody.message_id!=undefined){
         var message_id = requestBody.message_id;
     }else{
@@ -538,7 +544,7 @@ exports.user_create_message = function(requestBody,response){
                                 }             
                             }else{
                                 response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                response.data.log = "File Added";//user log message
+                                response.data.log = "Message Sent";//user log message
                                 response.data.message_id = message_id;
                                 response.data.success = 1;//failed flag
                                 response.end(JSON.stringify(response.data));//send message to user
@@ -589,7 +595,7 @@ exports.user_terminate_interview = function(requestBody,response){
                     }
                 }else{
                     if(data){//if application is found
-                        data.terminated_at = date.now(); //set termination date
+                        data.terminated_at = Date.now(); //set termination date
                         data.terminated = true; //terminate shii
                         data.terminated_buy = requestBody.user_email; //set terminator email
 
@@ -618,7 +624,7 @@ exports.user_terminate_interview = function(requestBody,response){
                                     private = true;
 
 
-                                Logs.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(t){
+                                Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(t){
                                     response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
                                     response.data.log = "Interview Terminated";//user log message
                                     response.data.success = 1;//success flag

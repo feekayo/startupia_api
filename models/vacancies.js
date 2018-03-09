@@ -58,7 +58,7 @@ var vacancyApplicantsSchema = new mongoose.Schema({
     timestamp: {type: Date, 'default': Date.now}
 });
 
-var Application = mongoose.model('VacancyApplicancts',vacancyApplicantsSchema); 
+var Application = mongoose.model('VacancyApplicants',vacancyApplicantsSchema); 
 
 var exports = module.exports;
 
@@ -78,9 +78,11 @@ exports.validate_application_access = function(application_id,user_id,callback){
         if(error){
             callback(false);
         }else{
+            console.log(data);
             if(data){
                 callback(true);
             }else{
+                console.log(application_id+" "+user_id);
                 callback(false);
             }
         }                

@@ -584,7 +584,7 @@ module.exports = {
     user_interview_room: function(request,response){
         var get_params = url.parse(request.url,true);
         
-        if((get_params.query.application_id!=undefined) && (get_params.query.application_id!="") (get_params.query.user_id!=undefined) && (get_params.query.user_id!="") && (get_params.query.interview_id!=undefined) && (get_params.query.interview_id!="")){
+        if((get_params.query.application_id!="") && (get_params.query.application_id!=undefined) && (get_params.query.user_id!="") && (get_params.query.user_id!=undefined) && (get_params.query.interview_id!="") && (get_params.query.interview_id!=undefined)){
     		Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
                 if(validated){
                     Interviews.fetch_user_interview(get_params.query,response); 

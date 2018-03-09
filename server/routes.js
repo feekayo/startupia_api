@@ -74,22 +74,24 @@ module.exports = function(app){
     router.post('/create/vacancy/:session_id',create.save_vacancy);//for saving vacancies permanently
     router.get('/read/vacancies/:session_id', read.startup_vacancies);
     //Changing the code a wee bit
+    
+    
     //FOR HR interviews
     //Fetching Means
-    router.get('/read/interview/admin/:session_id',read.admin_interview_room);//for fetching admin interviews
-    router.get('/read/interview/applicant/:session_id',read.user_interview_room);//for fetching admin interviews
+    router.get('/read/interview/admin/:session_id',read.admin_interview_room);//for fetching admin interviews **
+    router.get('/read/interview/applicant/:session_id',read.user_interview_room);//for fetching admin interviews **
     
     //Uploading Files
-    router.put('/create/interview/file/admin/:session_id',create.admin_interview_file);//for uploading admin files
-    router.put('/create/interview/file/user/:session_id',create.user_interview_file);//for uploading user files
+    router.put('/create/interview/file/admin/:session_id',create.admin_interview_file);//for uploading admin files **
+    router.put('/create/interview/file/applicant/:session_id',create.user_interview_file);//for uploading user files **
     
     //Sending Messages
-    router.put('/create/interview/message/admin/:session_id',create.admin_interview_message);//for creating admin interview messages
-    router.put('/create/interview/message/applicant/:session_id',create.user_interview_message);//for creating applicant interview messages
+    router.put('/create/interview/message/admin/:session_id',create.admin_interview_message);//for creating admin interview messages **
+    router.put('/create/interview/message/applicant/:session_id',create.user_interview_message);//for creating applicant interview messages **
     
     //Terminating Interviews
-    router.post('/update/terminate_interview/admin/:session_id',update.admin_terminate_interview)//for terminating an interview admin
-    router.post('/update/terminate_interview/applicant/:session_id',update.user_terminate_interview)//for terminating an interview admin
+    router.post('/update/terminate_interview/admin/:session_id',update.admin_terminate_interview)//for terminating an interview admin **
+    router.post('/update/terminate_interview/applicant/:session_id',update.user_terminate_interview)//for terminating an interview admin 
     
     
     //user invite routes
