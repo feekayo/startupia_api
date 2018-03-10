@@ -63,6 +63,7 @@ exports.startups_model = Startups;
 
 exports.startup_details = function(requestBody,response){
     Startups.findOne({id: requestBody.startup_id},function(error,data){
+        response.data = {};
         if(error){
  			console.log(error);//log error
 			if(response==null){//check for error 500
@@ -72,7 +73,6 @@ exports.startup_details = function(requestBody,response){
 				response.end(JSON.stringify(response.data));//send response to client 
 				return;//return
 			}else{
-                response.data = {};
                 response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "Database Error";//log message for client
                 response.data.success = 0;//flag success
