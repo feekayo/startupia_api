@@ -78,9 +78,6 @@ module.exports = function (app) {
     router.put('/create/vacancy_tool/:session_id', create.create_vacancy_tool);//for saving a vacancy's required tools
     router.post('/create/vacancy/:session_id', create.save_vacancy);//for saving vacancies permanently
     router.get('/read/vacancies/:session_id', read.startup_vacancies);
-<<<<<<< HEAD
-    //Changing the code a wee bit
-    
     
     //FOR HR interviews
     //Fetching Means
@@ -98,11 +95,7 @@ module.exports = function (app) {
     //Terminating Interviews
     router.post('/update/terminate_interview/admin/:session_id',update.admin_terminate_interview)//for terminating an interview admin **
     router.post('/update/terminate_interview/applicant/:session_id',update.user_terminate_interview)//for terminating an interview admin 
-    
-    
-=======
 
->>>>>>> ec6769c20644794c74bb352b81de5e4259f071d2
     //user invite routes
     router.get('/read/user_job_invites/:session_id', read.user_personnel_invites);//for fetching a user's job invites
     router.get('/read/user_founder_invites/:session_id', read.user_founder_invites);//for fetching a user's job invites
