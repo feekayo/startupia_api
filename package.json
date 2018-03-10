@@ -1,11 +1,15 @@
 {
-  "name": "spotpin",
-  "version": "0.0.1-1",
+  "name": "startupia",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "debug": "~2.2.0",
+    "jade": "~1.11.0",
+    "nodemon": "^1.17.1",
+    "serve-favicon": "~2.3.0",
     "aws-sdk": "^2.7.19",
     "body-parser": "^1.15.2",
     "cookie-parser": "^1.4.3",
@@ -16,22 +20,12 @@
     "mongodb": "^2.2.9",
     "mongoose": "^4.6.0",
     "morgan": "^1.7.0",
-    "nodemon": "^1.14.11",
     "sendgrid": "^5.2.3",
     "shortid": "^2.2.8",
     "sparkpost": "^2.0.1"
   },
-  "description": "Created with [Nodeclipse](https://github.com/Nodeclipse/nodeclipse-1)\r  ([Eclipse Marketplace](http://marketplace.eclipse.org/content/nodeclipse), [site](http://www.nodeclipse.org))",
-  "main": "app.js",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "spotnoteapi"
-  },
-  "author": "ifeoluwa afolabi",
-  "license": "ISC",
-  "subdomain": "spotpin",
-  "engines": {
-    "node": "8.9.4"
   }
 }
