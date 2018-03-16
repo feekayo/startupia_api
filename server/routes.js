@@ -9,7 +9,7 @@ let express = require('express'),
     update = require('../controllers/update'),
     remove = require('../controllers/delete');
 
-module.exports = function (app) {
+//module.exports = function (app) {
     // console.log('I get here')
     //fm expenditure
     router.use('/expenditure', fm_expenditure);
@@ -162,5 +162,6 @@ module.exports = function (app) {
     router.get('/startups/fetch_invited_founders', read.startup_founders_queue);//route for fetching startup founders queue
     router.get('/startups/fetch_founders', read.startup_founders);//route for fetching startup founders
     router.get('/startups/fetch_personnel', read.startup_personnel);//route for fetching startup personnel
-    app.use(router);
-}
+    //app.use(router);
+//}
+module.exports = router;
