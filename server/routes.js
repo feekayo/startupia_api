@@ -77,7 +77,11 @@ module.exports = function (app) {
     router.put('/create/vacancy_skill/:session_id', create.create_vacancy_skill);//for saving a vacancy's required skills
     router.put('/create/vacancy_tool/:session_id', create.create_vacancy_tool);//for saving a vacancy's required tools
     router.post('/create/vacancy/:session_id', create.save_vacancy);//for saving vacancies permanently
-    router.get('/read/vacancies/:session_id', read.startup_vacancies);
+    
+    router.get('/read/vacancies/:session_id', read.startup_vacancies);//for fetching all vacancies of a startup
+    
+    router.get('/read/vacancy_applicants/:session_id',read.vacancy_applicants);//for fetching vacancy applicants
+    router.get('/read/user_applications/:session_id',read.user_applications);//for fetching vacancy applicants
     
     //FOR HR interviews
     //Fetching Means
@@ -102,6 +106,15 @@ module.exports = function (app) {
     router.get('/read/user_privilege_invites/:session_id', read.user_privilege_invites);//for fetching a user's job invites
 
 
+    //fetching worker details **
+    router.get('/read/startup_employees/:session_id',read.startup_employees);//for fetching all of a company's workers
+    router.get('/read/startup_work_logs/:session_id',read.general_work_logs); //for fetching general work logs
+    router.get('/read/compartment_work_logs/:session_id',read.compartment_work_logs); //for fetching work logs for a compartment
+    router.get('/read/personal_user_logs/:session_id',read.user_logs);//for fetching a user's personal logs
+    router.get('/read/personnel_work_logs/:session_id',read.user_company_work_logs);//fetch general work logs for a member of staff
+    router.get('/read/personnel_compartment_logs/:session_id',read.user_company_compartment_work_logs);//for fetching a staff member's compartment logs
+    router.get('/read/personnel_project_logs/:session_id',read.project_work_logs);//get a user's project work logs
+    
     //user CV creation
     router.put('/create/user_cv/:session_id', create.user_cv);//for adding a user's cv
     router.put('/create/user_certificate/:session_id', create.user_certificate);//for adding a user's certificates to CV
@@ -124,8 +137,8 @@ module.exports = function (app) {
     router.post('/delete/user_certificate/:session_id', remove.user_certificate);//for deleting a user certificate
     router.post('/delete/user_skill/:session_id', remove.user_skill);//for deleting a user's skill
     router.post('/delete/user_tool/:session_id', remove.user_tool);//for deleting a user's skill
-
-
+    router.post('/delete/user_application',remove.user_delete_application); //for a user to delete his own application
+    
     //Financial Management Routes
     router.get('/read/validate_fm_access/:session_id', read.validate_fm_access);//for validating a user access to a startup's FM module
 

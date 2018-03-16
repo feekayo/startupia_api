@@ -40,7 +40,7 @@ exports.validate = function(session_id,user_id,callback){
 	});	
 }
 
-exports.validate_email = function(session_id, user_id,email,callback){
+exports.validate_email = function(session_id,user_id,email,callback){
 	console.log("Error: 7");
     Sessions.findOne({$and:[{user_id:user_id},{session_id:session_id}]},function(error,data){
 		console.log("Error: 8");
@@ -52,6 +52,7 @@ exports.validate_email = function(session_id, user_id,email,callback){
                     console.log("Error: 11");
                     callback(true);
                 }else{
+                    console.log(user_id+" "+email);
                     console.log("Error: 12");
                     callback(false);
                 }                

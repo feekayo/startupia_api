@@ -17,9 +17,7 @@ var usersSchema = new mongoose.Schema({
     },
 	phone: String,
 	bio: String,
-	address: String,
-	zip_code: String,
-	town: String,
+    location: String,
 	updated_at: {type: Date,'default': Date.now},
 	created_at: {type: Date}
 });
@@ -291,14 +289,19 @@ exports.edit = function(requestBody,response){
 			if(data){
 				if(requestBody.type == "Fullname"){
 					data.fullname = requestBody.param;
-				}else if(requestBody.type == "Address"){
-					data.address = requestBody.param;
-				}else if(requestBody.type == "Zip-code"){
-					data.zip_code = requestBody.param;
-				}else if(requestBody.type == "Town"){
-					data.town = requestBody.param;
+				}else if(requestBody.location == "Location"){
+					data.location = requestBody.location;
 				}else if(requestBody.type == "Dp"){
-					data.dp = requestBody.param;
+				    if((requestBody.object!=undefined) && (requestBody.object!="") && (requestBody.bucket!=undefined) && (requestBody.bucket!="")){
+                        data.dp = {};
+                        data.dp.object_key = requestBody.object;
+                        data.dp.bucket = requestBody.bucket;
+                    }else{
+                        response.writeHead(200,{'Content-Type':'application/json'});
+                        response.data.log = "DP data required";
+                        response.data.success = 0;
+                        response.end(JSON.stringify(response.data));                        
+                    }
 				}else if (requestBody.type == "Bio") {
 					data.bio = requestBody.param;
 				}

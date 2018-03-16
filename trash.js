@@ -64,6 +64,13 @@ var exports = module.exports;
 
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
+/**
+    create vacancy
+    add skills
+    allow applicants
+    fetch applicant cvs
+**/
+
 var exports = module.exports;
 
 exports.delete_user_application = function(requestBody,response){
@@ -90,33 +97,6 @@ exports.delete_user_application = function(requestBody,response){
             return;            
         }
     })
-}
-
-
-exports.delete_vacancy = function(requestBody,response){
-    Vacancies.remove({vacancy_id: requestBody.vacancy_id}, function(error){
-        if(error){
-            if(response==null){
-                response.writeHead(500,{'Content-Type':'application/json'});//set response type
-                response.data.log = "Internal Server Error";//log response
-                response.data.success = 0;
-                response.end(JSON.stringify(response.data));   
-                return;                  
-            }else{
-                response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                response.data.log = "Database Error";//log response
-                response.data.success = 0;
-                response.end(JSON.stringify(response.data));   
-                return;                
-            }            
-        }else{
-            response.writeHead(201,{'Content-Type':'application/json'});//set response type
-            response.data.log = "Vacancy Deleted!";//log response
-            response.data.success = 1;
-            response.end(JSON.stringify(response.data));   
-            return;            
-        }        
-    });
 }
 
 exports.validate_application_access = function(application_id,user_id,callback){
@@ -523,10 +503,6 @@ exports.fetch_startup_vacancies = function(requestBody,response){
             timestamp: 1,            
             applicants_number: {$size: "$vacancy_applicants"}
         }
-    },{
-        $skip: (requestBody.page_number-1) * 50
-    },{
-        $limit: 50
     }];    
 
 
@@ -572,7 +548,6 @@ exports.fetch_startup_vacancies = function(requestBody,response){
 
 }
 
-
 exports.fetch_vacancy_applicants = function(requestBody,response){
     response.data = {};
     
@@ -587,10 +562,38 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
         }
     },{
         $lookup: {
-            from: "interview_rooms",
-            foreignField: "application_id",
-            localField: 'id',
-            as: "interview_room"
+            from: "user_cvs",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_cv_data"
+        }
+    },{
+        $lookup: {
+            from: "user_social",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_social_data"
+        }
+    },{
+        $lookup: {
+            from: "user_skills",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_skills_data"
+        }
+    },{
+        $lookup: {
+            from: "user_tools",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_tools_data"
+        }
+    },{
+        $lookup: {
+            from: "user_certificates",
+            foreignField: "user_id",
+            localField: "user_id",
+            as: "user_certificates_data"
         }
     },{
         $project: {
@@ -611,12 +614,12 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
                 updated_at: 1,
                 created_at: 1                
             },
-            interview_room: 1
+            user_cv_data: 1,
+            user_social_data: 1,
+            user_skills_data: 1,
+            user_tools_data: 1,
+            user_certificates_data: 1
         }
-    },{
-        $skip: (requestBody.page_number-1) * 50
-    },{
-        $limit: 50
     }];
     
     Application.aggregate(aggregate,function(error,data){
@@ -653,128 +656,3 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
     })
 }
 
-exports.fetch_user_applications = function(requestBody,response){
-    response.data = {};
-    
-    var aggregate = [{
-        $match: {user_id: requestBody.user_id}        
-    },{
-        $lookup: {
-            from: "vacancies",
-            foreignField: "id",
-            localField: "vacancy_id",
-            as: "vacancy_data"
-        }
-    },{
-        $lookup: {
-            from: "startups",
-            foreignField: "id",
-            localField: "vacancy_data.startup_id",
-            as: "startup_data"
-        }        
-    },{
-        $lookup: {
-            from: "interview_rooms",
-            foreignField: "application_id",
-            localField: 'id',
-            as: "interview_room"
-        }
-    },{
-        $project: {
-            id: 1,
-            vacancy_id: 1,
-            user_id: 1,
-            timestamp: 1,            
-            interview_room: 1,
-            startup_data: 1
-        }
-    },{
-        $skip: (requestBody.page_number-1) * 50
-    },{
-        $limit: 50
-    }];
-    
-    Application.aggregate(aggregate,function(error,data){
-        if(error){
-            if(response==null){
-                response.writeHead(500,{'Content-Type':'application/json'});//set response type
-                response.data.log = "Internal Server Error";//log response
-                response.data.success = 0;
-                response.end(JSON.stringify(response.data));   
-                return;                  
-            }else{
-                console.log(error);
-                response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                response.data.log = "Database Error";//log response
-                response.data.success = 0;
-                response.end(JSON.stringify(response.data));   
-                return;                
-            }            
-        }else{
-            if(data && Object.keys(data).length>0){
-                response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                response.data.log = "Data Fetched";//log response
-                response.data.data = data;
-                response.data.success = 1;
-                response.end(JSON.stringify(response.data));   
-                return;     
-            }else{
-                response.writeHead(201,{'Content-Type':'application/json'});//set response type
-                response.data.log = "No Data Fetched";//log response
-                response.data.success = 0;
-                response.end(JSON.stringify(response.data));   
-                return;                     
-            }
-        }
-    })
-}
-
-
-function toVacancyQueue(data,id){
-    return new VacanciesQueue({
-        id: id,
-        position_title: data.position_title,
-        job_description: data.job_description,
-        min_experience: data.min_experience,
-        age_limit: data.age_limit,
-        min_education: data.min_education,
-        open_positions: data.open_positions,
-        geo_constraint: data.geo_constraint,
-        startup_id: data.startup_id
-    });
-}
-
-function toVacancy(data){
-    return new Vacancies({
-        id: data.id,
-        position_title: data.position_title,
-        job_description: data.job_description,
-        min_experience: data.min_experience,
-        age_limit: data.age_limit,
-        min_education: data.min_education,
-        open_positions: data.open_positions,
-        geo_constraint: data.geo_constraint,
-        startup_id: data.startup_id
-    });    
-}
-
-function toVacancySkills(skill_id,vacancy_id){
-    return new VacancySkills({
-        skill_id: skill_id,
-        vacancy_id: vacancy_id        
-    })
-}
-
-function toVacancyTools(tool_id,vacancy_id){
-    return new VacancyTools({
-        tool_id: tool_id,
-        vacancy_id: vacancy_id
-    })
-}
-
-function toApplication(data){
-    return new Application({
-        vacancy_id: data.vacancy_id,
-        user_id: data.user_id  
-    })
-}

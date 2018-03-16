@@ -44,6 +44,77 @@ var exports = module.exports;
 
 exports.personnel_model = Personnel;
 
+exports.fetch_startup_personnel = function(requestBody,response){
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {$and: [{startup_id:requestBody.startup_id},{verified: true}]}
+    },{
+        $lookup: {
+            from: "users",
+            foreignField: "email",
+            localField: "personnel_email",
+            as: "user_data"            
+        }
+    },{
+        $project: {
+            id: 1,
+            personnel_email: 1,
+            startup_id: 1,
+            signed_employment_contract: {
+                bucket: 1,
+                object_key: 1
+            },
+            position_title: 1,
+            non_compete: 1,
+            verified: 1,
+            timestamp:1,
+            user_data: {
+            	id: 1,
+                fullname: 1,
+                dp: 1,
+                location: 1,
+                bio: 1                
+            }            
+        }
+        
+    },{
+        $skip: (requestBody.page_number-1) * 50
+    },{
+        $limit: 50
+    }]
+    
+    Personnel.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.success = 1;
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));                   
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Employees";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                      
+            }
+        }
+    });
+}
+
 exports.create_personnel = function(requestBody,response){
     
     response.data = {};//response array

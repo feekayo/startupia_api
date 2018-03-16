@@ -6,6 +6,7 @@ var mongoose = require("mongoose"),
 var InterviewRoomSchema = new mongoose.Schema({
     id: {type: String},
     application_id: {type: String, require: true, unique: true},
+    startup_id: {type: Date, require: true},
     created_at: {type: Date, require: true}, 
     updated_at: {type: Date, 'default': Date.now},
     terminated_at: {type: Date},
@@ -83,7 +84,7 @@ exports.admin_terminate_interview = function(requestBody,response){
                             return;                 
                         }                        
                     }else{
-                        var message = requestBody.user_email+" terminated interview",
+                        var message = " terminated interview",
                             startup_id = requestBody.startup_id,
                             user_email = requestBody.user_email,
                             task_id= null,
@@ -218,31 +219,42 @@ exports.admin_create_message = function(requestBody,response){
                     var message_id = shortid.generate();//generate new message id            
                 }                
                 
-                var Message = toInterviewMessage(message_id,interview_id,requestBody);
-                
-                Message.save(function(error){
-                    if(error){
-                        if(response==null){//check for error 500
-                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Internal Server error";//user log message
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;                
+                var message = " sent an interview message",
+                    startup_id = requestBody.startup_id,
+                    user_email = requestBody.user_email,
+                    task_id= null,
+                    project_id = null,
+                    compartment = "HR",
+                    private = true;
+                                                    
+                        
+                Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(t){
+                    var Message = toInterviewMessage(message_id,interview_id,requestBody);
+
+                    Message.save(function(error){
+                        if(error){
+                            if(response==null){//check for error 500
+                                response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                response.data.log = "Internal Server error";//user log message
+                                response.data.success = 0;//failed flag
+                                response.end(JSON.stringify(response.data));//send message to user
+                                return;                
+                            }else{
+                                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                response.data.log = "Database Error";//user log message
+                                response.data.success = 0;//failed flag
+                                response.end(JSON.stringify(response.data));//send message to user
+                                return;                 
+                            }             
                         }else{
-                            response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                            response.data.log = "Database Error";//user log message
-                            response.data.success = 0;//failed flag
-                            response.end(JSON.stringify(response.data));//send message to user
-                            return;                 
-                        }             
-                    }else{
-                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                        response.data.log = "File Added";//user log message
-                        response.data.message_id = message_id;
-                        response.data.success = 1;//failed flag
-                        response.end(JSON.stringify(response.data));//send message to user
-                        return;            
-                    }                    
+                             response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                             response.data.log = "Message Sent";//user log message
+                             response.data.message_id = message_id;
+                             response.data.success = 1;//failed flag
+                             response.end(JSON.stringify(response.data));//send message to user
+                             return;            
+                         }                    
+                    });                                                
                 });
             }else{
                 //create a new interview room
@@ -273,34 +285,43 @@ exports.admin_create_message = function(requestBody,response){
                         }else{
                             var message_id = shortid.generate();//generate new message id            
                         }                
+                        var message = " sent an interview message",
+                            startup_id = requestBody.startup_id,
+                            user_email = requestBody.user_email,
+                            task_id= null,
+                            project_id = null,
+                            compartment = "HR",
+                            private = true;
+                                                    
+                        
+                        Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(t){
+                            var Message = toInterviewMessage(message_id,interview_id,requestBody);
 
-                        var Message = toInterviewMessage(message_id,interview_id,requestBody);
-
-                        Message.save(function(error){
-                            if(error){
-                                if(response==null){//check for error 500
-                                    response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
-                                    response.data.log = "Internal Server error";//user log message
-                                    response.data.success = 0;//failed flag
-                                    response.end(JSON.stringify(response.data));//send message to user
-                                    return;                
+                            Message.save(function(error){
+                                if(error){
+                                    if(response==null){//check for error 500
+                                        response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Internal Server error";//user log message
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;                
+                                    }else{
+                                        response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                                        response.data.log = "Database Error";//user log message
+                                        response.data.success = 0;//failed flag
+                                        response.end(JSON.stringify(response.data));//send message to user
+                                        return;                 
+                                    }             
                                 }else{
                                     response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                    response.data.log = "Database Error";//user log message
-                                    response.data.success = 0;//failed flag
+                                    response.data.log = "Message Sent";//user log message
+                                    response.data.message_id = message_id;
+                                    response.data.success = 1;//failed flag
                                     response.end(JSON.stringify(response.data));//send message to user
-                                    return;                 
-                                }             
-                            }else{
-                                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
-                                response.data.log = "Message Sent";//user log message
-                                response.data.message_id = message_id;
-                                response.data.success = 1;//failed flag
-                                response.end(JSON.stringify(response.data));//send message to user
-                                return;            
-                            }                    
-                        });                                                
-                        
+                                    return;            
+                                }                    
+                            });                                                
+                        });
                     }
                 });
             }
@@ -615,7 +636,7 @@ exports.user_terminate_interview = function(requestBody,response){
                                     return;                 
                                 }                        
                             }else{
-                                var message = requestBody.user_email+" terminated interview",
+                                var message = " terminated an interview",
                                     startup_id = requestBody.startup_id,
                                     user_email = requestBody.user_email,
                                     task_id= null,
@@ -656,7 +677,8 @@ function toInterviewRoom(id,data){
     return new InterviewRooms({
         id: id,
         application_id: data.application_id,
-        created_at: Date.now()      
+        created_at: Date.now(),
+        startup_id: data.startup_id
     });
 }
 

@@ -692,7 +692,7 @@ module.exports = {
         if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.startup_id!=undefined) && (request.body.startup_id!="") && (request.body.application_id!=undefined) && (request.body.application_id!="") && (request.body.message!=undefined) && (request.body.message!="") && (request.body.files_attached!=undefined) && (request.body.files_attached!="")){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){//validate session
                 if(validated){
-                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can also fetch invites
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR3", function(validated){//0 here means someone wif root access can also fetch invites
                         if(validated){
                             Interviews.admin_create_message(request.body,response); 
                         }else{
