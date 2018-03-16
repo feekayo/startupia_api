@@ -114,6 +114,7 @@ let express = require('express'),
     router.get('/read/personnel_work_logs/:session_id',read.user_company_work_logs);//fetch general work logs for a member of staff
     router.get('/read/personnel_compartment_logs/:session_id',read.user_company_compartment_work_logs);//for fetching a staff member's compartment logs
     router.get('/read/personnel_project_logs/:session_id',read.project_work_logs);//get a user's project work logs
+    router.post('/delete/vacancies/:session_id',remove.delete_vacancy);//delete vacancy
     
     //user CV creation
     router.put('/create/user_cv/:session_id', create.user_cv);//for adding a user's cv
