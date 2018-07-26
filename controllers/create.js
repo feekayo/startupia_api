@@ -7,7 +7,9 @@ var Sessions = require('../models/sessions'),
     Interviews = require('../models/interview'),
     UserCVs = require('../models/user_cvs');
 	CRM_apps = require('../models/CRM/apps'),
-	CRM_products = require('../models/CRM/products');
+	CRM_products = require('../models/CRM/products'),
+    TeamMembers = require('../models/projectManagement/teammembers'),
+    Teams = require('../models/projectManagement/teams');
 
 
 module.exports = {
@@ -284,7 +286,79 @@ module.exports = {
         }
     },
 
+    add_staff_to_department: function(request,response){
+        if((request.body.user_email!="")&&(request.body.user_email!="") && (request.body.startup_id!="")&&(request.body.personnel_email!="")&&(request.body.department_code)&&(request.body.personnel_user_id)){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    Privileges.validate_access('HR',request.body.user_email,request.body.startup_id, 0, "HR1", function(validated){//0 here means someone wif root access can create personnel
+                        if(validated){
+                            Personnel.create_staff_assignment(request.body.startup_id,request.body.personnel_email,request.body.department_code,function(returned){
+                                if(returned==0){
+                                    //exists
+                                    response.data = {};
+                                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                                    response.data.log = "User already in department!";//log message for client
+                                    response.data.success = 0; // success variable for client
+                                    response.end(JSON.stringify(response.data)); //send response to client 
+                                }else if(returned==1){
+                                    response.data = {};
+                                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                                    response.data.log = "An Error Occured";//log message for client
+                                    response.data.success = 0; // success variable for client
+                                    response.end(JSON.stringify(response.data)); //send response to client 
+                                }else if(returned==2){//successfully completed
 
+                                    Teams.fetch_compartment_team_id(request.body.startup_id,request.body.department_code,function(team_id){
+                                        if(team_id){
+                                            TeamMembers.add_member_department(request.body.personnel_user_id,team_id,false,function(added){
+                                                if(added){
+                                                    response.data = {};
+                                                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                                                    response.data.log = "Successfully Added Staff to "+request.body.department_code;//log message for client
+                                                    response.data.success = 1; // success variable for client
+                                                    response.end(JSON.stringify(response.data)); //send response to client
+                                                }else{
+                                                    response.data = {};
+                                                    response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                                                    response.data.log = "An Error Occured!!!";//log message for client
+                                                    response.data.success = 0; // success variable for client
+                                                    response.end(JSON.stringify(response.data)); //send response to client                                                    
+                                                }
+                                            });
+                                        }else{
+                                            response.data = {};
+                                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                                            response.data.log = "An Error Occured!";//log message for client
+                                            response.data.success = 0; // success variable for client
+                                            response.end(JSON.stringify(response.data)); //send response to client                                             
+                                        }
+                                    });
+                                }
+                            })
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "User Unauthorized!";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    })
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client                       
+                }
+            })
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client               
+        }
+    },
 
 
 	create_personnel: function(request,response){ //requires write access to personnel creation (HR1)
@@ -740,6 +814,40 @@ module.exports = {
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client             
         }        
+    },
+
+    compartment_create_privilege: function(request,response){
+        if((request.body.user_email!=undefined) && (request.body.user_id!=undefined) && (request.body.startup_id!=undefined) && (request.body.startup_name!=undefined) && (request.body.email!=undefined) && (request.body.compartment!=undefined) && (request.body.access_level!=undefined) && (request.body.description!=undefined) && (request.body.user_id!="") && (request.body.startup_id!="") && (request.body.startup_name!="") && (request.body.email!="") && (request.body.compartment!="") && (request.body.access_level!="") && (request.body.description!="") && (request.body.user_email!="")){
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    Privileges.validate_root_access(request.body.compartment,request.body.user_email,request.body.startup_id,function(validated){
+                        if(validated){
+                            Privileges.create_privilege(request.body,response);         
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                            response.data.log = "Only The Head of "+request.body.compartment+" can access this function";//log message for client
+                            response.data.success = 0; // success variable for client
+                            response.end(JSON.stringify(response.data)); //send response to client                             
+                        }
+                    });
+                    
+                }else{
+                    response.data = {};
+                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+                    response.data.log = "Invalid session";//log message for client
+                    response.data.success = 2; // success variable for client
+                    response.end(JSON.stringify(response.data)); //send response to client                  
+                }               
+            });
+        }else{
+            //console.log(request.body);
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client           
+        }
     }
     
     

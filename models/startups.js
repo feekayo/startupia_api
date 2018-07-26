@@ -396,7 +396,7 @@ exports.founders_model = Founders;
 
 exports.fetch_user_startups = function(requestBody,response){
     var email = requestBody.user_email;
-    
+    console.log(email);
     
     response.data = {};
     
@@ -440,6 +440,7 @@ exports.fetch_user_startups = function(requestBody,response){
                 return;//return statement                
             }                
         }else{
+            console.log(data);
             if(data && Object.keys(data).length>0){
                 response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "Data Fetched";//log message for client
@@ -450,6 +451,7 @@ exports.fetch_user_startups = function(requestBody,response){
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
                 response.data.log = "No Startups!";//log message for client
+                response.data.data = data;
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement                 

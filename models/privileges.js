@@ -33,6 +33,65 @@ var PrivilegesQueue = mongoose.model('PrivilegesQueue',privilegesQueueSchema)
 
 var exports = module.exports;
 
+exports.fetch_department_privileged = function(requestBody,response){
+    response.data = {};
+    var aggregate = [{
+            $match: {$and: [{company_id:requestBody.startup_id},{compartment:requestBody.department_code}]}
+        },{
+            $lookup: {
+                from: "users",
+                foreignField: "email",
+                localField: "user_email",
+                as: "user_data"            
+            }
+        },{
+          $project: {
+            id: 1,
+            user_email: 1,
+            company_id: 1,
+            compartment: 1, 
+            access_level: 1,
+            user_data: {
+                id: 1,
+                fullname: 1,
+                dp: 1,
+                location: 1,
+                bio: 1                
+            }            
+        }
+         
+    }]
+
+    Privileges.aggregate(aggregate,function(error,data){
+       if(error){
+            console.log(error);
+           if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Internal server error";//send message to user
+                response.data.success = 0;//failed flag
+                response.end(JSON.stringify(response.data));//send message to user
+                return;
+           }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Database Error";//send message to user
+                response.data.success = 0;//failed flag
+                response.end(JSON.stringify(response.data));//send message to user
+                return;
+           }
+       }else{
+            if(data && Object.keys(data).length>0){
+
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "No Staff Privilege Exists";//send message to user
+                response.data.success = 0;//failed flag
+                response.end(JSON.stringify(response.data));//send message to user
+                return;
+            } 
+       }
+    })
+}
+
 exports.validate_startup_access = function(email,startup_id,response){
 
     response.data = {};
@@ -54,7 +113,7 @@ exports.validate_startup_access = function(email,startup_id,response){
 				return;
            }
        }else{
-           if(data){
+           if(data && Object.keys(data).length>0){
                console.log("process data");
          
                Privileges.find({$and: [{company_id:startup_id},{user_email:email}]},function(error,data){
@@ -244,8 +303,6 @@ exports.validate_hr_access = function(email,startup_id,response){
                         response.data.staff_assessment_access = true;
                     }else if(element.access_level=="HR7"){
                         response.data.work_logs_access = true;
-                    }else if(element.access_level=="HR8"){
-                        response.data.hr_staff_access = true;
                     }
                 }
                 response.data.success = 1;
@@ -311,8 +368,6 @@ exports.validate_fm_access = function(email,startup_id,response){
                         response.data.audit_report_access = true; //6
                     }else if(element.access_level=="FM7"){
                         response.data.financial_tasks_access = true; //7
-                    }else if(element.access_level=="FM8"){
-                        response.data.assign_duty_access = true; //
                     }
                 }
                 response.data.success = 1;
@@ -329,6 +384,23 @@ exports.validate_fm_access = function(email,startup_id,response){
        } 
     });
 }
+exports.validate_root_access = function(compartment,user_email,company_id,callback){
+    Privileges.findOne({$and:[{compartment: compartment},{user_email:user_email},{company_id:company_id},{access_level: 0}]},function(error,data){
+        if(error){
+            console.log(error);
+            callback(false);
+        }else{
+            if(data){
+                console.log(data);
+                callback(true);
+            }else{
+                //console.log("No Bueno");
+                callback(false);
+            }
+        }
+    });
+}
+    
 
 exports.validate_access = function(compartment,user_email,company_id, root_access, access_level, callback){
     if(root_access==0){

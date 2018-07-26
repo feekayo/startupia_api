@@ -67,7 +67,8 @@ var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 var exports = module.exports;
 
 exports.delete_user_application = function(requestBody,response){
-    Application.remove({$and: [{id: application_id},{user_id: user_id}]},function(error){
+
+    Application.remove({$and: [{id: requestBody.application_id},{user_id: requestBody.user_id}]},function(error){
         if(error){
             if(response==null){
                 response.writeHead(500,{'Content-Type':'application/json'});//set response type
@@ -653,6 +654,60 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
     })
 }
 
+
+exports.fetch_skill_vacancies = function(skill_id,page_number,response){
+    response.data = {};
+
+    var aggregate = [{
+        $match: {skill_id: skill_id}
+    },{
+        $lookup: {
+            from: "vacancies",
+            foreignField: "id",
+            localField: "vacancy_id",
+            as: "job_data"
+        }
+    },{
+        $skip: (requestBody.page_number-1) * 50
+    },{
+        $limit: 50
+    }]
+
+    VacancySkills.aggregate(aggregate,function(error,data){
+        if(error) {
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal Server Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                  
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                
+            } 
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.data = data;
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));   
+                return;     
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Data Fetched";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));   
+                return;                     
+            }
+        }
+
+    });
+}
+
 exports.fetch_user_applications = function(requestBody,response){
     response.data = {};
     
@@ -685,6 +740,7 @@ exports.fetch_user_applications = function(requestBody,response){
             vacancy_id: 1,
             user_id: 1,
             timestamp: 1,            
+            vacancy_data: 1,
             interview_room: 1,
             startup_data: 1
         }

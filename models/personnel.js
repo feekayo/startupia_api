@@ -22,6 +22,16 @@ var personnelSchema = new mongoose.Schema({
 
 var Personnel = mongoose.model('personnel',personnelSchema);
 
+
+var staffAssignmentsSchema = new mongoose.Schema({
+    id: {type: String, unique: true, require: true, 'default': shortid.generate},
+    personnel_email: {type: String, require: true},
+    department_code: {type: String, require: true}
+});
+
+var StaffAssignments = mongoose.model('staff_assignments',staffAssignmentsSchema)
+
+
 var personnelQueueSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true},
     personnel_email: {type: String, require: true},
@@ -925,6 +935,82 @@ exports.fetch_unvalidated_staff = function(requestBody,response){
     })
 }
 
+exports.fetch_validated_staff = function(requestBody,response){
+    
+    response.data = {};
+    
+    var startup_id = requestBody.startup_id;
+    var aggregate = [{
+            $match: {$and: [{startup_id: startup_id},{verified: true}]}
+        },{
+            $lookup: {
+                from: "users",
+                foreignField: "email",
+                localField: "personnel_email",
+                as: "user_data"
+            }   
+        },{
+            $lookup: {
+                from: "staff_assignments",
+                foreignField: "personnel_email",
+                localField: "personnel_email",
+                as: "current_departments"
+            }
+        },{
+            $project: {
+                id: 1,
+                personnel_email: 1,
+                message: 1,
+                startup_id: 1,
+                employment_contract: {
+                    bucket: 1,
+                    object_key: 1
+                },        
+                non_compete: 1,
+                user_data: {
+                    id: 1,
+                    fullname: 1,
+                    dp: 1,
+                    phone: 1,
+                    bio: 1
+                },
+                current_departments: {
+                    department_code: 1
+                }
+            }
+        }];
+    
+    Personnel.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){
+                response.writeHead(500,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Internal server error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));
+            }else{
+                console.log(error);
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Database Error";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "Data Fetched";//log response
+                response.data.data = data;
+                response.data.success = 1;
+                response.end(JSON.stringify(response.data));                
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//set response type
+                response.data.log = "No Unverified Staff";//log response
+                response.data.success = 0;
+                response.end(JSON.stringify(response.data));                
+            }
+        }
+    })
+}
+
 exports.retract_validation = function(requestBody,response){
     response.data = {};
     
@@ -1102,18 +1188,39 @@ exports.validate_personnel = function(requestBody,response){
     })
 }
 
-exports.create_vacancy = function(requestBody,response){
-    
+exports.create_staff_assignment = function(startup_id,personnel_email,department_code,callback){
+
+    StaffAssignments.findOne({$and: [{startup_id: startup_id},{personnel_email:personnel_email},{department_code: department_code}]},function(error,data){        
+        if(data && Object.keys(data)>0){
+            callback(0);
+        }else{  
+            var StaffAssignment = toStaffAssignment(startup_id,personnel_email,department_code);
+
+            StaffAssignment.save(function(error){
+                if(error){
+                    //log error
+                    callback(1);
+                }else{
+                    callback(2);
+                }
+            });
+        }
+    });
+
 }
 
-exports.save_vacancy_skills = function(requestBody,response){
-    
-}
+exports.delete_staff_assignment = function(startup_id,personnel_email,department_code,callback){
 
-exports.fetch_vacancy_applicants = function(requestBody,response){
-    
-}
+    StaffAssignments.remove({$and: [{startup_id: startup_id},{personnel_email:personnel_email},{department_code: department_code}]},function(error){
+        if(error){
+            //log error
+            callback(false);
+        }else{
+            callback(true);
+        }
+    })
 
+}
 
 function toPersonnel (data,bucket,object_key){
     return new Personnel({
@@ -1139,5 +1246,13 @@ function toPersonnelQueue(data,id){
         },        
         position_title: data.position_title,
         non_compete: data.non_compete
+    })
+}
+
+function toStaffAssignment(startup_id,personnel_email,department_code){
+    return new StaffAssignments({
+        startup_id: startup_id,
+        personnel_email: personnel_email,
+        department_code: department_code       
     })
 }

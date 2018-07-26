@@ -9,6 +9,12 @@ let express = require('express'),
     update = require('../controllers/update'),
     remove = require('../controllers/delete');
 
+
+    create_prodDevt = require('../controllers/prodDevt/create');
+    delete_prodDevt = require('../controllers/prodDevt/delete');
+    read_prodDevt = require('../controllers/prodDevt/read');
+    update_prodDevt = require('../controllers/prodDevt/update');
+
 //module.exports = function (app) {
     // console.log('I get here')
     //fm expenditure
@@ -29,12 +35,6 @@ let express = require('express'),
 
     router.put('/user/verify_email/:session_id', accounts.verify_email);//route for sending verification code to user email
     router.post('/user/verify_email/:session_id', accounts.confirm_verify_email);//route for checking and authorizing email verification
-
-    //router.post('/crm/login',accounts.login_compartment);//route for logging into CRM
-    //router.post('/crm/create_app',create.crm_create_app);
-    //router.post('/crm/create_product',create.crm_create_product);
-    //router.post('/crm/create_button',create.crm_create_button);
-
 
     //create startup founders, personnel and privileges
     router.put('/create/startup/:session_id', create.save_startup);//route for saving startups in the queue before confirmation
@@ -73,6 +73,7 @@ let express = require('express'),
     router.get('/read/job_invite/:session_id', read.personnel_invite);//for fetching a singular job invite
     router.post('/delete/remove_job_invite/:session_id', remove.delete_job_invites);//for deleting job invites
     router.get('/read/unvalidated_staff/:session_id', read.unvalidated_staff);//for fetching list of staff in need of validation
+    router.get('/read/validated_staff/:session_id', read.validated_staff);//for fetching list of staff in need of validation
     router.put('/create/vacancy/:session_id', create.create_vacancy);//for saving vacancies to buffer collection
     router.put('/create/vacancy_skill/:session_id', create.create_vacancy_skill);//for saving a vacancy's required skills
     router.put('/create/vacancy_tool/:session_id', create.create_vacancy_tool);//for saving a vacancy's required tools
@@ -138,31 +139,31 @@ let express = require('express'),
     router.post('/delete/user_certificate/:session_id', remove.user_certificate);//for deleting a user certificate
     router.post('/delete/user_skill/:session_id', remove.user_skill);//for deleting a user's skill
     router.post('/delete/user_tool/:session_id', remove.user_tool);//for deleting a user's skill
-    router.post('/delete/user_application',remove.user_delete_application); //for a user to delete his own application
+    router.post('/delete/user_application/:session_id',remove.user_delete_application); //for a user to delete his own application
     
     //Financial Management Routes
     router.get('/read/validate_fm_access/:session_id', read.validate_fm_access);//for validating a user access to a startup's FM module
 
-
-    //router.post('/create/click',create.crm_create_click);
-    //router.post('/create/order',create.crm_create_order);
-    //router.post('/create/near_miss',create.crm_create_near_miss);
-    //router.post('/create/product_view',create.crm_create_product_view);
-
-    //router.post('/crm/fetch_products',read.crm_fetch_products);//route for fetching products
-    //router.post('/crm/fetch_apps',read.crm_fetch_apps);//route for fetching app
-
-    //router.post('/crm/fetch_orders',read.crm_track_orders);//route for fetching orders
-    //router.post('/crm/fetch_near_misses',read.crm_fetch_near_misses);//route for fetching near_misses
-    //router.post('/crm/fetch_product_views',read.crm_fetch_product_views);//route for fetching orders
-
-    //router.post('/crm/fetch_app_overview',read.crm_app_stats);//route for fetching orders
-    //router.post('/crm/fetch_app_usage',read.crm_live_app_usage);//route for fetching orders
 
     //read routes 
     router.get('/startups/fetch_invited_founders', read.startup_founders_queue);//route for fetching startup founders queue
     router.get('/startups/fetch_founders', read.startup_founders);//route for fetching startup founders
     router.get('/startups/fetch_personnel', read.startup_personnel);//route for fetching startup personnel
     //app.use(router);
+
+    router.get('/read/skill_vacancies/:skill_id/:page_number',read.skill_jobs);//route for fetching jobs offered to skill holder
+
+
+    
+    //compartment and staff assignment routes 
+    router.post('/create/compartment_workspaces/:session_id',create_prodDevt.create_compartment_project);//route for creating workspaces
+    router.post('/create/staff_assignments/:session_id',create.add_staff_to_department);//route for making staff staff_assignments
+    router.get('/read/department_team/:session_id',read_prodDevt.fetch_compartment_team);//route for fetching a department's team
+    router.get('/read/department_privileged/:session_id',read.department_privileged);//route for fetching a department's privileged
+
+    router.post('/create/department_privilege/:session_id',create.compartment_create_privilege);//for creating privileged access within a department
+
+    //prodDevt routes
+
 //}
 module.exports = router;

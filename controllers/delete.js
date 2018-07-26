@@ -212,7 +212,7 @@ module.exports = {
     },
     
     user_delete_application: function(request,response){
-        if((request.body.user_id!=undefined) && (request.body.skill_id!=undefined)&& (request.body.user_email!=undefined) && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.skill_id!="")&& (request.body.user_email!="") && (request.params.session_id!="")){
+        if((request.body.user_id!=undefined) && (request.body.application_id!=undefined)&& (request.body.user_email!=undefined) && (request.params.session_id!=undefined) && (request.body.user_id!="") && (request.body.application_id!="")&& (request.body.user_email!="") && (request.params.session_id!="")){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
                     Vacancies.delete_user_application(request.body,response);
@@ -232,6 +232,7 @@ module.exports = {
             response.end(JSON.stringify(response.data));//send response to client             
         }        
     },
+ 
     delete_vacancy: function(request,response){
         if((request.body.user_id!=undefined) && (request.body.personnel_id!=undefined) && (request.body.user_email!=undefined) && (request.body.startup_id!=undefined)&& (request.body.vacancy_id!=undefined)){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){

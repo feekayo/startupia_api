@@ -12,6 +12,7 @@ let Sessions = require('../models/sessions'),
 let required_fileds = [
     'startup_id', 'log_message', 'expenditure', 'cause'
 ];
+
 module.exports = {
     delete: function (request, response) {
         //Next Step is to validat session
