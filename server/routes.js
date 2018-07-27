@@ -7,13 +7,8 @@ let express = require('express'),
     create = require('../controllers/create'),
     read = require('../controllers/read'),
     update = require('../controllers/update'),
-    remove = require('../controllers/delete'),
+    remove = require('../controllers/delete');
 
-
-    create_prodDevt = require('../controllers/prodDevt/create'),
-    delete_prodDevt = require('../controllers/prodDevt/delete'),
-    read_prodDevt = require('../controllers/prodDevt/read'),
-    update_prodDevt = require('../controllers/prodDevt/update');
 
 //module.exports = function (app) {
     // console.log('I get here')
@@ -156,14 +151,13 @@ let express = require('express'),
 
     
     //compartment and staff assignment routes 
-    router.post('/create/compartment_workspaces/:session_id',create_prodDevt.create_compartment_project);//route for creating workspaces
+    router.post('/create/compartment_workspaces/:session_id',create.create_compartment_project);//route for creating workspaces
     router.post('/create/staff_assignments/:session_id',create.add_staff_to_department);//route for making staff staff_assignments
-    router.get('/read/department_team/:session_id',read_prodDevt.fetch_compartment_team);//route for fetching a department's team
+    router.get('/read/department_team/:session_id',read.fetch_compartment_team);//route for fetching a department's team
     router.get('/read/department_privileged/:session_id',read.department_privileged);//route for fetching a department's privileged
 
     router.post('/create/department_privilege/:session_id',create.compartment_create_privilege);//for creating privileged access within a department
 
-    //prodDevt routes
 
 //}
 module.exports = router;

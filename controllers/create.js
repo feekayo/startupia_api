@@ -4,182 +4,16 @@ var Sessions = require('../models/sessions'),
 	Startups = require('../models/startups'),
     Personnel = require('../models/personnel'),
     Vacancies = require('../models/vacancies'),
+    Projects = require('../models/projectManagement/projects'),
     Interviews = require('../models/interview'),
-    UserCVs = require('../models/user_cvs');
-	CRM_apps = require('../models/CRM/apps'),
-	CRM_products = require('../models/CRM/products'),
     TeamMembers = require('../models/projectManagement/teammembers'),
-    Teams = require('../models/projectManagement/teams');
+    Teams = require('../models/projectManagement/teams'),
+    TeamMessages = require('../models/projectManagement/teammessages'),
+    Tasks = require('../models/projectManagement/tasks');
 
 
 module.exports = {
-	/**crm_create_app: function(request,response){
-		console.log(request.body);
-		if((request.body.company_id!=undefined)&&(request.body.user_id!=undefined)&&(request.body.user_email!=undefined)&&(request.body.app_name!=undefined)&&(request.body.app_category!=undefined)){//add session variable in later update
-		
-			//check  session
-			Privileges.validate_privilege(request.body.user_email,request.body.company_id,'CRM','1', function(valid){
-				//requires admin access to CRM 
-				if(valid){
-					CRM_apps.create_app(request.body,response);
-				}else{
-					response.data = {};
-		            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-		            response.data.log = "Invalid Request"; //log message for client
-		            response.data.success = 0;//success variable for client
-		            response.end(JSON.stringify(response.data));//send response to client 					
-				}
-			});
-		}else{
-			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client 
-		}
-	},
-
-	crm_create_button: function(request,response){
-		console.log(request.body);
-		if((request.body.company_id!=undefined)&&(request.body.user_id!=undefined)&&(request.body.user_email!=undefined)&&(request.body.app_id!=undefined)&&(request.body.button_id!=undefined)&&(request.body.button_desc!=undefined)){//add session variable in later update
-		
-			//check  session
-			Privileges.validate_privilege(request.body.user_email,request.body.company_id,'CRM','1', function(valid){
-				//requires admin access to CRM 
-				if(valid){
-					CRM_apps.validate_app(request.body.app_id,request.body.company_id,function(validated){
-						if(validated){
-							CRM_apps.create_button(request.body,response);
-						}else{
-							response.data = {};
-				            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-				            response.data.log = "Invalid Request"; //log message for client
-				            response.data.success = 0;//success variable for client
-				            response.end(JSON.stringify(response.data));//send response to client 
-						}	
-					})
-					
-				}else{
-					response.data = {};
-		            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-		            response.data.log = "Invalid Request"; //log message for client
-		            response.data.success = 0;//success variable for client
-		            response.end(JSON.stringify(response.data));//send response to client 					
-				}
-			});
-		}else{
-			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client 
-		}
-	},
-
-	crm_create_click: function(request,response){
-		var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
-        if((request.body.app_id!=undefined)&&(request.body.user_email!=undefined)&&(request.body.button_id!=undefined)){//add session variable in later update
-		
-			//CRM_apps.validate_button(request.body.app_id,request.body.button_id,function(validated){
-				//if(validated){
-					response.data = {};
-					CRM_apps.create_click(ip,request.body,response);
-				//}else{
-				//	response.data = {};
-	        	 //   response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-	        	  //  response.data.log = "Invalid Request"; //log message for client
-	        	    //response.data.success = 0;//success variable for client
-	        	    //response.end(JSON.stringify(response.data));//send response to client 
-				//}	
-			//});
-		}else{
-			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client 
-		}
-	},
-
-	crm_create_product: function(request,response){
-		console.log(request.body);
-		if((request.body.company_id!=undefined)&&(request.body.user_id!=undefined)&&(request.body.user_email!=undefined)
-		&&(request.body.product_id!=undefined)&&(request.body.product_name!=undefined)&&(request.body.product_category_id!=undefined)
-		&&(request.body.product_price!=undefined)&&(request.body.product_currency!=undefined) ){//add session variable in later update
-		
-			//check  session
-			Privileges.validate_privilege(request.body.user_email,request.body.company_id,'CRM','1', function(valid){
-				//requires admin access to CRM 
-				if(valid){
-					console.log("1");
-					CRM_products.create_product(request.body,response);
-				}else{
-					response.data = {};
-		            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-		            response.data.log = "Invalid Request"; //log message for client
-		            response.data.success = 0;//success variable for client
-		            response.end(JSON.stringify(response.data));//send response to client 					
-				}
-			});
-		}else{
-			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client 
-		}	
-	},
-
-	crm_create_order: function(request,response){
-		var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
-        console.log(ip);
-
-        if((request.body.client_email!=undefined)&&(request.body.platform_id!=undefined)&& (request.body.product_id!=undefined) && (request.body.status!=undefined)){
-	        	CRM_products.create_order(ip,request.body,response);//create order
-    	}else{
- 			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client   		
-    	}
-	},
-
-	crm_create_product_view: function(request,response){
-		var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
-        console.log(ip);
-
-        if((request.body.client_email!=undefined)&&(request.body.platform_id!=undefined)&& (request.body.product_id!=undefined)){
-	        	CRM_products.create_product_view(ip,request.body,response);//create order
-    	}else{
- 			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client   		
-    	}
-	},
-
-	crm_create_near_miss: function(request,response){
-		var ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress;
-        console.log(ip);
-
-        if((request.body.client_email!=undefined)&&(request.body.platform_id!=undefined)&& (request.body.product_id!=undefined)){
-	        	CRM_products.create_near_miss(ip,request.body,response);//create order
-    	}else{
- 			response.data = {};
-            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
-            response.data.log = "Incomplete Request"; //log message for client
-            response.data.success = 0;//success variable for client
-            response.end(JSON.stringify(response.data));//send response to client   		
-    	}
-	},
-
-	crm_create_campaign: function(request,response){
-
-	},
-    **/
-    
+	 
     save_startup: function(request,response){
 		if((request.body.user_id!=undefined) &&
             (request.body.name!=undefined) &&
@@ -848,7 +682,274 @@ module.exports = {
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client           
         }
-    }
+    },
+    
+    /**
+    PRODUCT DEVELOPMENT
+    */
+    //admin_compartment_workspace_membership
+    
+    create_compartment_project: function(request,response){
+        if(request.body.startup_id!=undefined && request.body.startup_id!="" && request.body.user_id!=undefined && request.body.user_id!=""){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                        //create HR TEAM & Workspace
+                        Projects.create_compartment_projects('Human Resources', 'HR', request.body.startup_id,function(created){
+                            if(created){
+
+                                //Create FM Team and Workspace
+                                Projects.create_compartment_projects('Financial Management', 'FM', request.body.startup_id,function(created){
+                                    if(created){
+
+                                        //Create PD Team and Workspace
+                                        Projects.create_compartment_projects('Product Development', 'PD', request.body.startup_id,function(created){
+                                            if(created){
+                                                //Create CRM WORKSPACE
+                                                //CREATE ADVERTISMENT WORKSPACE
+                                                //CREATE PRODUCT MONITORING WORKSPACE
+                                                response.data = {};
+                                                response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                                                response.data.log = "Successfully initialted Workspaces"; //log message for client
+                                                response.data.success = 1;//success variable for client
+                                                response.end(JSON.stringify(response.data));//send response to client 
+                                            }else{
+                                                response.data = {};
+                                                response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                                                response.data.log = "Failed to Create PD Root Workspaces"; //log message for client
+                                                response.data.success = 0;//success variable for client
+                                                response.end(JSON.stringify(response.data));//send response to client                                         
+                                            }
+                                        });
+                                    }else{
+                                        response.data = {};
+                                        response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                                        response.data.log = "Failed to Create FM Root Workspace"; //log message for client
+                                        response.data.success = 0;//success variable for client
+                                        response.end(JSON.stringify(response.data));//send response to client                                         
+                                    }
+                                });
+                            }else{
+                                response.data = {};
+                                response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                                response.data.log = "Failed to Create HR Root Workspace"; //log message for client
+                                response.data.success = 0;//success variable for client
+                                response.end(JSON.stringify(response.data));//send response to client 
+                            }
+                        });
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }
+    },
+    
+    create_project: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.project_validation(function(validated){
+                        Projects.create_project(request.body,response);
+                    })**/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }
+    },
+    
+    create_team: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }
+    },
+    
+    create_admin: function(request,response){
+       if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }          
+    },
+    
+    create_teammember: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }        
+    },
+    
+    create_teammessage: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }        
+    },
+    
+    create_task: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }        
+    },
+    
+    create_task_note: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }           
+    },
+    
+    create_projectlink: function(request,response){
+        if(true){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    /**Privileges.validate_access(function(validated){
+                        Teams.create_team(request.body,response);
+                    })***/
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }           
+    },
+    
+    /**update_workflow: function(request,response){//remove from here
+        
+    },**/
+    
+    
     
     
 } 
