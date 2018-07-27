@@ -7,12 +7,12 @@ let express = require('express'),
     create = require('../controllers/create'),
     read = require('../controllers/read'),
     update = require('../controllers/update'),
-    remove = require('../controllers/delete');
+    remove = require('../controllers/delete'),
 
 
-    create_prodDevt = require('../controllers/prodDevt/create');
-    delete_prodDevt = require('../controllers/prodDevt/delete');
-    read_prodDevt = require('../controllers/prodDevt/read');
+    create_prodDevt = require('../controllers/prodDevt/create'),
+    delete_prodDevt = require('../controllers/prodDevt/delete'),
+    read_prodDevt = require('../controllers/prodDevt/read'),
     update_prodDevt = require('../controllers/prodDevt/update');
 
 //module.exports = function (app) {
