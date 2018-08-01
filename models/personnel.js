@@ -1003,7 +1003,7 @@ exports.fetch_validated_staff = function(requestBody,response){
                 response.end(JSON.stringify(response.data));                
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//set response type
-                response.data.log = "No Unverified Staff";//log response
+                response.data.log = "No Staff";//log response
                 response.data.success = 0;
                 response.end(JSON.stringify(response.data));                
             }

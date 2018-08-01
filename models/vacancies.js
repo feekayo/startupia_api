@@ -656,6 +656,9 @@ exports.fetch_vacancy_applicants = function(requestBody,response){
 
 
 exports.fetch_skill_vacancies = function(skill_id,page_number,response){
+
+    console.log("fooliz");
+
     response.data = {};
 
     var aggregate = [{
@@ -668,7 +671,7 @@ exports.fetch_skill_vacancies = function(skill_id,page_number,response){
             as: "job_data"
         }
     },{
-        $skip: (requestBody.page_number-1) * 50
+        $skip: (page_number-1) * 50
     },{
         $limit: 50
     }]

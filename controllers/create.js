@@ -144,7 +144,7 @@ module.exports = {
 
                                     Teams.fetch_compartment_team_id(request.body.startup_id,request.body.department_code,function(team_id){
                                         if(team_id){
-                                            TeamMembers.add_member_department(request.body.personnel_user_id,team_id,false,function(added){
+                                            TeamMembers.add_member_departments(request.body.personnel_user_id,team_id,false,function(added){
                                                 if(added){
                                                     response.data = {};
                                                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format

@@ -80,7 +80,12 @@ exports.fetch_department_privileged = function(requestBody,response){
            }
        }else{
             if(data && Object.keys(data).length>0){
-
+                response.writeHead(201,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Data Fetched";//send message to user
+                response.data.success = 1;//failed flag
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));//send message to user
+                return;
             }else{
                 response.writeHead(200,{'Content-Type':'application/json'});//set content resolution variables
                 response.data.log = "No Staff Privilege Exists";//send message to user

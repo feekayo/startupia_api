@@ -80,6 +80,7 @@ exports.fetch_compartment_team_id = function(startup_id,compartment,callback){
             callback(false)
         }else{
             if(data && Object.keys(data).length>0){
+                console.log(data);
                 callback(data.id)
             }else{
                 callback(false);

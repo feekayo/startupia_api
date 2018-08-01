@@ -805,9 +805,45 @@ var get_params = url.parse(request.url,true);
     }, 
 
     skill_jobs: function(request,response){
-        var skill_id = request.params.skill_id,
-            page_number = request.params.page_number;
-        Vacancies.fetch_skill_vacancies(skill_id,page_number,response);    
+
+        console.log('hat')        
+        var get_params = url.parse(request.url,true);
+
+        if((get_params.query.skill_id != "") && (get_params.query.page_number != "") && (params.query.skill_id != undefined) && (get_params.query.page_number=undefined)){
+            /**
+            var skill_id = get_params.query.skill_id,
+                page_number = get_params.query.page_number;
+        
+            Vacancies.fetch_skill_vacancies(skill_id,page_number,response);    
+            **/
+            console.log("fooliz")
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format
+            response.data.log = "Incomplete Request";//log message for client
+            response.data.success = 0; // success variable for client
+            response.end(JSON.stringify(response.data)); //send response to client             
+        }
+    },
+
+    skill_vacancies: function(request,response){
+        
+        var get_params = url.parse(request.url,true);
+        if(get_params.query.skill_id!="" && get_params.query.page_number!="" && get_params.query.skill_id!=undefined && get_params.query.page_number!=undefined){
+            Vacancies.fetch_skill_vacancies(get_params.query.skill_id,get_params.query.page_number,response);               
+        }else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client             
+        }
+
     },
 
     department_privileged: function(request,response){
@@ -816,7 +852,7 @@ var get_params = url.parse(request.url,true);
         if(get_params.query.user_id!="" && get_params.query.startup_id!="" && get_params.query.department_code!="" && get_params.query.user_id!=undefined && get_params.query.startup_id!=undefined && get_params.query.department_code!=undefined){
             Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
                 if(validated){
-                    Privileges.fetch_department_privileged(request.body,response);
+                    Privileges.fetch_department_privileged(get_params.query,response);
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type' : 'application/json'});//server response is in json format

@@ -144,9 +144,10 @@ let express = require('express'),
     router.get('/startups/fetch_invited_founders', read.startup_founders_queue);//route for fetching startup founders queue
     router.get('/startups/fetch_founders', read.startup_founders);//route for fetching startup founders
     router.get('/startups/fetch_personnel', read.startup_personnel);//route for fetching startup personnel
+    router.get('/startups/fetch_personnel', read.startup_personnel);//route for fetching startup personnel
     //app.use(router);
 
-    router.get('/read/skill_vacancies/:skill_id/:page_number',read.skill_jobs);//route for fetching jobs offered to skill holder
+    router.get('/read/skill_vacancies',read.skill_vacancies);//route for fetching jobs offered to skill holder
 
 
     

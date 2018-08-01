@@ -160,15 +160,25 @@ exports.remove_member = function(requestBody,response){
 
 exports.add_member_departments = function(user_id,team_id,admin,callback){
 
-    var Member = toMember2(user_id,team_id,admin);
-
-    Member.save(function(error){
+    Team_Members.findOne({$and: [{user_id: user_id},{team_id: team_id}]},function(error,data){
         if(error){
-            callback(false)
+            callback(false);
         }else{
-            callback(true);
+            if(data){
+                callback(false);
+            }else{
+                var Member = toMember2(user_id,team_id,admin);
+
+                Member.save(function(error){
+                    if(error){
+                        callback(false)
+                    }else{
+                        callback(true);
+                    }
+                });                
+            }
         }
-    })
+    });
 }
 
 exports.fetch_team_members = function(team_id,callback){

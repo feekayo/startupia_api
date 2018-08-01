@@ -1,20 +1,3 @@
-/**
-    team messages
-    
-    id
-    team_id
-    message
-    file_attached
-    timestamp
-**/
-
-/**
-    attached_file messages
-    message_id
-    file
-    timestamp
-**/
-
 var mongoose = require('mongoose'),
     shortid = require('shortid'),
     Sessions = require('../sessions'),
@@ -36,9 +19,10 @@ var Messages = mongoose.model('team_messages',messagesSchema);
 
 var topicsSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
-    message_id: {type: String, require: true},
-    team_id: {type: String, require: true},
-    topic: {type: String, require: true}
+    project_id: {type: String, require: true},
+    topic: {type: String, require: true},
+    description: {type: String},
+    timestamp: {type: Date, 'default': Date.now}
 });
 
 var Topics = mongoose.model('team_topics',topicsSchema);
@@ -47,7 +31,8 @@ var mentionsSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
     message_id: {type: String, require: true},
     team_id: {type: String, require: true},
-    user_id: {type: String, require: true}
+    user_id: {type: String, require: true},
+    timestamp: {type: Date, 'default': Date.now}
 });
 
 var Mentions = mongoose.model('team_mentions',mentionsSchema);
@@ -136,8 +121,80 @@ function create_mention(){
     
 }
 
-function create_topic(){
-    
+exports.create_topic_callback = function(requestBody,callBack){
+    Topics.findOne({$and: [{topic: requestBody.topic},{project_id: requestBody.project_id}]},function(error,data){
+        if(error){
+            callBack(false);
+        }else{
+            if(data){
+                callBack(false);
+            }else{
+                var Topic = toTopic(requestBody);
+                
+                Topic.save(function(error){
+                    if(error){
+                        callBack(false);
+                    }else{
+                        callBack(true);
+                    }
+                })
+            }
+        }
+    });
+}
+
+exports.create_topic = function(requestBody,response){
+    Topics.findOne({$and: [{topic: requestBody.topic},{project_id: requestBody.project_id}]},function(error,data){
+        if(error){
+            if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Internal server error"; //send client log message
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client 
+                return;//return
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }             
+        }else{
+            if(data){
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Topic already exists";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement      
+            }else{
+                var Topic = toTopic(requestBody);
+                
+                Topic.save(function(error){
+                    if(error){
+                        if(response==null){//check for error 500
+                            response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                            response.data.log = "Internal server error"; //send client log message
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client 
+                            return;//return
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Database Error";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement                
+                        } 
+                    }else{
+                        response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                        response.data.log = "Topic added";//log message for client
+                        response.data.success = 1;//flag success
+                        response.end(JSON.stringify(response.data));//send response to client
+                        return;//return statement 
+                    }
+                })
+            }
+        }
+    });    
 }
 
 function create_file(data,message_id,callback){
@@ -176,9 +233,9 @@ function toMention(data){
 
 function toTopic(data){
     return new Topics({
-        message_id: data.message_id,
-        team_id: data.team_id,
-        topic: topic       
+        project_id: data.team_id,
+        topic: data.topic,
+        description: data.description
     });
 }
 

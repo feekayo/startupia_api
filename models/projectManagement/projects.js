@@ -12,6 +12,7 @@ var mongoose = require('mongoose'),
     shortid = require('shortid'),
     Sessions = require('../sessions'),
     Teams = require('./teams'),
+    TeamMessages = require('./teammessages'),
     Log = require('../logs');
     
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
@@ -34,7 +35,8 @@ var Projects = mongoose.model('projects',projectsSchema);
 var projectsLinkSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
     url: {type: String, require: true},
-    name: {type: String, require: true},
+    description: {type: String, require: true},
+    type: {type: String, require: true},
     created_at: {type: Date, require: true, 'default': Date.now}
 });
 
@@ -148,6 +150,7 @@ exports.create_compartment_projects = function(compartment_name,department_code,
             callback(false)
         }else{
             if(edata && Object.keys(edata).length>0){
+                console.log(edata)
                 callback(false);//abort operation
             }else{
                 Project = toProject(data)
@@ -157,21 +160,37 @@ exports.create_compartment_projects = function(compartment_name,department_code,
                         callback(false)
                     }else{
                         
-                        var tdata = {};
+                        var bdata = {};
+                        bdata.topic = "general";
+                        bdata.description = "general discussions";
+                        bdata.project_id = project_id;
+            
+                        TeamMessages.create_topic_callback(bdata,function(general){
+                            var tdata = {};
 
-                        tdata.project_id = project_id;
-                        tdata.parent_team = 0;
-                        tdata.team_name = data.project_name+" Team";
-                        tdata.startup_id = startup_id;
-                        tdata.compartment = department_code;
-
-                        Teams.create_team_callback(team_id,tdata,function(saved){
-                            if(saved){
-                                callback(true);//continue operation
+                            tdata.project_id = project_id;
+                            tdata.parent_team = 0;
+                            tdata.team_name = data.project_name+" Team";
+                            tdata.startup_id = startup_id;
+                            tdata.compartment = department_code;                            
+                            if(general){
+                                Teams.create_team_callback(team_id,tdata,function(saved){
+                                    if(saved){
+                                        callback(true);//continue operation
+                                    }else{
+                                        callback(false);
+                                    }    
+                                });                                  
                             }else{
-                                callback(false);
-                            }    
-                        })                          
+                                Teams.create_team_callback(team_id,tdata,function(saved){
+                                    if(saved){
+                                        callback(true);//continue operation
+                                    }else{
+                                        callback(false);
+                                    }    
+                                });                                   
+                            }
+                        })                        
                         
                     }
                 })
@@ -203,11 +222,20 @@ exports.create_project = function(requestBody,response){
                 return;//return statement                
             }              
         }else{
-            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
-            response.data.log = "Project Saved";//log message for client
-            response.data.success = 1;//flag success
-            response.end(JSON.stringify(response.data));//send response to client
-            return;//return statement             
+            
+            var bdata = {};
+            
+            bdata.topic = "general";
+            bdata.project_id = project_id;
+            bdata.description = "general discussions";
+            TeamMessages.create_topic_callback(bdata,function(general){            
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Project Saved";//log message for client
+                response.data.success = 1;//flag success
+                response.data.project_id = requestBody.id;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement           
+            });
         }
     })
     
@@ -413,6 +441,7 @@ function toProject(data){
 function toProjectLink(data){
     return new ProjectLinks({
         url: data.url,
-        name: data.name
+        description: data.description,
+        type: data.type
     })    
 }
