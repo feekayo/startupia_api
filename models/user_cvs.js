@@ -971,6 +971,8 @@ exports.addSkill = function(requestBody,response){
     
     response.data = {};
     
+    console.log("requestBody");
+    
     SkillsnTools.skills.findOne({skill: requestBody.name},function(error,data){
         if(error){
             if(response==null){

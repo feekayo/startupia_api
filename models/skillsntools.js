@@ -21,6 +21,7 @@ exports.skills = Skills;
 exports.tools = Tools;
 
 exports.create_skill = function(name,callback){
+    console.log("fine ball");
     Skills.findOne({skill: name},function(error,data){
         if(error){
             console.log(error)

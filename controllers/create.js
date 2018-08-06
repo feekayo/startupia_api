@@ -6,6 +6,7 @@ var Sessions = require('../models/sessions'),
     Vacancies = require('../models/vacancies'),
     Projects = require('../models/projectManagement/projects'),
     Interviews = require('../models/interview'),
+    UserCVs = require('../models/user_cvs'),
     TeamMembers = require('../models/projectManagement/teammembers'),
     Teams = require('../models/projectManagement/teams'),
     TeamMessages = require('../models/projectManagement/teammessages'),
@@ -476,10 +477,11 @@ module.exports = {
         }
     },
     
-   user_skill: function(request,response){        
-        if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.name!=undefined) && (request.body.name!="") && (request.body.proof_url!=undefined) && (request.body.proof_url!="")){
+   user_skill: function(request,response){         
+       if((request.body.user_id!=undefined) && (request.body.user_id!="") && (request.body.user_email!=undefined) && (request.body.user_email!="") && (request.body.name!=undefined) && (request.body.name!="") && (request.body.proof_url!=undefined) && (request.body.proof_url!="")){
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
+                    console.log("bleh");
                     UserCVs.addSkill(request.body,response);
                 }else{
             		response.data = {};
