@@ -222,6 +222,7 @@ module.exports = {
     			}
     		});
 		}else{
+            console.log(request.body)
 			response.data = {};
             response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
             response.data.log = "Incomplete data"; //log message for client
@@ -756,12 +757,22 @@ module.exports = {
     },
     
     create_project: function(request,response){
-        if(true){//parameter validation
+            
+        if(request.body.primary_project!="" && request.body.parent_project!="" && request.body.depth!="" && request.body.project_name!="" && request.body.startup_id!="" && request.body.user_id!="" && request.body.team_id!="" && request.body.parent_team!="" && request.body.primary_project!=undefined && request.body.parent_project!=undefined && request.body.depth!=undefined && request.body.project_name!=undefined && request.body.startup_id!=undefined && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.parent_team!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
-                    /**Privileges.project_validation(function(validated){
-                        Projects.create_project(request.body,response);
-                    })**/
+                    request.body.department_code = "HR";
+                    TeamMembers.validate_department_access(request.body,function(validated){
+                        if(validated){
+                            Projects.create_project(request.body,response);
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "User Unauthorized"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    })
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -804,12 +815,20 @@ module.exports = {
     },
     
     create_admin: function(request,response){
-       if(true){//parameter validation
+       if(request.body.user_id!="" && request.body.team_id!="" && request.body.member_id!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.member_id!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
-                    /**Privileges.validate_access(function(validated){
-                        Teams.create_team(request.body,response);
-                    })***/
+                    TeamMembers.validate_admin(request.body.team_id, request.body.user_id,function(validated){
+                        if(validated){
+                            TeamMembers.add_admin(request.body,response)
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Incomplete data"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client 	                            
+                        }
+                    })
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -852,12 +871,20 @@ module.exports = {
     },
     
     create_teammessage: function(request,response){
-        if(true){//parameter validation
+        if(request.body.user_id!="" && request.body.team_id!="" && request.body.topic_id!="" && request.body.message_id!="" && request.body.message!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.topic_id!=undefined && request.body.message_id!=undefined && request.body.message!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
-                    /**Privileges.validate_access(function(validated){
-                        Teams.create_team(request.body,response);
-                    })***/
+                    TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){
+                        if(member){
+                            TeamMessages.create_message(request.body,response);
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    });
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -900,12 +927,20 @@ module.exports = {
     },
     
     create_task_note: function(request,response){
-        if(true){//parameter validation
+        if(request.body.task_id!="" && request.body.user_id!="" && request.body.note!="" && request.body.task_id!=undefined && request.body.user_id!=undefined && request.body.note!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
-                    /**Privileges.validate_access(function(validated){
-                        Teams.create_team(request.body,response);
-                    })***/
+                    TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){
+                        if(member){
+                            Tasks.create_task_note(request.body,response);
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    })
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -923,13 +958,21 @@ module.exports = {
         }           
     },
     
-    create_projectlink: function(request,response){
-        if(true){//parameter validation
+    create_project_resource: function(request,response){
+        if(request.body.user_id!="" && request.body.project_id!="" && request.body.url!="" && request.body.description!="" &&  request.body.type!="" && request.body.user_id!=undefined && request.body.project_id!=undefined && request.body.url!=undefined && request.body.description!=undefined &&  request.body.type!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
-                    /**Privileges.validate_access(function(validated){
-                        Teams.create_team(request.body,response);
-                    })***/
+                    TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){
+                        if(member){
+                            Projects.create_project_link(request.body,response);
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    })
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -947,10 +990,37 @@ module.exports = {
         }           
     },
     
-    /**update_workflow: function(request,response){//remove from here
-        
-    },**/
-    
+    create_project_topic: function(request,response){
+        if(request.body.user_id!="" && request.body.team_id!="" && request.body.project_id!="" && request.body.topic!="" && request.body.description!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.project_id!=undefined && request.body.topic!=undefined && request.body.description!=undefined){//parameter validation
+            Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
+                if(validated){
+                    TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){
+                        if(member){
+                            TeamMessages.create_topic(request.body,response);
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    })
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client 	                    
+                }
+            })
+        }else{
+			response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 	            
+        }           
+    }
     
     
     

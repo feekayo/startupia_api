@@ -13,6 +13,7 @@ var mongoose = require('mongoose'),
     Sessions = require('../sessions'),
     Teams = require('./teams'),
     TeamMessages = require('./teammessages'),
+    TeamMembers = require('./teammembers'),
     Log = require('../logs');
     
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
@@ -34,6 +35,7 @@ var Projects = mongoose.model('projects',projectsSchema);
 
 var projectsLinkSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
+    project_id: {type: String, require: true},
     url: {type: String, require: true},
     description: {type: String, require: true},
     type: {type: String, require: true},
@@ -45,6 +47,7 @@ var ProjectLinks = mongoose.model('ProjectLinks',projectsLinkSchema);
 var prioritiesSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
     priority: {type: Number, required: true},
+    parent_project: {type: String, required: true},
     task_id: {type: String},
     project_id: {type: String}
 });
@@ -53,6 +56,100 @@ var WorkPriority = mongoose.model('WorkPriority', prioritiesSchema);
 
 var exports = module.exports;
 
+exports.fetch_work_resources = function(requestBody,response){
+    
+    response.data = {};
+    
+    ProjectLinks.find({project_id: requestBody.project_id},function(error,data){
+        if(error){
+            console.log(error);
+			if(response==null){//check for error 500
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error"; //send client log message
+				response.data.success = 0;//flag success
+				response.end(JSON.stringify(response.data));//send response to client 
+				return;//return
+			}else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Resources Fetched";//log message for client
+                response.data.success = 1;//flag success
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement 
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No resources yet!";//log message for client
+                response.data.success = 1;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                 
+            }
+        }
+    })
+}
+
+exports.fetch_priority = function(requestBody,response){
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {parent_project: requestBody.parent_project}
+    },{
+        $lookup:{
+            from: "projects",
+            foreignField: "id",
+            localField: "project_id",
+            as:"project_details"
+        }
+    },{
+        $lookup:{
+            from: "tasks",
+            foreignField: "id",
+            localField: "task_id",
+            as:"task_details"
+        }
+    }];
+    
+    WorkPriority.aggregate(aggregate,function(error,data){
+        if(error){
+            console.log(error);
+			if(response==null){//check for error 500
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error"; //send client log message
+				response.data.success = 0;//flag success
+				response.end(JSON.stringify(response.data));//send response to client 
+				return;//return
+			}else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }              
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Tasks Fetched";//log message for client
+                response.data.success = 1;//flag success
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                    
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Tasks Yet!";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                    
+            }
+        }
+    })
+}
 
 exports.create_priority = function(requestBody,response){
     response.data = {};
@@ -199,6 +296,10 @@ exports.create_compartment_projects = function(compartment_name,department_code,
     })    
 }
 
+exports.project_validation = function(requestBody,response,callback){
+    
+}
+
 exports.create_project = function(requestBody,response){
     
     response.data = {};
@@ -221,21 +322,54 @@ exports.create_project = function(requestBody,response){
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement                
             }              
-        }else{
+        }else{            
             
-            var bdata = {};
+            //create a Team            
+            var team_id = shortid.generate();
+        
+            var tdata = {};
+            tdata.project_id = requestBody.id;
+            tdata.parent_team = requestBody.parent_team;
+            tdata.team_name = requestBody.project_name+" Team";
+            tdata.startup_id = requestBody.startup_id;
+            tdata.compartment = ""; 
             
-            bdata.topic = "general";
-            bdata.project_id = project_id;
-            bdata.description = "general discussions";
-            TeamMessages.create_topic_callback(bdata,function(general){            
-                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
-                response.data.log = "Project Saved";//log message for client
-                response.data.success = 1;//flag success
-                response.data.project_id = requestBody.id;//flag success
-                response.end(JSON.stringify(response.data));//send response to client
-                return;//return statement           
-            });
+            Teams.create_team_callback(team_id,tdata,function(created){
+                if(created){
+                    
+                    TeamMembers.add_member_departments(requestBody.user_id,requestBody.team_id,true,function(added){
+                       if(added){
+                            var bdata = {};
+
+                            bdata.team_id = team_id;
+                            bdata.topic = "general";
+                            bdata.project_id = requestBody.id;
+                            bdata.description = "general discussions";
+                            TeamMessages.create_topic_callback(bdata,function(general){            
+                                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                                response.data.log = "Project Saved";//log message for client
+                                response.data.success = 1;//flag success
+                                response.data.project_id = requestBody.id;//flag success
+                                response.end(JSON.stringify(response.data));//send response to client
+                                return;//return statement           
+                            });                            
+                       }else{
+                        response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                        response.data.log = "Something went wrong!";//log message for client
+                        response.data.success = 0;//flag success
+                        response.end(JSON.stringify(response.data));//send response to client
+                        return;//return statement                             
+                       } 
+                        
+                    });                   
+                }else{
+                    response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                    response.data.log = "Something went wrong!";//log message for client
+                    response.data.success = 0;//flag success
+                    response.end(JSON.stringify(response.data));//send response to client
+                    return;//return statement                      
+                }
+            })
         }
     })
     
@@ -440,6 +574,7 @@ function toProject(data){
 
 function toProjectLink(data){
     return new ProjectLinks({
+        project_id: data.project_id,
         url: data.url,
         description: data.description,
         type: data.type

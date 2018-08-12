@@ -159,6 +159,22 @@ let express = require('express'),
 
     router.post('/create/department_privilege/:session_id',create.compartment_create_privilege);//for creating privileged access within a department
 
+    router.get('/validate_department_workstation_access/:session_id',read.compartment_workstation_access);//for accessing compartment workstation
 
+    router.get('/project_topics/:session_id',read.project_topics);//for fetching a project's topics
+    router.get('/project_workflow/:session_id',read.project_workflow);//for fetching a project's topics
+    router.get('/project_resources/:session_id',read.project_resources);//for fetching a project's topics
+    router.get('/project_topic_messages/:session_id',read.project_topic_messages);//for fetching a project's topics
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    router.post('/create/topic/:session_id',create.create_project_topic);//for creating topics in workspaces **
+    router.post('/create/resource/:session_id',create.create_project_resource);//for creating resources in workspaces**
+    router.post('/create/task_note/:session_id',create.create_task_note);//for creating task notes **
+    router.post('/create/topic_message/:session_id',create.create_teammessage)//for creating messages for a topic **
+    //router.post()//creating tasks 
+    router.post('/create/team_members/:session_id',create.create_teammember)//creating team members **
+    router.post('/create/team_admin/:session_id',create.create_admin)//creating admin ***
+    router.post('/create/project/:session_id',create.create_project)//creating sub project **
+    
 //}
 module.exports = router;

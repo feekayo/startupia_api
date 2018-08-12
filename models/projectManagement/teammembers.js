@@ -1,31 +1,18 @@
-/**
-    team_members #done by parent team leader  
-    id
-    team_id
-    admin: true/false
-    user_id
-    project_id
-    compartment
-    timestamp
-**/
-
 var mongoose = require('mongoose'),
     shortid = require('shortid'),
     Sessions = require('../sessions'),
-    Log = require('../logs');
+    Log = require('../logs'),
+    Privileges = require('../privileges'),
+    Teams = require('./teams');
     
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
 var teammembersSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
     user_id: {type: String, require: 'true'},
-/** project_id: {type: String, require: 'true'},
-    startup_id: {type: String, require: 'true'},**/
     created_at: {type: Date, require: 'true', 'default': Date.now},
     team_id: {type: String, require: 'true'},
-    admin: {type: Boolean, require: 'true'},
-    //compartment: {type: String, require: 'true'}
-    
+    admin: {type: Boolean, require: 'true'}    
 });
 
 var Team_Members = mongoose.model('team_members',teammembersSchema);
@@ -38,6 +25,43 @@ var onlineStatus = new mongoose.Schema({
 });
 
 var exports = module.exports;
+
+exports.validate_department_access = function(requestBody,callback){
+
+    Teams.fetch_compartment_team_id(requestBody.startup_id,requestBody.department_code,function(team_id){
+        
+        if(team_id){
+            Team_Members.findOne({$and: [{user_id: requestBody.user_id},{team_id: team_id}]},function(error,data){
+                if(error){
+                    callback(false);
+                }else{
+                    if(data && Object.keys(data).length>0){
+                        callback(true);
+                    }else{
+                        Privileges.validate_root_access(requestBody.department_code,requestBody.user_email,requestBody.startup_id,function(access){
+                            if(access){
+                                var TeamMember = toMember2(requestBody.user_id,team_id,true);
+                                
+                                TeamMember.save(function(error){
+                                    if(error){
+                                        callback(false);
+                                    }else{
+                                        callback(true);
+                                    }
+                                })
+                            }else{
+                                callback(false);
+                            }
+                        });
+                    }
+                }
+            });            
+        }else{
+            callback(false);    
+        }
+    })
+
+} 
 
 exports.validate_membership = function(team_id,user_id,callback){
     Team_Members.findOne({$and: [{team_id: team_id},{user_id: user_id}]},function(error,data){
@@ -129,6 +153,27 @@ exports.add_admin = function(requestBody,response){
         }
     })
 }
+
+/**
+
+exports.add_admin = function(requestBody,response){
+    
+    response.data = {};
+    
+    Team_Members.update({id: requestBody.member_id},{$set: {admin: true}},function(error){
+        if(error){
+			if(response==null){//check for error 500
+				callback(false);
+			}else{
+                callback(false);              
+            }                          
+        }else{
+            callback(true);            
+        }
+    })
+}
+
+**/
 
 exports.remove_member = function(requestBody,response){
     response.data = {};

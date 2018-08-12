@@ -216,7 +216,9 @@ exports.create_personnel = function(requestBody,response){
                                                     response.end(JSON.stringify(response.data));//send message to user                                        
                                                 }
                                             }else{
-
+                                                
+                                                var email = requestBody.personnel_email;
+                                                
                                                 var request = sendgrid.emptyRequest({
                                                   method: 'POST',
                                                   path: '/v3/mail/send',

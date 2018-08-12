@@ -906,6 +906,148 @@ var get_params = url.parse(request.url,true);
             response.data.success = 0;//success variable for client
             response.end(JSON.stringify(response.data));//send response to client 			
 		}
-	}
+	},
+    
+    compartment_workstation_access: function(request,response){//check if a user has access to a project workstation
+        
+        var get_params = url.parse(request.url,true);
+
+		if(get_params.query.user_id!="" && get_params.query.startup_id!="" && get_params.query.user_email!="" && get_params.query.department_code!="" && get_params.query.user_id!=undefined && get_params.query.startup_id!=undefined &&  get_params.query.user_email!=undefined && get_params.query.department_code!=undefined){
+            
+			Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+                    TeamMembers.validate_department_access(get_params.query,function(access){
+                        if(access){
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Granted!"; //log message for client
+                            response.data.success = 1;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    });  
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid Session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client                                                        
+                }
+            });
+            
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}        
+        
+        
+    },
+    
+    project_topics: function(request,response){//check if a user has access to a project workstation
+        
+        var get_params = url.parse(request.url,true);
+		
+        if(get_params.query.user_id!="" && get_params.query.project_id!="" && get_params.query.user_id!=undefined && get_params.query.project_id!=undefined){
+			Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+                    TeamMessages.fetch_project_topics(get_params.query,response);  
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid Session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client                                                        
+                }
+            });
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}        
+        
+        
+    },
+    
+    project_workflow: function(request,response){//for fetching a project's workflow
+        var get_params = url.parse(request.url,true);
+		
+        if(get_params.query.user_id!="" && get_params.query.project_id!="" && get_params.query.user_id!=undefined && get_params.query.project_id!=undefined){
+			Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+                     Projects.fetch_priority(get_params.query,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid Session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client                                                        
+                }
+            });
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}         
+    },
+    
+    project_resources: function(request,response){//for fetching a project's resources
+        var get_params = url.parse(request.url,true);
+		
+        if(get_params.query.user_id!="" && get_params.query.project_id!="" && get_params.query.user_id!=undefined && get_params.query.project_id!=undefined){
+			Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+                    Projects.fetch_work_resources(get_params.query,response); 
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid Session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client                                                        
+                }
+            });
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}         
+    },
+    
+    project_topic_messages: function(request,response){//for fetching a project topic messages
+        var get_params = url.parse(request.url,true);
+		
+        if(get_params.query.user_id!="" && get_params.query.topic_id!="" && get_params.query.page_number!="" && get_params.query.user_id!=undefined && get_params.query.topic_id!=undefined && get_params.query.page_number!=undefined){
+			Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+                    TeamMessages.fetch_topic_messages(get_params.query,response);
+                }else{
+                    response.data = {};
+                    response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                    response.data.log = "Invalid Session"; //log message for client
+                    response.data.success = 2;//success variable for client
+                    response.end(JSON.stringify(response.data));//send response to client                                                        
+                }
+            });
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}         
+    }
 
 } 

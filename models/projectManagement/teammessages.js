@@ -9,8 +9,7 @@ var messagesSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true},
     team_id: {type: String, require: true},
     user_id: {type: String, require: true},
-    topic: {type: String, require: true},
-    private: {type: Boolean, require: true},
+    topic_id: {type: String, require: true},
     message: {type: String, require: true},
     timestamp: {type: Date, 'default': Date.now},
 });
@@ -40,6 +39,7 @@ var Mentions = mongoose.model('team_mentions',mentionsSchema);
 var filesSchema = new mongoose.Schema({
     id: {type: String, unique: true, require: true, 'default': shortid.generate},
     team_id: {type: String, require: true},
+    message_id: {type: String, require: true},
     file: {
         bucket: {type: String, require: true},
         object: {type: String, require: true}
@@ -51,10 +51,64 @@ var Files = mongoose.model('team_files',filesSchema);
 
 var exports = module.exports;
 
-exports.create_message = function(requestBody,response){
-       
-        var message_id = shortid.generate();
+exports.fetch_topic_messages = function(requestBody,response){
+    
+    response.data = {};
+    
+    var aggregate = [{
+        $match: {topic_id: requestBody.topic_id}    
+    },{
+        $lookup: {
+            from: "team_files",
+            localField: "id",
+            foreignField: "message_id",
+            as: "file_attached"
+        }
+    },{
+        $sort:{"timestamp": -1}
+    },{
+        $skip: (requestBody.page_number-1) * 100
+    },{
+        $limit: 100
+    }];
+    
+    
+    Messages.aggregate(aggregate,function(error,data){
+        if(error){
+            if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Internal server error"; //send client log message
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client 
+                return;//return
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Data Fetched";//log message for client
+                response.data.data = data;
+                response.data.success = 1;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                  
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Data";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                  
+            }
+        }
+    })
+}
 
+exports.create_message = function(requestBody,response){
+     
         var Message = toMessage(requestBody,topic_id,message_id);
 
         Message.save(function(error){
@@ -197,6 +251,42 @@ exports.create_topic = function(requestBody,response){
     });    
 }
 
+exports.fetch_project_topics = function(requestBody,response){
+    
+    Topics.find({project_id: requestBody.project_id},function(error,data){
+        if(error){
+            if(response==null){//check for error 500
+                response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+                response.data.log = "Internal server error"; //send client log message
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client 
+                return;//return
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }             
+        }else{
+            if(data && Object.keys(data).length>0){
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Data fetched";//log message for client
+                response.data.success = 1;//flag success
+                response.data.data = data;
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement   
+            }else{
+                response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Data";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                   
+            }
+        }
+    })
+}
+
 function create_file(data,message_id,callback){
     var File = toFile(data,message_id);
     
@@ -218,7 +308,6 @@ function toMessage(data,topic_id,message_id){
         team_id: data.team_id,
         user_id: data.user_id,
         topic_id: topic_id,
-        private: data.private,
         message: data.message        
     });
 }
@@ -233,7 +322,7 @@ function toMention(data){
 
 function toTopic(data){
     return new Topics({
-        project_id: data.team_id,
+        project_id: data.project_id,
         topic: data.topic,
         description: data.description
     });

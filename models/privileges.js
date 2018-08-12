@@ -390,7 +390,10 @@ exports.validate_fm_access = function(email,startup_id,response){
     });
 }
 exports.validate_root_access = function(compartment,user_email,company_id,callback){
-    Privileges.findOne({$and:[{compartment: compartment},{user_email:user_email},{company_id:company_id},{access_level: 0}]},function(error,data){
+    
+    var access_level = 0;
+    
+    Privileges.findOne({$or: [{$and:[{compartment: compartment},{user_email:user_email},{company_id:company_id},{access_level: access_level}]},{$and: [{user_email:user_email},{compartment: "ROOT"}]}]},function(error,data){
         if(error){
             console.log(error);
             callback(false);
@@ -399,7 +402,6 @@ exports.validate_root_access = function(compartment,user_email,company_id,callba
                 console.log(data);
                 callback(true);
             }else{
-                //console.log("No Bueno");
                 callback(false);
             }
         }
