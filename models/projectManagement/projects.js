@@ -56,6 +56,49 @@ var WorkPriority = mongoose.model('WorkPriority', prioritiesSchema);
 
 var exports = module.exports;
 
+exports.add_priority_callback = add_priority_callback;
+    
+function add_priority_callback (requestBody,callback){
+    
+    if(requestBody.parent_project!="" && requestBody.parent_project!=0){
+
+        response.data = {};
+
+        var aggregate = [{
+            $match: {parent_project: requestBody.parent_project}
+        },{
+            $sort: {"priority": -1}
+        },{
+            $limit: 1
+        }];
+
+        WorkPriority.aggregate(aggregate,function(error,data){
+            if(error){
+                callback(false);
+            }else{
+                if(data && Object.keys(data).length>0){
+
+                    var priority = data.priority;
+
+                    var Priority = toPriority(requestBody,priority);
+
+                    Priority.save(function(error){
+                        if(error){
+                            callback(false);
+                        }else{
+                            callback(true);
+                        }
+                    });
+                }else{
+                    callback(false);
+                }
+            }
+        });
+    }else{
+        callback(true);
+    }
+}
+
 exports.fetch_work_resources = function(requestBody,response){
     
     response.data = {};
@@ -324,52 +367,59 @@ exports.create_project = function(requestBody,response){
             }              
         }else{            
             
-            //create a Team            
-            var team_id = shortid.generate();
-        
-            var tdata = {};
-            tdata.project_id = requestBody.id;
-            tdata.parent_team = requestBody.parent_team;
-            tdata.team_name = requestBody.project_name+" Team";
-            tdata.startup_id = requestBody.startup_id;
-            tdata.compartment = ""; 
-            
-            Teams.create_team_callback(team_id,tdata,function(created){
-                if(created){
-                    
-                    TeamMembers.add_member_departments(requestBody.user_id,requestBody.team_id,true,function(added){
-                       if(added){
-                            var bdata = {};
+            requestBody.project_id = requestBody.id
+            add_priority_callback(requestBody,function(added){
+                if(added){
+                    //create a Team           
+                    var team_id = shortid.generate();
+                    var tdata = {};
+                    tdata.project_id = requestBody.id;
+                    tdata.parent_team = requestBody.parent_team;
+                    tdata.team_name = requestBody.project_name+" Team";
+                    tdata.startup_id = requestBody.startup_id;
+                    tdata.compartment = ""; 
 
-                            bdata.team_id = team_id;
-                            bdata.topic = "general";
-                            bdata.project_id = requestBody.id;
-                            bdata.description = "general discussions";
-                            TeamMessages.create_topic_callback(bdata,function(general){            
+                    Teams.create_team_callback(team_id,tdata,function(created){
+                        if(created){
+
+                            TeamMembers.add_member_departments(requestBody.user_id,requestBody.team_id,true,function(added){
+                               if(added){
+                                    var bdata = {};
+
+                                    bdata.team_id = team_id;
+                                    bdata.topic = "general";
+                                    bdata.project_id = requestBody.id;
+                                    bdata.description = "general discussions";
+                                    TeamMessages.create_topic_callback(bdata,function(general){            
+                                        response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                                        response.data.log = "Project Saved";//log message for client
+                                        response.data.success = 1;//flag success
+                                        response.data.project_id = requestBody.id;//flag success
+                                        response.end(JSON.stringify(response.data));//send response to client
+                                        return;//return statement           
+                                    });                            
+                               }else{
                                 response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
-                                response.data.log = "Project Saved";//log message for client
-                                response.data.success = 1;//flag success
-                                response.data.project_id = requestBody.id;//flag success
+                                response.data.log = "Something went wrong!";//log message for client
+                                response.data.success = 0;//flag success
                                 response.end(JSON.stringify(response.data));//send response to client
-                                return;//return statement           
-                            });                            
-                       }else{
-                        response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
-                        response.data.log = "Something went wrong!";//log message for client
-                        response.data.success = 0;//flag success
-                        response.end(JSON.stringify(response.data));//send response to client
-                        return;//return statement                             
-                       } 
-                        
-                    });                   
+                                return;//return statement                             
+                               } 
+
+                            });                   
+                        }else{
+                            response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                            response.data.log = "Something went wrong!";//log message for client
+                            response.data.success = 0;//flag success
+                            response.end(JSON.stringify(response.data));//send response to client
+                            return;//return statement                      
+                        }
+                    });                    
                 }else{
-                    response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
-                    response.data.log = "Something went wrong!";//log message for client
-                    response.data.success = 0;//flag success
-                    response.end(JSON.stringify(response.data));//send response to client
-                    return;//return statement                      
+                    
                 }
             })
+           
         }
     })
     
@@ -579,4 +629,13 @@ function toProjectLink(data){
         description: data.description,
         type: data.type
     })    
+}
+
+function toPriority(data,priority){
+    return new WorkPriority({
+        priority: priority,
+        parent_project: data.parent_project,
+        task_id: data.task_id,
+        project_id: data.project_id
+    });
 }

@@ -815,7 +815,7 @@ module.exports = {
     },
     
     create_admin: function(request,response){
-       if(request.body.user_id!="" && request.body.team_id!="" && request.body.member_id!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.member_id!=undefined){//parameter validation
+       if(request.body.user_id!="" && request.body.team_id!="" && request.body.admin_user_id!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.admin_user_id!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
                     TeamMembers.validate_admin(request.body.team_id, request.body.user_id,function(validated){
@@ -871,7 +871,7 @@ module.exports = {
     },
     
     create_teammessage: function(request,response){
-        if(request.body.user_id!="" && request.body.team_id!="" && request.body.topic_id!="" && request.body.message_id!="" && request.body.message!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.topic_id!=undefined && request.body.message_id!=undefined && request.body.message!=undefined){//parameter validation
+        if(request.body.user_id!="" && request.body.team_id!="" && request.body.topic_id!="" && request.body.message!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.topic_id!=undefined && request.body.message!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
                     TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){
@@ -903,12 +903,20 @@ module.exports = {
     },
     
     create_task: function(request,response){
-        if(true){//parameter validation
+        if(request.body.user_id!="" && request.body.team_id!="" && request.body.task_name!="" && request.body.description!="" && request.body.project_id!="" && request.body.startup_id!="" && request.body.worker_id!="" && request.body.deadline!="" && request.body.user_id!=undefined && request.body.team_id!=undefined && request.body.task_name!=undefined && request.body.description!=undefined && request.body.project_id!=undefined && request.body.startup_id!=undefined && request.body.worker_id!=undefined && request.body.deadline!=undefined){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
-                    /**Privileges.validate_access(function(validated){
-                        Teams.create_team(request.body,response);
-                    })***/
+                    TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){
+                        if(member){
+                            Tasks.create_task(request.body,response);
+                        }else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "Access Denied!"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+                    });
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -940,7 +948,7 @@ module.exports = {
                             response.data.success = 0;//success variable for client
                             response.end(JSON.stringify(response.data));//send response to client                             
                         }
-                    })
+                    });
                 }else{
                     response.data = {};
                     response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
@@ -959,7 +967,7 @@ module.exports = {
     },
     
     create_project_resource: function(request,response){
-        if(request.body.user_id!="" && request.body.project_id!="" && request.body.url!="" && request.body.description!="" &&  request.body.type!="" && request.body.user_id!=undefined && request.body.project_id!=undefined && request.body.url!=undefined && request.body.description!=undefined &&  request.body.type!=undefined){//parameter validation
+        if(request.body.team_id!="" && request.body.user_id!="" && request.body.project_id!="" && request.body.url!="" && request.body.description!="" &&  request.body.type!="" && request.body.user_id!=undefined && request.body.project_id!=undefined && request.body.url!=undefined && request.body.description!=undefined &&  request.body.type!=undefined && request.body.team_id!=""){//parameter validation
             Sessions.validate(request.params.session_id,request.body.user_id,function(validated){
                 if(validated){
                     TeamMembers.validate_membership(request.body.team_id,request.body.user_id,function(member){

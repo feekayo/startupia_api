@@ -165,16 +165,17 @@ let express = require('express'),
     router.get('/project_workflow/:session_id',read.project_workflow);//for fetching a project's topics
     router.get('/project_resources/:session_id',read.project_resources);//for fetching a project's topics
     router.get('/project_topic_messages/:session_id',read.project_topic_messages);//for fetching a project's topics
-
+    router.get('/task_notes/:session_id',read.project_topic_messages);//for fetching a project's topics
+    router.get('/team_members/:session_id',read.fetch_team);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    router.post('/create/topic/:session_id',create.create_project_topic);//for creating topics in workspaces **
-    router.post('/create/resource/:session_id',create.create_project_resource);//for creating resources in workspaces**
-    router.post('/create/task_note/:session_id',create.create_task_note);//for creating task notes **
-    router.post('/create/topic_message/:session_id',create.create_teammessage)//for creating messages for a topic **
-    //router.post()//creating tasks 
-    router.post('/create/team_members/:session_id',create.create_teammember)//creating team members **
-    router.post('/create/team_admin/:session_id',create.create_admin)//creating admin ***
-    router.post('/create/project/:session_id',create.create_project)//creating sub project **
+    router.put('/create/topic/:session_id',create.create_project_topic);//for creating topics in workspaces **
+    router.put('/create/resource/:session_id',create.create_project_resource);//for creating resources in workspaces**
+    router.put('/create/task_note/:session_id',create.create_task_note);//for creating task notes **
+    router.put('/create/topic_message/:session_id',create.create_teammessage)//for creating messages for a topic **
+    router.put('/create/task/:session_id',create.create_task)//creating tasks 
+    router.put('/create/team_members/:session_id',create.create_teammember)//creating team members **
+    router.put('/create/team_admin/:session_id',create.create_admin)//creating admin ***
+    router.put('/create/project/:session_id',create.create_project)//creating sub project **
     
 //}
 module.exports = router;

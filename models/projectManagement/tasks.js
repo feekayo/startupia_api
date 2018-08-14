@@ -11,19 +11,21 @@
 var mongoose = require('mongoose'),
     shortid = require('shortid'),
     Sessions = require('../sessions'),
+    Projects = require('./projects')
     Log = require('../logs');
     
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
 var tasksSchema = new mongoose.Schema({
-    id: {type: String, unique: true, require: true, 'default': shortid.generate},
-    user_id: {type: String, require: 'true'},
+    id: {type: String, unique: true, require: true},
+    creator_id: {type: String, require: 'true'},
+    task_name: {type: String, require: 'true'},
     description: {type: String, require: 'true'},
     project_id: {type: String, require: 'true'},
     startup_id: {type: String, require: 'true'},
     created_at: {type: Date, require: 'true'},
     updated_at: {type: Date, 'default': Date.now},
-    team_id: {type: String, require: 'true'},
+    user_id: {type: String, require: 'true'},
     deadline: {type: Date, require: 'true'},
     status: {type: String, require: 'true', 'default': 'fresh'} //fresh, ongoing, completed
 });
@@ -46,6 +48,8 @@ exports.create_task = function(requestBody,response){
     
     response.data = {};
     
+    requestBody.id = shortid.generate();
+    
     var Task = toTask(requestBody);
     
     Task.save(function(error){
@@ -65,12 +69,25 @@ exports.create_task = function(requestBody,response){
             }     
         }else{
             
-            //log task creation
-            response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-            response.data.log = "Task Added";//log message for client
-            response.data.success = 1;//flag success
-            response.end(JSON.stringify(response.data));//send response to client
-            return;//return statement                
+            requestBody.task_id = requestBody.id;
+            
+            Projects.add_priority_callback(requestBody,function(added){
+                if(added){
+                    //log task creation
+                    response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                    response.data.log = "Task added to Workflow";//log message for client
+                    response.data.success = 1;//flag success
+                    response.end(JSON.stringify(response.data));//send response to client
+                    return;//return statement
+                }else{
+                    //log task creation
+                    response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
+                    response.data.log = "Something went wrong";//log message for client
+                    response.data.success = 0;//flag success
+                    response.end(JSON.stringify(response.data));//send response to client
+                    return;//return statement                    
+                }
+            });
         }
     })
 }
@@ -91,7 +108,7 @@ exports.update_task_status = function(requestBody,response){
     
     response.data = {};
     
-    Tasks.findOne({id: requestBody.task_id},function(error,data){ //find task
+    Tasks.findOne({$and: [{id: requestBody.task_id},{user_id: requestBody.user_id}]},function(error,data){ //find task
         if(error){
 			if(response==null){//check for error 500
 				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
@@ -107,7 +124,7 @@ exports.update_task_status = function(requestBody,response){
                 return;//return statement                
             }            
         }else{
-            if(data){ //if task is found
+            if(data && Object.keys(data).length>0){ //if task is found
                 //save task note first
                 data.status = requestBody.status; //update status
                 
@@ -127,19 +144,16 @@ exports.update_task_status = function(requestBody,response){
                             return;//return statement                
                         }                        
                     }else{
-                        
-                        //log task saving
-                        
                         response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
                         response.data.log = "Task Updated";//log message for client
-                        response.data.success = 0;//flag success
+                        response.data.success = 1;//flag success
                         response.end(JSON.stringify(response.data));//send response to client
                         return;//return statement                         
                     }       
                 })
             }else{
                 response.writeHead(201,{'Content-Type':'application/json'});//setcontent resolution variables
-                response.data.log = "Task not found";//log message for client
+                response.data.log = "Operation not allowed!";//log message for client
                 response.data.success = 0;//flag success
                 response.end(JSON.stringify(response.data));//send response to client
                 return;//return statement                   
@@ -401,16 +415,93 @@ exports.delete_task_note = function(requestBody,response){
 }
 
 exports.read_task_notes = function(requestBody,response){
+    response.data = {};
     
+    var aggregate = [{
+        $match: {task_id: requestBody.task_id}
+    },{
+        $lookup: {
+            from: "users",
+            foreignField: "id",
+            localField: "user_id",
+            as: "user_data" 
+        }
+    },{
+        $project: {
+            task_id: 1,
+            note: 1,
+            user_data: {
+            	id: 1,
+                fullname: 1,
+                dp: 1,
+                location: 1,
+                bio: 1                   
+            }
+        }        
+    }];
+    
+    TaskNotes.aggregate(aggregate,function(error,data){//fetch data
+        if(error){
+			if(response==null){//check for error 500
+				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables
+				response.data.log = "Internal server error"; //send client log message
+				response.data.success = 0;//flag success
+				response.end(JSON.stringify(response.data));//send response to client 
+				return;//return
+			}else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Database Error";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                
+            }              
+        }else{
+            
+            if(data && Object.keys(data).length>0){
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "Data Fetched";//log message for client
+                response.data.data = data;
+                response.data.success = 1;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                              
+            }else{
+                response.writeHead(200,{'Content-Type':'application/json'});//setcontent resolution variables
+                response.data.log = "No Notes";//log message for client
+                response.data.success = 0;//flag success
+                response.end(JSON.stringify(response.data));//send response to client
+                return;//return statement                              
+            }             
+        }        
+    })
+}
+
+exports.update_task_worker = function(requestBody,response){
+    
+    response.data = {};
+    
+    Tasks.findOne({},function(error,data){
+        if(error){
+            
+        }else{
+            if(data){
+                
+            }else{
+                
+            }
+        }
+    })
 }
 
 function toTask(data){
     return new Tasks({
-        user_id: data.user_id,
+        id: data.id,
+        creator_id: data.user_id,
+        task_name: data.task_name,
+        description: data.description,
         project_id: data.project_id,
         startup_id: data.startup_id,
         created_at: Date.now(),
-        team_id: data.team_id,
+        user_id: data.worker_id,
         deadline: data.deadline
     })
 }

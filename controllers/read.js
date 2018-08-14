@@ -908,6 +908,45 @@ var get_params = url.parse(request.url,true);
 		}
 	},
     
+    fetch_team: function(request,response){//fetch all the staffers of a compartment team
+		var get_params = url.parse(request.url,true);
+
+		if(get_params.query.user_id!="" && get_params.query.team_id!="" && get_params.query.user_id!=undefined && get_params.query.team_id!=undefined){
+            Sessions.validate(request.params.session_id,get_params.query.user_id,function(validated){
+                if(validated){
+					TeamMembers.fetch_team_members(request.body.team_id,function(team_members){
+						if(team_members){
+				            response.data = {};
+				            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+				            response.data.log = "Team Fetched"; //log message for client
+				            response.data.data = team_members;
+				            response.data.success = 1;//success variable for client
+				            response.end(JSON.stringify(response.data));//send response to client							
+						}else{
+                            response.data = {};
+                            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+                            response.data.log = "No Data"; //log message for client
+                            response.data.success = 0;//success variable for client
+                            response.end(JSON.stringify(response.data));//send response to client                             
+                        }
+					})
+				}else{
+		            response.data = {};
+		            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+		            response.data.log = "Invalid session"; //log message for client
+		            response.data.success = 2;//success variable for client
+		            response.end(JSON.stringify(response.data));//send response to client 					
+				}
+			})
+		}else{
+            response.data = {};
+            response.writeHead(201,{'Content-Type':'application/json'});//server response set to json format
+            response.data.log = "Incomplete data"; //log message for client
+            response.data.success = 0;//success variable for client
+            response.end(JSON.stringify(response.data));//send response to client 			
+		}
+	},    
+    
     compartment_workstation_access: function(request,response){//check if a user has access to a project workstation
         
         var get_params = url.parse(request.url,true);

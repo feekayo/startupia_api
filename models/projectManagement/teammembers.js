@@ -129,7 +129,7 @@ exports.add_admin = function(requestBody,response){
     
     response.data = {};
     
-    Team_Members.update({id: requestBody.member_id},{$set: {admin: true}},function(error){
+    Team_Members.update({user_id: requestBody.admin_user_id},{$set: {admin: true}},function(error){
         if(error){
 			if(response==null){//check for error 500
 				response.writeHead(500,{'Content-Type':'application/json'});//set content resolution variables

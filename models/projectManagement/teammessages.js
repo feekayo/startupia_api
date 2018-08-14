@@ -109,6 +109,8 @@ exports.fetch_topic_messages = function(requestBody,response){
 
 exports.create_message = function(requestBody,response){
      
+        var message_id = shortid.generate();
+    
         var Message = toMessage(requestBody,topic_id,message_id);
 
         Message.save(function(error){
@@ -198,6 +200,9 @@ exports.create_topic_callback = function(requestBody,callBack){
 }
 
 exports.create_topic = function(requestBody,response){
+    
+    response.data = {};
+    
     Topics.findOne({$and: [{topic: requestBody.topic},{project_id: requestBody.project_id}]},function(error,data){
         if(error){
             if(response==null){//check for error 500
