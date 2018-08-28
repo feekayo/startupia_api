@@ -12,7 +12,20 @@ module.exports = {
     index: function(request,response) { //index link
         response.send("Welcome to Startupia API"); //show welcome message
     },
-    
+
+    get: function(req, response){
+        //user automatically injected into the response
+        // by the middleware, all needed authorization
+        // can then be done as per request basis
+
+        const user = req.user;
+        const data = {};
+
+        data.log = "Login Success";
+        data.success = 1;
+        data.data = user;
+        return response.json(data);
+    },
 
     login: function(request,response){ //login function
         let ip = request.connection.remoteAddress || request.headers['x-forwarded-for'] || request.socket.remoteAddress || request.connection.socket.remoteAddress; //check source IP Address
