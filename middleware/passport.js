@@ -1,6 +1,11 @@
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const {users} = require('../models');
+const users = require('../models/users');
+/**
+ * Function to parse error
+ * */
+const pe = require('parse-error');
+
 
 module.exports = function (passport){
     const opts = {};
@@ -8,14 +13,16 @@ module.exports = function (passport){
     opts.secretOrKey = CONFIG.jwt_encryption;
 
     passport.use(new JwtStrategy(opts, async (jwt_payload, done) =>{
-        let err, user;
-        [err, user] = await To(users.findById(jwt_payload.user_id));
 
-        if(err) return done(err, false);
-        if(user) {
-            return done(null, user);
-        }else{
-            return done(null, false);
-        }
+        users.findById(jwt_payload.user_id,(error, data)=>{
+
+            if(error) return done(pe[error], false);
+
+            if(data) {
+                return done(null, data);
+            }else{
+                return done(null, false);
+            }
+        });
     }));
 };
