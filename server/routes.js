@@ -9,6 +9,15 @@ let express = require('express'),
     update = require('../controllers/update'),
     remove = require('../controllers/delete');
 
+//require passport for authentication
+const passport         = require('passport');
+
+/**
+ * middleware for using passport to protect routes
+ * and parse the user making request into the request
+ * object
+ * */
+require('../middleware/passport')(passport);
 
 //module.exports = function (app) {
     // console.log('I get here')
@@ -17,6 +26,12 @@ let express = require('express'),
     router.use('/earning', fm_earning);
     //accounts routes
     router.get('/', accounts.index);//hello message
+
+    //add the middle ware to routes that require user authentication,
+    // and the requesting user will then be injected into the request
+    // by the middleware for use in the controller, all necessary
+    // authorization checks can then be handled by the controller
+    router.get('/user', passport.authenticate('jwt', {session:false}), accounts.get);//login route
     router.get('/user/login', accounts.login);//login route
     router.put('/user/register', accounts.signup)//signup route
     router.get('/user/confirm/:uniq_id', accounts.confirm);//account confirmation route
