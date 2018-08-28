@@ -1,4 +1,11 @@
 'use strict';
+require('dotenv').config();//instantiate environment variables
+
+//require the application configurations
+require('./commons/config');
+
+
+const passport     = require('passport');
 const express = require('express');
 const path = require('path');
 //const favicon = require('serve-favicon');
@@ -10,6 +17,9 @@ const index = require('./server/routes');
 const users = require('./routes/users');
 
 const app = express();
+
+//initialise Passport
+app.use(passport.initialize());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
