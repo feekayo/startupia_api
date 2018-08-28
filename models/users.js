@@ -1,7 +1,8 @@
 var mongoose = require("mongoose"),//requirements
 	shortid = require("shortid"),
-	Sessions = require("./sessions")
+	Sessions = require("./sessions"),
     Log = require('./logs');
+const jwt = require('jsonwebtoken');
 
 var sendgrid = require('sendgrid')(process.env.SENDGRID_API_KEY);
 
@@ -23,6 +24,15 @@ var usersSchema = new mongoose.Schema({
 });
 
 var Users = mongoose.model('Users',usersSchema);//intialize data model instance
+
+/**
+ * a prototype function to generate a
+ * jwt for a user
+ * */
+Users.prototype.getJWT = function () {
+    let expiration_time = parseInt(CONFIG.jwt_expiration);
+    return jwt.sign({user_id: this.id}, CONFIG.jwt_encryption, {expiresIn: expiration_time});
+};
 
 var tempUsersSchema = new mongoose.Schema({
 	id: {type: String, unique: true},
@@ -102,15 +112,16 @@ exports.login = function(requestBody,response){
                                 task_id = null,//no task involved
                                 project_id = null,//no project involved
                                 compartment = "Accounts",
-                                private = true;
+                                _private = true;
                             console.log("new session");
-                            Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,private,function(logged){//log confirmation
+                            Log.create_log_message(message,user_email,startup_id,task_id,project_id,compartment,_private,function(logged){//log confirmation
                                 console.log("NYQUIL");
                                 response.writeHead(201,{'Content-Type':'application/json'});
                                 response.data.log = "Login Success";
                                 response.data.success = 1;
                                 response.data.data = data;
                                 response.data.session_id = session_id;
+                                response.data.token = data.getJWT();
                                 response.end(JSON.stringify(response.data));
                                 return;                                
                             });
@@ -340,6 +351,10 @@ exports.edit = function(requestBody,response){
 		}
 	});
 }
+
+exports.findById = function(id, callback){
+	return Users.findOne({id: id},callback);
+};
     
 
 
