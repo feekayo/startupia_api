@@ -1,0 +1,58 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js install
+
+PATH: 
+  C:\Users\odaib\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\odaib\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git\cmd;C:\Program Files\nodejs;C:\Program Files\PuTTY;C:\wamp64\bin\php\php7.1.16;C:\ProgramData\ComposerSetup\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\Program Files (x86)\Yarn\bin;C:\JMeter\bin;C:\Program Files\Java\jre1.8.0_181\bin;C:\Users\odaib\AppData\Local\Microsoft\WindowsApps;C:\Users\odaib\AppData\Roaming\npm;C:\Users\odaib\AppData\Roaming\Composer\vendor\bin;C:\Program Files\PostgreSQL\10\bin;C:\Users\odaib\AppData\Local\Yarn\bin;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl
+
+Yarn version: 
+  1.9.2
+
+Node version: 
+  8.11.2
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: getaddrinfo ENOTFOUND registry.yarnpkg.com registry.yarnpkg.com:443
+      at errnoException (dns.js:50:10)
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:92:26)
+
+npm manifest: 
+  {
+    "name": "startupia",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+      "start": "node ./bin/www"
+    },
+    "dependencies": {
+      "debug": "~2.2.0",
+      "jade": "~1.11.0",
+      "nodemon": "^1.17.1",
+      "serve-favicon": "~2.3.0",
+      "aws-sdk": "^2.7.19",
+      "body-parser": "^1.15.2",
+      "cookie-parser": "^1.4.3",
+      "errorhandler": "^1.4.3",
+      "express": "^4.14.0",
+      "express-handlebars": "^3.0.0",
+      "method-override": "^2.3.6",
+      "mongodb": "^2.2.9",
+      "mongoose": "^4.6.0",
+      "morgan": "^1.7.0",
+      "sendgrid": "^5.2.3",
+      "shortid": "^2.2.8",
+      "sparkpost": "^2.0.1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "spotnoteapi"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
