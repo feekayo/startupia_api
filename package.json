@@ -9,7 +9,7 @@
     "aws-sdk": "^2.7.19",
     "body-parser": "^1.15.2",
     "cookie-parser": "^1.4.3",
-    "debug": "~2.2.0",
+    "debug": ">=2.6.9",
     "dotenv": "^6.0.0",
     "errorhandler": "^1.4.3",
     "express": "^4.14.0",
